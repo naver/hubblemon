@@ -1,3 +1,21 @@
+#
+# Hubblemon - Yet another general purpose system monitor
+#
+# Copyright 2015 NAVER Corp.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
 import os, sys
 from syslog import syslog
 
@@ -15,7 +33,7 @@ arcus_driver_path = os.path.abspath('./arcus_mon/arcus_driver')
 sys.path.append(arcus_driver_path)
 from arcus import *
 from arcus_mc_node import *
-from arcus_util import *
+from arcus_driver.arcus_util import *
 
 from django import forms
 
