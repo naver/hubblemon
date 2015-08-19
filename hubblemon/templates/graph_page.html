@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block external %}
+<link href="../site_media/flot.css" rel="stylesheet" type="text/css">
+<script src="http://cytoscape.github.io/cytoscape.js/api/cytoscape.js-latest/cytoscape.min.js"></script>
+{% endblock %}
+
+{% block title %}cloud graph view{% endblock %}
+{% block content %}
+	<div class="title"> Hubblemon </div>
+	<div class="main_link">
+	{{ main_link|safe }}
+	</div>
+
+	<div class="graph_list">
+	{{ graph_list|safe }}
+	</div>
+
+	<div class="graph_area">
+	{{ graph_data|safe }}
+	</div>
+{% endblock %}
+
+

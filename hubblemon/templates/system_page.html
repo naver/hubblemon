@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block external %}
+<link href="../site_media/flot.css" rel="stylesheet" type="text/css">
+<script src="http://www.flotcharts.org/flot/jquery.flot.js"></script>
+<script src="http://www.flotcharts.org/flot/jquery.flot.time.js"></script>
+{% endblock %}
+
+{% block title %}system chart view{% endblock %}
+{% block content %}
+	<div class="title"> Hubblemon </div>
+	<div class="main_link">
+	{{ main_link|safe }}
+	</div>
+
+	<div class="chart_list">
+	{{ chart_list|safe }}
+	</div>
+
+	<div class="chart_area">
+	{{ chart_data|safe }}
+	</div>
+{% endblock %}
+
+

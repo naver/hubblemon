@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block external %}
+<link href="../site_media/flot.css" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block title %}query view{% endblock %}
+{% block content %}
+	<div class="title"> Hubblemon </div>
+	<div class="main_link">
+	{{ main_link|safe }}
+	</div>
+
+	<div class="query_list">
+	{{ query_list|safe }}
+	</div>
+
+	<div class="query_form">
+	<form method="post" action=".">{% csrf_token %}
+		<div id="auth_fields">
+		{{ auth_fields|safe }}
+		</div>
+
+		{{ query_form.query.name }} {{ query_form.query }}
+		{% for hidden in query_form.hidden_fields %}
+		    {{ hidden }}
+		{% endfor %}
+
+		<input type="submit" value="send" height=1em />
+		{% for choice in query_form.query_type %}
+			{{ choice.choice_label }}
+			<span class="radio"> {{ choice.tag }}</span>
+		{% endfor %}
+	</form>
+	</div>
+
+	<div class="query_area">
+	{{ query_data|safe }}
+	</div>
+{% endblock %}
+
+
