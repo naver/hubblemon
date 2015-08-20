@@ -27,7 +27,7 @@ sys.path.append(hubblemon_path)
 
 import common.core
 
-memcached_preset = [['bytes', 'total_malloced', 'limit_maxbytes'], (lambda x: x['get_hits'] / x['cmd_get'] * 100, 'hit_ratio', ['rusage_user', 'rusage_system'], 'curr_items', 'evictions', 'reclaimed', ['bytes_read', 'bytes_written'], 'curr_connections', ['cmd_get', 'cmd_set'], 'cmd_flush', 'cmd_touch', 'auth_cmds', 'auth_errors' ]
+memcached_preset = [['bytes', 'total_malloced', 'limit_maxbytes'], (lambda x: x['get_hits'] / x['cmd_get'] * 100, 'hit_ratio'), ['rusage_user', 'rusage_system'], 'curr_items', 'evictions', 'reclaimed', ['bytes_read', 'bytes_written'], 'curr_connections', ['cmd_get', 'cmd_set'], 'cmd_flush', 'cmd_touch', 'auth_cmds', 'auth_errors' ]
 
 
 def memcached_view(path, title = ''):

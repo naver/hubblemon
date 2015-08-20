@@ -28,12 +28,11 @@ from common.core import *
 import arcus_mon.arcus_view
 
 
-
 arcus_driver_path = os.path.abspath('./arcus_mon/arcus_driver')
 sys.path.append(arcus_driver_path)
 from arcus import *
 from arcus_mc_node import *
-from arcus_driver.arcus_util import *
+from arcus_util import *
 
 from django import forms
 
