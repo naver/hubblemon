@@ -26,6 +26,8 @@ import binascii, socket
 import data_loader.basic_loader
 
 
+hubblemon_path = os.path.join(os.path.dirname(__file__), '..')
+
 #
 # default loader settings
 #
@@ -45,13 +47,20 @@ def _get_data_path(file):
 	idx = ret % n
 
 	data_path = common.settings.listener_list[idx][1]
+	if data_path[0] != '/':
+		data_path = os.path.join(hubblemon_path, data_path)
+	
 	return os.path.join(data_path, file)
 
 
 def _get_system_pathes():
 	result = []
 	for item in common.settings.listener_list:
-		result.append(item[1])
+		path = item[1]
+		if path[0] != '/':
+			path = os.path.join(hubblemon_path, path)
+
+		result.append(path)
 
 	return result
 

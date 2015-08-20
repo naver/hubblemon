@@ -19,7 +19,7 @@
 
 import os, sys
 
-hubblemon_path = os.path.abspath('..')
+hubblemon_path = os.path.join(os.path.dirname(__file__), '..')
 sys.path.append(hubblemon_path)
 
 from collect_server import alarm, alarm_mail, alarm_wget

@@ -21,10 +21,14 @@
 # data path
 #
 
+import os, sys, socket
+
+
+collect_server_port = 40000
 
 # should be sorted by addr
 #  add listener if you want
-listener_list =[('127.0.0.1:30001', '/data1/collect_listener')]
+listener_list =[('%s:40001' % socket.gethostname(), 'collect_server/listener_40001')]
 
 
 #

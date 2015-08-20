@@ -47,8 +47,8 @@ class CollectServer:
 		return self.listeners[idx]
 
 	def listen(self, count = -1):
-		#print(socket.gethostname())
-		#print(self.port)
+		print(socket.gethostname())
+		print(self.port)
 		self.sock.bind((socket.gethostname(), self.port))
 		self.sock.listen(5)
 

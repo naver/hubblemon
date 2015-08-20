@@ -17,15 +17,31 @@
 # limitations under the License.
 #
 
-from server import *
+import os, sys
 
-svr = CollectServer(30000)
+hubblemon_path = os.path.join(os.path.dirname(__file__), '..')
+sys.path.append(hubblemon_path)
 
-for i in range(1, 11):
-	port = 30000 + i
-	svr.put_listener('10.98.129.47:%d' % port)
+import collect_server.server
+import common.settings
 
-svr.listen()
+def server():
+	svr = collect_server.server.CollectServer(common.settings.collect_server_port)
+
+	for item in common.settings.listener_list:
+		print('# put listener: %s' % item[0])
+		svr.put_listener(item[0])
+
+	svr.listen()
+
+
+while True:
+	pid = os.fork()
+
+	if pid == 0: # child
+		server()
+
+	os.wait()
 
 
 

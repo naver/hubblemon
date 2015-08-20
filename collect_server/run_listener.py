@@ -18,20 +18,55 @@
 #
 
 
-import sys
+import os, sys
 
-from collect_listener import *
-from server_rrd_plugin import *
-
-port = int(sys.argv[1])
-path = sys.argv[2]
-
-lsn = CollectListener(port)
-lsn.put_plugin(server_rrd_plugin(path)) 
-
-lsn.listen(200000) # set repeat count, because some leak in rrdtool
-#lsn.listen() # solve above with Process
+import collect_listener
+import server_rrd_plugin
 
 
+hubblemon_path = os.path.join(os.path.dirname(__file__), '..')
+sys.path.append(hubblemon_path)
+
+import common.settings
+
+
+def listener(port, path):
+	lsn = collect_listener.CollectListener(port)
+	lsn.put_plugin(server_rrd_plugin.server_rrd_plugin(path))
+	
+	lsn.listen(200000) # set repeat count, because some leak in rrdtool
+	#lsn.listen() # solve above with Process
+
+
+def restart_listener(port, path):
+	while True:
+		pid = os.fork()
+
+		if pid == 0: # child
+			listener(port, path)
+		else: # parent
+			os.wait()
+
+
+
+	
+for item in common.settings.listener_list:
+	addr = item[0]
+	path = item[1]
+
+	if path[0] != '/': # abs
+		path = os.path.join(hubblemon_path, path)
+	
+	ip, port = addr.split(':')
+	port = int(port)
+
+
+	pid = os.fork()
+
+	if pid == 0: # child
+		restart_listener(port, path)
+
+
+os.wait()
 
 

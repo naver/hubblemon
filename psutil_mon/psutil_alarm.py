@@ -22,7 +22,7 @@ import socket, fnmatch, pickle, sys, os
 import psutil_mon.settings
 
 
-hubblemon_path = os.path.abspath('..')
+hubblemon_path = os.path.join(os.path.dirname(__file__), '..')
 sys.path.append(hubblemon_path)
 import common.settings
 

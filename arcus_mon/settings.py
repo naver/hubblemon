@@ -36,7 +36,7 @@ alarm_conf_absolute = {
 				'cmd_set':(40000, 80000, 200000),
 		},
 
-		'line-home-*':{
+		'band':{
 			'evictions':(150000, 150000, 200000),
 		},
 	}
@@ -50,17 +50,10 @@ alarm_conf_lambda = {
 			#lambda x, limit: (x['total_malloced'] / x['engine_maxbytes'] > limit, 'ratio of total_malloced/enging_maxbytes(%f) exceeds %f' % (x['total_malloced'] / x['engine_maxbytes'], limit)) : (0.097, None, None),
 		},
 
-		'linegame-bb2-krc':{
-			lambda x, limit: (x['total_malloced'] / x['engine_maxbytes'] > limit, 'ratio of total_malloced/enging_maxbytes(%f) exceeds %f' % (x['total_malloced'] / x['engine_maxbytes'], limit)) : (0.5, 0.7, 0.75),
-		},
-
 		'linegame-*':{
 			lambda x, limit: (x['total_malloced'] / x['engine_maxbytes'] > limit, 'ratio of total_malloced/enging_maxbytes(%f) exceeds %f' % (x['total_malloced'] / x['engine_maxbytes'], limit)) : (0.7, 0.7, 0.75),
 		},
 
-		'nwe-admin-krc':{
-			lambda x, limit: (x['total_malloced'] / x['engine_maxbytes'] > limit, 'ratio of total_malloced/enging_maxbytes(%f) exceeds %f' % (x['total_malloced'] / x['engine_maxbytes'], limit)) : (0.7, 0.7, 0.75),
-		},
 	}
 
 

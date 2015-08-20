@@ -34,10 +34,10 @@ hostname = socket.gethostname()
 
 
 if True:
-	c = collectd(hostname, ['127.0.0.1:30000'])
+	c = collectd(hostname, ['%s:40000' % hostname])
 else:
 	# use stacking if network response is too low
-	c = collectd(hostname, ['127.0.0.1:30000'], stack=10)
+	c = collectd(hostname, ['%s:40000' % hostname], stack=10)
 
 
 """
