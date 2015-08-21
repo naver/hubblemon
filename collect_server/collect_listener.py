@@ -37,6 +37,7 @@ class CollectListener:
 		print('# CollectListener listen (%s)' % (self.port))
 		#print(socket.gethostname())
 		#print(self.port)
+		
 		self.sock.bind((socket.gethostname(), self.port))
 		self.sock.listen(5)
 
@@ -54,7 +55,7 @@ class CollectListener:
 				if sock == self.sock: # new client
 					conn, addr = self.sock.accept()
 					self.sock_node_map[conn] = CollectNode(conn, self.plugins)
-					print ('connect by %s(%s)' % (addr, conn.fileno()))
+					print ('[%d]connect from %s(%s)' % (self.port, addr, conn.fileno()))
 					continue
 
 				else:

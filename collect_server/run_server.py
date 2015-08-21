@@ -26,22 +26,31 @@ import collect_server.server
 import common.settings
 
 def server():
-	svr = collect_server.server.CollectServer(common.settings.collect_server_port)
+	port = common.settings.collect_server_port
+
+	print('>>> start child server %d (%d)' % (port, os.getpid()))
+	svr = collect_server.server.CollectServer(port)
 
 	for item in common.settings.listener_list:
 		print('# put listener: %s' % item[0])
 		svr.put_listener(item[0])
 
 	svr.listen()
+	print('>>> stop child server %d (%d)' % (port, os.getpid()))
 
 
 while True:
+	port = common.settings.collect_server_port
+
+	print('>>> server %d(%d) fork' % (port, os.getpid()))
 	pid = os.fork()
 
 	if pid == 0: # child
 		server()
-
-	os.wait()
+	else:
+		print('>>> server %d (%d) wait' % (port, pid))
+		os.wait()
+		print('>>> server %d (%d) wakeup' % (port, pid))
 
 
 
