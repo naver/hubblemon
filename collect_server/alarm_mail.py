@@ -55,11 +55,11 @@ class alarm_mail:
 				self.smtp = smtplib.SMTP(self.server)
 				self.smtp.set_debuglevel(1)
 				ret = self.smtp.sendmail(self.fr, self.to, msg.as_string())
-				print(ret)
+				print('# smtp ret: %s' % ret)
 				self.smtp.quit()
 				break
 			except Exception as e:
-				print(e)
+				print('# smtp exception: %s' % str(e))
 				continue
 			
 		

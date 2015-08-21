@@ -52,7 +52,7 @@ alarm_conf_absolute = {
 # lambda
 alarm_conf_lambda = { 
 		'*:*':{
-			lambda x, limit: (x['keyspace_hits'] / (x['keyspace_hits'] + x['keyspace_misses']) < limit, 'keyspace hit ratio belows %f' % (x['keyspce_hits'] / (x['keyspace_hits'] + x['keyspace_misses']), limit)) : (0.80, 0.60, None),
+			lambda x, limit: (x['keyspace_hits'] / (x['keyspace_hits'] + x['keyspace_misses']) < limit, 'keyspace hit ratio(%f) belows %f' % (x['keyspace_hits'] / (x['keyspace_hits'] + x['keyspace_misses']), limit)) : (0.80, 0.60, None),
 		},
 	}
 

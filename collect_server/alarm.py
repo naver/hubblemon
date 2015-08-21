@@ -150,7 +150,7 @@ class main_alarm:
 					try:
 						result, message = lambda_func(curr_item, limits[idx])
 					except Exception as e:
-						print(e)
+						print('# exception: %s' % str(e))
 						continue
 
 
@@ -173,7 +173,7 @@ class main_alarm:
 			if last_ts + self.suppress_sec > ts:
 				return
 			
-		print(msg)
+		print('## alarm msg: %s' % msg)
 		method.send(msg, msg)
 		self.last_alarm[type] = ts
 	
