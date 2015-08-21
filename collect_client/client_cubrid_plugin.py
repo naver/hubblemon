@@ -33,11 +33,14 @@ class cubrid_stat:
 
 		self.collect_key_init()
 		self.create_key_init()
+		self.flag_auto_register = False
 
 	def __repr__(self):
 		return '[%s-(%s,%s)]' % (self.dblist.__repr__(), self.name, self.type)
 
 	def auto_register(self):
+		self.flag_auto_register = True
+
 		proc1 = subprocess.Popen(shlex.split('ps -ef'), stdout=subprocess.PIPE)
 		proc2 = subprocess.Popen(shlex.split('grep cub_server'), stdin=proc1.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		proc1.stdout.close()
@@ -45,7 +48,7 @@ class cubrid_stat:
 		out = out.decode('utf-8')
 		lines = out.split('\n')
 
-		self.dblist = []
+		tmp_dblist = []
 		for line in lines:
 			dbname = None
 			lst = line.split()
@@ -65,7 +68,17 @@ class cubrid_stat:
 					break
 
 			if dbname is not None:
-				self.dblist.append(dbname)
+				tmp_dblist.append(dbname)
+ 
+		tmp_dblist.sort()
+
+		if self.dblist != tmp_dblist:
+			print('## auto register cubrid')
+			print(tmp_dblist)
+			self.dblist = tmp_dblist
+			return True
+
+		return False
 
 	def push_dbname(self, dbname):
 		self.dblist.append(dbname)
@@ -77,6 +90,11 @@ class cubrid_stat:
 
 	def collect(self):
 		all_stats = {}
+
+		if self.flag_auto_register == True:
+			if self.auto_register() == True:
+				return None # for create new file
+
 		for dbname in self.dblist:
 			stat = {}
 
