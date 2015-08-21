@@ -60,6 +60,11 @@ c.plugins.append(my)
 cub = cubrid_stat()
 cub.auto_register()
 c.plugins.append(cub)
+
+# jstat stat example
+js = jstat_stat()
+js.auto_register(['java', 'apache', 'catalina'])
+c.plugins.append(js)
 """
 
 # system stat (psutil) example
