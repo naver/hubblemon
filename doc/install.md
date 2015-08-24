@@ -53,7 +53,7 @@ If there are many listeners, add them as list item.
 
 Above default set will be shown like below on browser
 
-![main_link](doc/img/main_link.png)
+![main_link](img/main_link.png)
 
 Remove list item if you don't want to use.
 And add list item if you make another plugin later.
