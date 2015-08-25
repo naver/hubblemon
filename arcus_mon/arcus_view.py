@@ -270,7 +270,7 @@ def get_graph_data(param):
 	for k, v in param.items():
 		#print(k, v)
 		if k.startswith('desc_'):
-			cloud = k.split('_', 2)[1]
+			cloud = k.split('_', 1)[1]
 			
 			path = '/arcus/meta/%s' % cloud
 			print('**** %s, %s, %s' % (k, cloud, path))
@@ -449,7 +449,7 @@ def get_arcus_cloud_list(param):
 		for k, v in param.items():
 			#print(k, v)
 			if k.startswith('desc_'):
-				cloud = k.split('_', 2)[1]
+				cloud = k.split('_', 1)[1]
 
 				path = '/arcus/meta/%s' % cloud
 				#print('**** %s, %s, %s' % (k, cloud, path))
@@ -461,8 +461,7 @@ def get_arcus_cloud_list(param):
 
 				if cloud in zoo.arcus_cache_map:
 					zoo.arcus_cache_map[cloud].meta = [v, None]
-					print(zoo.arcus_cache_map[cloud].meta)
-					arcus_mon.arcus_view.arcus_cloud_list_map[cloud][2] = [v, None]
+					arcus_mon.arcus_view.arcus_cloud_list_map[cloud][2] = [v, None] # [zk, instance list, meta]
 				if cloud == 'zookeeper':
 					zoo.meta = [v, None]
 
