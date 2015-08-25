@@ -220,7 +220,7 @@ class zookeeper:
 
 		for child in children:
 			data, stat, children = self.zk_read('/arcus/meta/' + child)
-			ret[child] = (data.decode('utf-8'), stat)
+			ret[child] = [data.decode('utf-8'), stat]
 
 		return ret
 

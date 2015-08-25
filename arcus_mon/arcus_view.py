@@ -311,6 +311,7 @@ def set_description(zoo, param):
 				<input type="submit" value="submit">
 				<input type="hidden" name="zk" value="%s">
 				<input type="hidden" name="admin" value="">
+				<input type="hidden" name="type" value="arcus_graph">
 			</form>
 			<br>
 		"""
@@ -459,10 +460,11 @@ def get_arcus_cloud_list(param):
 					zoo.zk_create(path, v)
 
 				if cloud in zoo.arcus_cache_map:
-					zoo.arcus_cache_map[cloud].meta[0] = v
-					arcus_mon.arcus_view.arcus_cloud_list_map[cloud][2] = v
+					zoo.arcus_cache_map[cloud].meta = [v, None]
+					print(zoo.arcus_cache_map[cloud].meta)
+					arcus_mon.arcus_view.arcus_cloud_list_map[cloud][2] = [v, None]
 				if cloud == 'zookeeper':
-					zoo.meta[0] = v
+					zoo.meta = [v, None]
 
 
 
@@ -504,7 +506,7 @@ def get_arcus_cloud_list(param):
 		tmp += '<div style="float:left; width:20%%;">%s</div>' % (tmp_server)
 
 		mtime = ''
-		if meta[1] != None:
+		if isinstance(meta, list) and hasattr(meta[1], 'mtime'):
 			mtime = str(datetime.datetime.fromtimestamp(int(meta[1].mtime)/1000))
 
 		if 'admin' in param:
@@ -514,6 +516,7 @@ def get_arcus_cloud_list(param):
 					<input type="submit" value="submit">
 					<input type="hidden" name="zk" value="%s">
 					<input type="hidden" name="admin" value="">
+					<input type="hidden" name="type" value="arcus_list">
 				</form>
 				<div>
 				%s
