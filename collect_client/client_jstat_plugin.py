@@ -1,23 +1,3 @@
-
-#
-# Hubblemon - Yet another general purpose system monitor
-#
-# Copyright 2015 NAVER Corp.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-
-
 import subprocess
 import shlex
 
@@ -26,18 +6,56 @@ class jstat_stat:
 		self.name = 'jstat'
 		self.type = 'rrd'
 
-		self.applist = {}
+		self.pidlist = []
 		self.proc = {}
 
 		self.collect_key_init()
 		self.create_key_init()
+		self.flag_auto_register = False
+		self.auto_register_filters = None
 
 	def __repr__(self):
 		return '[%s-(%s,%s)]' % (self.applist.__repr__(), self.name, self.type)
 
+	def auto_register(self, filters = ['java']):
+		self.flag_auto_register = True
+		self.auto_register_filters = filters
 
-	def push_app(self, appname, pid):
-		self.applist[appname] = pid
+		proc1 = subprocess.Popen(shlex.split('ps -ef'), stdout=subprocess.PIPE)
+		proc2 = subprocess.Popen(shlex.split('grep java'), stdin=proc1.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		proc1.stdout.close()
+		out, err = proc2.communicate()
+		out = out.decode('utf-8')
+		lines = out.split('\n')
+
+		tmp_pidlist = []
+		for line in lines:
+			flag = True
+			for filter in filters:
+				if line.find(filter) < 0:
+					flag = False
+
+			if line.find('grep') >= 0: # ignore grep
+				flag = False
+
+			if flag == True:
+				lst = line.split()
+				if lst[1].isnumeric():
+					tmp_pidlist.append(int(lst[1]))
+
+
+		tmp_pidlist.sort()
+		if self.pidlist != tmp_pidlist:
+			print('## auto register java')
+			print(tmp_pidlist)
+			self.pidlist = tmp_pidlist
+			return True
+
+		return False
+
+
+	def push_pid(self, pid):
+		self.pidlist.append(pid)
 
 
 	def collect_init(self, pid):
@@ -47,8 +65,11 @@ class jstat_stat:
 	def collect(self):
 		all_stats = {}
 
+		if self.flag_auto_register == True:
+			if self.auto_register(self.auto_register_filters) == True:
+				return None # for create new file
 
-		for appname, pid in self.applist.items():
+		for pid in self.pidlist:
 			stat = {}
 
 			self.collect_init(pid)
@@ -60,8 +81,13 @@ class jstat_stat:
 			items = line.split()
 			values = []
 
-			if items[0] == 'S0':
+			if len(items) > 0 and items[0] == 'S0':
+				print(line)
 				continue # first line
+
+			if len(items) != len(self.collect_key):
+				print(line)
+				continue # somthine wrong
 
 			for i in range(0, len(items)):
 				alias_key = self.collect_key[i][0]
@@ -70,7 +96,7 @@ class jstat_stat:
 				value = float(items[i]) * factor
 				stat[alias_key] = int(value)
 
-			all_stats['jstat_%s' % appname] = stat
+			all_stats['jstat_%d' % pid] = stat
 
 			#print(all_stats)
 
@@ -81,8 +107,8 @@ class jstat_stat:
 	def create(self):
 		all_map = {}
 
-		for appname, pid in self.applist.items():
-			all_map['jstat_%s' % appname] = self.create_key_list # stats per port
+		for pid in self.pidlist:
+			all_map['jstat_%d' % pid] = self.create_key_list # stats per port
 
 		all_map['RRA'] = self.rra_list
 		return all_map

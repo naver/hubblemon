@@ -31,7 +31,6 @@ class redis_stat:
 
 		self.collect_alias_key_init()
 		self.create_key_init()
-		self.flag_auto_register = False
 
 	def __repr__(self):
 		return '[%s-(%s,%s)]' % (self.addr.__repr__(), self.name, self.type)
@@ -110,7 +109,6 @@ class redis_stat:
 	def collect(self):
 		all_stats = {}
 		
-		#self.auto_register()
 		self.collect_stat(all_stats)
 		return all_stats
 		

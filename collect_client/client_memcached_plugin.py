@@ -166,9 +166,13 @@ class memcached_stat:
 	def collect(self):
 		all_stats = {}
 		
-		self.auto_register()
+		if self.flag_auto_register == True:
+			if self.auto_register() == True:
+				return None # for create new file
+
 		self.collect_stat(all_stats)
 		self.collect_prefix(all_stats)
+		#print(all_stats)
 		return all_stats
 		
 

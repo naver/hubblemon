@@ -26,7 +26,7 @@ from collect_server import alarm, alarm_mail, alarm_wget
 
 
 # set alarm suppress time
-alarm_suppress = 60*60*12 # 12 hour
+alarm_suppress = 60*60*6 # 6 hour
 
 # health check time
 health_check = ['12:00']
