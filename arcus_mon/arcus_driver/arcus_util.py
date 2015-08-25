@@ -31,7 +31,7 @@ class arcus_cache:
 		self.node = []
 		self.active_node = []
 		self.dead_node = []
-		self.meta = ('', None)
+		self.meta = ['', None]
 
 	def __repr__(self):
 		repr = '[Service Code: %s] (zk:%s)\n (node) %s\n (active) %s\n (dead) %s' % (self.code, self.zk_addr, self.node, self.active_node, self.dead_node)
