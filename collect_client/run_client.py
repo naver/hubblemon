@@ -30,14 +30,13 @@ from client_jstat_plugin import jstat_stat
 
 
 
-hostname = socket.gethostname()
-
+server_address = ['1.1.1.1:40000', '2.2.2.2:40000'] # your collect server address
 
 if True:
-	c = collectd(hostname, ['%s:40000' % hostname])
+	c = collectd(hostname, server_address)
 else:
 	# use stacking if network response is too low
-	c = collectd(hostname, ['%s:40000' % hostname], stack=10)
+	c = collectd(hostname, server_address, stack=10)
 
 
 """
