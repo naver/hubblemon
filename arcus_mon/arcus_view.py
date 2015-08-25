@@ -514,6 +514,7 @@ def get_arcus_cloud_list(param):
 					<input type="submit" value="submit">
 					<input type="hidden" name="zk" value="%s">
 					<input type="hidden" name="admin" value="">
+					<input type="hidden" name="type" value="arcus_list">
 				</form>
 				<div>
 				%s
