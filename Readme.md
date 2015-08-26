@@ -5,6 +5,8 @@ Hubblemon is a general purpose system, application monitoring & management tool 
 It's made for Arcus (memcached cloud for Naver corp) monitoring first time.
 And now it support various client plugins.
 
+(You can read Korean readme file [here](Readme.kr.md))
+
 
 ## Supported client
 
@@ -57,7 +59,7 @@ Below page is mysql query. Hubblemon sends mysql query and prints results.
 
 In eval mode, 'conn' and 'cursor' variable is pre-setted and user use this value for script.
 
-In below page, conn is pre-set as memcached connection of xmon01.arcus(11211 port)
+In below page, conn is pre-set as memcached connection of test.mc (11211 port)
 Script set 0 to 99 to memcached and recevie them as list.
 Hubblemon prints lists with return_as_string(ret, p)
 p is an inner variable to handle parameter. Hubblemon prints p['result'] which is set in return_as_string 
@@ -65,7 +67,7 @@ p is an inner variable to handle parameter. Hubblemon prints p['result'] which i
 ![eval memcached](doc/img/rm_eval_memcached.png)
 
 Here is another example,
-conn and cursor is pre-set as mysql connection and cursor of Mysql in xmon01.arcus 
+conn and cursor is pre-set as mysql connection and cursor of Mysql in test.mysql
 Script creates table and inserts 0 to 99 to table and select them.
 return_as_table(cursor, p) make html table from DB cursor.
 
@@ -83,7 +85,7 @@ Below expr page is made using python eval. It eval python script expression in i
 
 So, User can do everything with saved data files in this page.
 
-Simply, read data like below. It calls default_loader function which is  pre-defined in hubblemon. That function read cpu stats of ccon01.arcus machine and select user, system, idle stats.
+Simply, read data like below. It calls default_loader function which is  pre-defined in hubblemon. That function read cpu stats of test.arcus machine and select user, system, idle stats.
 
 ![expr default loader](doc/img/rm_expr_default_loader.png)
 
@@ -104,12 +106,12 @@ for_each function read all stat datas of data_list and pass it two second filter
 
 for some examples,
 
-below expression traverse all clients (get_system_list returns all clients which send stats to hubblmon server) and find bytes_recv + bytes_send are over 60M bytes,
+below expression traverse all clients (get_all_data_list(preifx) returns all data in each clients which starts with prefix) and find bytes_recv + bytes_send are over 60M bytes,
 And show that lists
 
 With this expression, You can find heavy clients.
 
-	for_each(get_system_list('psutil_net'), lambda x: x.max('bytes_sent') + x.max('bytes_recv') > 1000000*60, lambda x: default_loader(x, [['bytes_sent', 'bytes_recv']], title = x))
+	for_each(get_all_data_list('psutil_net'), lambda x: x.max('bytes_sent') + x.max('bytes_recv') > 1000000*60, lambda x: default_loader(x, [['bytes_sent', 'bytes_recv']], title = x))
 
 ![for_each net](doc/img/rm_for_each_net.png)
 
