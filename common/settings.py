@@ -24,11 +24,11 @@
 import os, sys, socket
 
 
-collect_server_port = 40000
+collect_server_port = 30000
 
 # should be sorted by addr
 #  add listener if you want
-listener_list =[('%s:40001' % socket.gethostname(), 'collect_server/listener_40001')]
+listener_list =[('%s:30001' % socket.gethostname(), 'collect_server/listener_30001')]
 
 
 #

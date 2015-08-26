@@ -172,6 +172,7 @@ class memcached_stat:
 
 		self.collect_stat(all_stats)
 		self.collect_prefix(all_stats)
+		#print(all_stats)
 		return all_stats
 		
 

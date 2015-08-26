@@ -50,7 +50,7 @@ alarm_conf_absolute = {
 
 # lambda
 alarm_conf_lambda = { 
-		'*:*':{
+		'*:112??':{
 			lambda x, limit: (x['get_hits'] / x['cmd_get'] < limit, 'ratio of get_hits/cmd_get(%f) belows %f' % (x['get_hits'] / x['cmd_get'], limit)) : (0.80, 0.60, None),
 		},
 	}
