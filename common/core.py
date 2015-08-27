@@ -99,6 +99,21 @@ def get_system_list(postfix=None):
 
 	return system_list
 
+def get_all_data_list(prefix):
+	data_list = []
+
+	pathes = _get_system_pathes()
+	for path in pathes:
+		for dir in os.listdir(path):
+			dir_path = os.path.join(path, dir)
+
+			if os.path.isdir(dir_path):
+				for file in os.listdir(dir_path):
+					if file.startswith(prefix):
+						data_list.append(dir + '/' + file)						
+
+	return data_list
+
 
 
 #
