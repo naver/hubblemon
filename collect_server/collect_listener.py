@@ -106,9 +106,19 @@ class CollectNode:
 		if not data:
 			return False
 
+		ret = data.split(b'\n', 1)
+		if len(ret) != 2:
+			print('>> protocol error: %s' % data)
+			return True
+
 		header, data = data.split(b'\n', 1)
+
+		ret = header.split()
+		if len(ret) != 4:
+			print('>> protocol error (header): %s' % header)
+			return True
+
 		dummy, version, name, length = header.split()
-		#print(header)
 
 		remain = int(length) - len(data)
 		while remain > 0:

@@ -61,7 +61,7 @@ def query(param, ip):
 
 	server = param['server']
 	instance = param['instance']
-	dummy, port_suffix = instance.split('-')
+	dummy, port_suffix = instance.split('_')
 	port, suffix = port_suffix.split('.')
 
 	id = ''

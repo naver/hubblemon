@@ -87,6 +87,6 @@ def query(param, ip):
 		syslog('[hubblemon-mysql-eval:%s-%s-%s(%s)] %s' % (server, dbname, id, ip, query))
 		exec(query)
 
-		result = p['result']
+		return p['result']
 	
 
