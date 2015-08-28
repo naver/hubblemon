@@ -37,7 +37,7 @@ redis_preset = [['memory', 'memory_human', 'memory_lua', 'memory_rss'], 'mem_fra
 
 
 def redis_view(path, title = ''):
-	return common.core.default_loader(path, redis_preset, title)
+	return common.core.loader(path, redis_preset, title)
 
 
 
@@ -58,11 +58,11 @@ def init_plugin():
 
 	print('#### redis init ########')
 
-	system_list = common.core.get_system_list()
-	for system in system_list:
-		instance_list = common.core.get_data_list(system, 'redis_')
+	client_list = common.core.get_client_list()
+	for client in client_list:
+		instance_list = common.core.get_data_list_of_client(client, 'redis_')
 		if len(instance_list) > 0:
-			redis_cloud_map[system] = instance_list	
+			redis_cloud_map[client] = instance_list	
 
 	print (redis_cloud_map)
 		
@@ -87,7 +87,7 @@ def get_chart_data(param):
 	if type == 'redis_stat':
 		for node in redis_cloud_map[server_name]:
 			if node.startswith(instance_name):
-				results = common.core.default_loader(server_name + '/' + node, redis_preset, title=node)
+				results = common.core.loader(server_name + '/' + node, redis_preset, title=node)
 				break
 
 	return results

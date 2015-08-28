@@ -18,48 +18,203 @@
 #
 
 import os
+from chart.chart_data import chart_data
 
-import common.core
-from data_loader.rrd_loader import rrd_loader
-from data_loader.loader_util import merge_loader
-from data_loader.loader_util import sum_loader
-from data_loader.loader_util import filter_loader
-from data_loader.loader_util import draw_loader
+              
+class basic_loader:
+	def __init__(self, handle, filter, title=''):
+		self.filter = filter
 
+		self.handle = handle
 
-# rrd
+		self.title = title
+		self.data = {}
 
-def rrd(path, filter = None, title = ''):
-	results = []
+		self.ts_start = None
+		self.ts_end = None
 
-	if not path.endswith('.rrd'):
-		path += '.rrd'
+	def count(self, name):
+		if self.handle is None:
+			return 0
 
-	try:
-		fd = common.core.get_data_handle(path)
-		return rrd_loader(fd.path, filter, title)
-	except:
-		return rrd_loader(None, [])
+		sum = 0
+
+		if name in self.data:
+			chart = self.data[name]
+			item = chart.items[0] # should be 1 metric 
+
+			for ts_value in item.data:
+				if ts_value == None:
+					continue
+
+				sum += ts_value[1]
+		return sum
+
+	def avg(self, name):
+		if self.handle is None:
+			return 0
+
+		sum = 0
+		avg = 0
+
+		if name in self.data:
+			chart = self.data[name]
+			item = chart.items[0] # should be 1 metric 
+
+			for ts_value in item.data:
+				if ts_value == None:
+					continue
+
+				sum += ts_value[1]
+
+			avg = sum / len(item.data)
+
+		return avg
+
+	def max(self, name):
+		if self.handle is None:
+			return 0
+
+		max = 0
+
+		if name in self.data:
+			chart = self.data[name]
+			item = chart.items[0] # should be 1 metric 
+
+			for ts_value in item.data:
+				if ts_value == None:
+					continue
+
+				if ts_value[1] > max:
+					max = ts_value[1]
+		return max
+
+	def min(self, name):
+		if self.handle is None:
+			return 0
+
+		min = sys.maxsize
+
+		if name in self.data:
+			chart = self.data[name]
+			item = chart.items[0] # should be 1 metric 
+
+			for ts_value in item.data:
+				if ts_value == None:
+					continue
+
+				if ts_value[1] < min:
+					min = ts_value[1]
+		return min
+
+	def parse(self, ts_start, ts_end):
+		self.ts_start = ts_start
+		self.ts_end = ts_end
+
+		if self.handle is None:
+			return
+
+		chart_data_list = self.load(ts_start, ts_end)
+
+		self.data = {}
+		for chart_data in chart_data_list:
+			self.data[chart_data.title] = chart_data
+
+	def make_chart(self, titles, tmap, items, ts_start, ts_step):
+		if isinstance(titles, str):
+			idx = tmap[titles]
+			data = []
+			ts_count = 0
+			for item in items:
+				ts = ts_start + ts_count * ts_step
+				ts_count += 1
+
+				if item[idx] == None:
+					data.append(None)
+					continue
+
+				data.append([ts, item[idx]])
+
+			return [(titles, data)]
+
+		elif isinstance(titles, tuple) and hasattr(titles[0], '__call__'):
+			func = titles[0]
+			title = titles[1]
+
+			data = []
+			ts_count = 0
+			for item in items:
+				ts = ts_start + ts_count * ts_step
+				ts_count += 1
+
+				input = {}
+				for name, idx in tmap.items():
+					input[name] = item[idx]
+
+				try:
+					output = [ts, func(input)]
+				except:
+					output = None
+
+				data.append(output)
+
+			return [(title, data)]
+
+		elif isinstance(titles, list):
+			ret = []
+			for title in titles:
+				ret += self.make_chart(title, tmap, items, ts_start, ts_step)
 		
+			return ret
+
+		return []
+
+
+	def load(self, ts_start, ts_end):
+		self.ts_start = ts_start
+		self.ts_end = ts_end
+
+		if self.handle is None:
+			return []
+
+		#info = self.rrd.info(self.rrd.filename)
+
+		ret = self.handle.read(ts_start, ts_end)
+		print ('result: ', ret)
+		# ((metric1, metric2, metric3), ([0, 0, 0], [1, 1, 1]....)
+
+		ts_start = ret[0][0] * 1000
+		ts_step = ret[0][2] * 1000
 		
-# utility
-def merge(loaders):
-	ret = merge_loader(loaders)
-	return ret
-	
-def sum(loaders):
-	ret = sum_loader(loaders)
-	return ret
+		names = ret[1]
+		items = ret[2]
 
-def filter(loaders, *filters):
-	ret = filter_loader(loaders, filters)
-	return ret
-	
-def draw(range, *datas):
-	ret = draw_loader(range, datas)
-	return ret
+		tmap = {}
+		for i in range(0, len(names)):
+			tmap[names[i]] = i
+			
 
-# add functions to use at chart_page
+		chart_data_list = []
+		if self.title != '':
+			title_chart = chart_data()
+			title_chart.title = self.title
+			chart_data_list.append(title_chart)
+
+		if self.filter == None: 	# select all
+			self.filter = names
+
+		#print(self.filter)
+		for titles in self.filter: # for each chart
+			new_chart = chart_data()
+
+			tmp_list = self.make_chart(titles, tmap, items, ts_start, ts_step)
+			for tmp in tmp_list:
+				new_chart.push_data(tmp[0], tmp[1])
+
+			chart_data_list.append(new_chart) 
+
+		return chart_data_list
+
 
 
 

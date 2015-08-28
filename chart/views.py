@@ -340,7 +340,7 @@ def system_page(request):
 	system_list = []
 	item_list = [ 'brief', 'cpu', 'memory', 'swap', 'disk', 'net', 'resource' ]
 
-	system_list = common.core.get_system_list()
+	system_list = common.core.get_client_list()
 	
 	system_list.sort()
 	js_chart_list = _make_static_chart_list(request.GET, 'system', levels, [ system_list, item_list ])

@@ -32,14 +32,15 @@ import common.settings
 
 def listener(port, path):
 	print('>>> start child listener %d (%d)' % (port, os.getpid()))
-	lsn = collect_listener.CollectListener(port)
+	lsn = collect_listener.CollectListener(port, path)
 	lsn.put_plugin(server_rrd_plugin.server_rrd_plugin(path))
 	
 	#time.sleep(5)
-	lsn.listen(200000) # set repeat count, because some leak in rrdtool
+	lsn.listen(50000) # set repeat count, because some leak in rrdtool
 	#lsn.listen() # solve above with Process
 	print('>>> stop child listener %d (%d)' % (port, os.getpid()))
 
+	sys.exit()
 
 def restart_listener(port, path):
 	while True:
@@ -53,6 +54,7 @@ def restart_listener(port, path):
 			os.wait()
 			print('>>> listener %d (%d) wakeup' % (port, pid))
 
+	sys.exit()
 
 
 	

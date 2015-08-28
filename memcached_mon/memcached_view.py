@@ -31,7 +31,7 @@ memcached_preset = [['bytes', 'total_malloced', 'limit_maxbytes'], (lambda x: x[
 
 
 def memcached_view(path, title = ''):
-	return common.core.default_loader(path, memcached_preset, title)
+	return common.core.loader(path, memcached_preset, title)
 
 memcached_prefix_preset = [ 'cmd_get', 'cmd_hit', 'cmd_set', 'cmd_del' ]
 
@@ -57,9 +57,9 @@ def init_plugin():
 
 	print('#### memcached init ########')
 
-	system_list = common.core.get_system_list()
-	for system in system_list:
-		instance_list = common.core.get_data_list(system, 'memcached_')
+	client_list = common.core.get_client_list()
+	for client in client_list:
+		instance_list = common.core.get_data_list_of_client(client, 'memcached_')
 		if len(instance_list) > 0:
 
 			new_list = []
@@ -67,7 +67,7 @@ def init_plugin():
 				if not instance.startswith('memcached_prefix_'): # skip prefix
 					new_list.append(instance)
 
-				memcached_cloud_map[system] = new_list
+				memcached_cloud_map[client] = new_list
 
 	print (memcached_cloud_map)
 		
@@ -92,7 +92,7 @@ def get_chart_data(param):
 	if type == 'memcached_stat':
 		for node in memcached_cloud_map[server_name]:
 			if node.startswith(instance_name):
-				results = common.core.default_loader(server_name + '/' + node, memcached_preset, title=node)
+				results = common.core.loader(server_name + '/' + node, memcached_preset, title=node)
 				break
 
 	return results

@@ -84,7 +84,7 @@ class rrd_data:
 		ret = rrdtool.update(self.filename, result)
 
 
-	def read(self, ts_from, ts_to):
+	def read(self, ts_from, ts_to, filter = None):
 		ret = rrdtool.fetch(self.filename, 'MAX', '-s', str(ts_from), '-e', str(ts_to))
 		return ret
 

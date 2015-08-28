@@ -34,7 +34,7 @@ arcus_preset = [['bytes', 'total_malloced', 'engine_maxbytes'], (lambda x: x['ge
 
 
 def arcus_view(path, title = ''):
-	return common.core.default_loader(path, arcus_preset, title)
+	return common.core.loader(path, arcus_preset, title)
 
 arcus_prefix_preset = [ ['cmd_get', 'cmd_hit', 'cmd_set', 'cmd_del'],
 			['cmd_lop_create', 'cmd_lop_insert', 'lop_insert_hits', 'cmd_lop_delete', 'lop_delete_hits', 'cmd_lop_get', 'lop_get_hits'],
@@ -147,7 +147,7 @@ def get_chart_data(param):
 				if node.startswith('['):
 					continue # skip
 
-				loader = common.core.default_loader(node, arcus_preset, title=node)
+				loader = common.core.loader(node, arcus_preset, title=node)
 				loader_list.append(loader)
 
 			results = data_loader.basic_loader.sum(loader_list)
@@ -158,7 +158,7 @@ def get_chart_data(param):
 				if node.startswith('['):
 					continue # skip
 
-				loader = common.core.default_loader(node, arcus_preset, title=node)
+				loader = common.core.loader(node, arcus_preset, title=node)
 				loader_list.append(loader)
 
 			results = data_loader.basic_loader.merge(loader_list)
@@ -166,7 +166,7 @@ def get_chart_data(param):
 		else:
 			for node in arcus_cloud_map[cloud_name]:
 				if node.startswith(server_name):
-					results = common.core.default_loader(node, arcus_preset, title=node)
+					results = common.core.loader(node, arcus_preset, title=node)
 					break
 
 	elif type == 'arcus_prefix':
@@ -179,18 +179,18 @@ def get_chart_data(param):
 
 		if prefix == '[ALL]':
 			results = []
-			system, port = server_name.split('/')
-			file_list = common.core.get_data_list(system, port + '-')
+			client, port = server_name.split('/')
+			file_list = common.core.get_data_list_of_client(client, port + '-')
 
 			for file in file_list:
 				file_path = os.path.join(server, file)
 
 				tmp_port, prefix_name = file.split('-', 1)
 				curr_prefix, tmp_name = prefix_name.split('.')
-				results.append(common.core.default_loader(file_path, arcus_prefix_preset, curr_prefix)) # all lists
+				results.append(common.core.loader(file_path, arcus_prefix_preset, curr_prefix)) # all lists
 		else:
 			path = os.path.join(server, '%s-%s' % (port, prefix))
-			results = common.core.default_loader(path, arcus_prefix_preset, title=prefix)
+			results = common.core.loader(path, arcus_prefix_preset, title=prefix)
 		
 	return results
 
@@ -233,9 +233,9 @@ def get_chart_list(param):
 		if cloud == '' or server == '':
 			return (['cloud', 'server', 'prefix'], arcus_cloud_map)
 
-		system, port = server.split('/')
+		client, port = server.split('/')
 
-		file_list = common.core.get_data_list(system, port + '-')
+		file_list = common.core.get_data_list_of_client(client, port + '-')
 
 		prefix_list = ['[ALL]']
 		for file in file_list:
