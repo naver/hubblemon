@@ -36,22 +36,22 @@ def system_view_brief(path, title = ''):
 	loader_list = []
 
 	file_path = os.path.join(path, 'psutil_cpu')
-	loader_list.append(common.core.default_loader(file_path, cpu_filter, 'cpu'))
+	loader_list.append(common.core.loader(file_path, cpu_filter, 'cpu'))
 	
 	file_path = os.path.join(path, 'psutil_memory')
-	loader_list.append(common.core.default_loader(file_path, mem_filter, 'memory'))
+	loader_list.append(common.core.loader(file_path, mem_filter, 'memory'))
 
 	file_path = os.path.join(path, 'psutil_swap')
-	loader_list.append(common.core.default_loader(file_path, swap_filter, 'swap'))
+	loader_list.append(common.core.loader(file_path, swap_filter, 'swap'))
 
 	file_path = os.path.join(path, 'psutil_disk')
-	loader_list.append(common.core.default_loader(file_path, disk_filter, 'disk'))
+	loader_list.append(common.core.loader(file_path, disk_filter, 'disk'))
 	
 	file_path = os.path.join(path, 'psutil_net')
-	loader_list.append(common.core.default_loader(file_path, net_filter, 'net'))
+	loader_list.append(common.core.loader(file_path, net_filter, 'net'))
 
 	file_path = os.path.join(path, 'psutil_resource')
-	loader_list.append(common.core.default_loader(file_path, resource_filter, 'resource'))
+	loader_list.append(common.core.loader(file_path, resource_filter, 'resource'))
 		
 	return loader_list
 
@@ -84,7 +84,7 @@ def system_view(path, item, title = ''):
 		
 	
 	for loader_file in loader_file_list:
-		loader_list.append(common.core.default_loader(loader_file, filter, os.path.basename(loader_file)[:-4]))
+		loader_list.append(common.core.loader(loader_file, filter, os.path.basename(loader_file)[:-4]))
 
 	return loader_list
 

@@ -30,7 +30,7 @@ import common.core
 jstat_preset = [['Survivor_0', 'Survivor_1', 'Eden', 'Old', 'Permanent'], 'YGC', 'YGCT', 'FGC', 'FGCT', 'GCT', ['YGC', 'FGC', 'GCT'], ['YGCT', 'FGCT']]
 
 def jstat_view(path, title = ''):
-	return common.core.default_loader(path, jstat_preset, title)
+	return common.core.loader(path, jstat_preset, title)
 
 
 #
@@ -53,11 +53,11 @@ def init_plugin():
 	print('#### jstat init ########')
 
 
-	system_list = common.core.get_system_list()
-	for system in system_list:
-		instance_list = common.core.get_data_list(system, 'jstat_')
+	client_list = common.core.get_client_list()
+	for client in client_list:
+		instance_list = common.core.get_data_list_of_client(client, 'jstat_')
 		if len(instance_list) > 0:
-			jstat_cloud_map[system] = instance_list	
+			jstat_cloud_map[client] = instance_list	
 
 	print (jstat_cloud_map)
 		
@@ -82,7 +82,7 @@ def get_chart_data(param):
 	if type == 'jstat_stat':
 		for node in jstat_cloud_map[server_name]:
 			if node.startswith(instance_name):
-				results = common.core.default_loader(server_name + '/' + node, jstat_preset, title=node)
+				results = common.core.loader(server_name + '/' + node, jstat_preset, title=node)
 				break
 
 	return results

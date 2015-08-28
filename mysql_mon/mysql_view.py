@@ -50,7 +50,7 @@ mysql_preset = [['Bytes_received', 'Bytes_sent'],
 
 
 def mysql_view(path, title = ''):
-	return common.core.default_loader(path, mysql_preset, title)
+	return common.core.loader(path, mysql_preset, title)
 
 
 
@@ -72,11 +72,11 @@ def init_plugin():
 	print('#### mysql init ########')
 
 
-	system_list = common.core.get_system_list()
-	for system in system_list:
-		instance_list = common.core.get_data_list(system, 'mysql_')
+	client_list = common.core.get_client_list()
+	for client in client_list:
+		instance_list = common.core.get_data_list_of_client(client, 'mysql_')
 		if len(instance_list) > 0:
-			mysql_cloud_map[system] = instance_list	
+			mysql_cloud_map[client] = instance_list	
 
 	print (mysql_cloud_map)
 		
@@ -101,7 +101,7 @@ def get_chart_data(param):
 	if type == 'mysql_stat':
 		for node in mysql_cloud_map[server_name]:
 			if node.startswith(instance_name):
-				results = common.core.default_loader(server_name + '/' + node, mysql_preset, title=node)
+				results = common.core.loader(server_name + '/' + node, mysql_preset, title=node)
 				break
 
 	return results

@@ -24,6 +24,7 @@ import datetime
 import common.settings
 import binascii, socket
 import data_loader.basic_loader
+import data_loader.loader_factory
 
 
 hubblemon_path = os.path.join(os.path.dirname(__file__), '..')
@@ -31,13 +32,38 @@ hubblemon_path = os.path.join(os.path.dirname(__file__), '..')
 #
 # default loader settings
 #
-default_loader = data_loader.basic_loader.rrd
+get_default_local_handle = data_loader.loader_factory.get_rrd_handle
+get_default_remote_handle = data_loader.loader_factory.get_remote_handle
+
+def loader(path, filter = None, title = ''):
+	results = []
+
+	info = _get_listener_info(path)
+	
+	if info[2] == 'local':
+		try:
+			handle = get_default_local_handle(path)
+			return data_loader.basic_loader.basic_loader(handle, filter, title)
+		except:
+			return data_loader.basic_loader.basic_loader(None, [])
+	else: # remote
+		try:
+			host, port = info[0].split(':')
+			handle = get_default_remote_handle(host, int(port), path)
+			return data_loader.basic_loader.basic_loader(handle, filter, title)
+		except:
+			return data_loader.basic_loader.basic_loader(None, [])
+	
+
+		
 
 
 #
 # data, system handling
 #
-def _get_data_path(file):
+
+
+def _get_listener_info(file):
 	#print(file)
 	name = file.split('/')[0]
 	#ip = socket.gethostbyname(name)
@@ -46,14 +72,19 @@ def _get_data_path(file):
 	n = len(common.settings.listener_list)
 	idx = ret % n
 
-	data_path = common.settings.listener_list[idx][1]
+	return common.settings.listener_list[idx]
+	
+
+
+def _get_local_data_path(file):
+	data_path = _get_listener_info(file)[1]
 	if data_path[0] != '/':
 		data_path = os.path.join(hubblemon_path, data_path)
 	
 	return os.path.join(data_path, file)
 
 
-def _get_system_pathes():
+def _get_local_client_pathes():
 	result = []
 	for item in common.settings.listener_list:
 		path = item[1]
@@ -64,56 +95,83 @@ def _get_system_pathes():
 
 	return result
 
-
-def get_data_list(path, prefix):
-	path = _get_data_path(path)
-	instance_list = []
-
-	for file in os.listdir(path):
-		if file.startswith(prefix):
-			instance_list.append(file)
-
-	return instance_list
-	
-
-def get_data_handle(path):
-	path = _get_data_path(path)
+def get_local_data_handle(path):
+	path = _get_local_data_path(path)
 	fd = open(path)
 	fd.path = path
 	return fd
 
+# local or remote
+def get_client_list():
+	client_list = []
 
-def get_system_list(postfix=None):
-	system_list = []
+	for item in common.settings.listener_list:
+		if item[2] == 'local':
+			path = item[1]
+			if path[0] != '/':
+				path = os.path.join(hubblemon_path, path)
 
-	pathes = _get_system_pathes()
-	for path in pathes:
-		for dir in os.listdir(path):
-			dir_path = os.path.join(path, dir)
+				for dir in os.listdir(path):
+					dir_path = os.path.join(path, dir)
 
-			if os.path.isdir(dir_path):
-				if postfix:
-					system_list.append(dir + '/' + postfix)
-				else:
-					system_list.append(dir)
+					if os.path.isdir(dir_path):
+						client_list.append(dir)
 
-	return system_list
+		else: # remote
+			address = item[0]
+			host, port = address.split(':')
+			port = int(port)
+			handle = get_default_remote_handle(host, port)
+			client_list += handle.get_client_list()
 
+	return client_list
+
+
+# local or remote
+def get_data_list_of_client(client, prefix):
+	info = _get_listener_info(client)
+	data_list = []
+
+	if info[2] == 'local':
+		path = _get_local_data_path(client)
+
+		for file in os.listdir(path):
+			if file.startswith(prefix):
+				data_list.append(file)
+
+	else: # remote
+		address = info[0]
+		host, port = address.split(':')
+		port = int(port)
+		handle = get_default_remote_handle(host, port)
+		data_list += handle.get_data_list_of_client(client, prefix)
+
+	return data_list
+	
+
+# local or remote
 def get_all_data_list(prefix):
 	data_list = []
 
-	pathes = _get_system_pathes()
-	for path in pathes:
-		for dir in os.listdir(path):
-			dir_path = os.path.join(path, dir)
+	for item in common.settings.listener_list:
+		if item[2] == 'local':
+			path = item[1]
+			for dir in os.listdir(path):
+				dir_path = os.path.join(path, dir)
 
-			if os.path.isdir(dir_path):
-				for file in os.listdir(dir_path):
-					if file.startswith(prefix):
-						data_list.append(dir + '/' + file)						
+				if os.path.isdir(dir_path):
+					for file in os.listdir(dir_path):
+						if file.startswith(prefix):
+							data_list.append(dir + '/' + file)						
+		else:
+			address = item[0]
+			host, port = address.split(':')
+			port = int(port)
+			handle = get_default_remote_handle(host, port)
+			data_list += handle.get_all_data_list(prefix)
+
 
 	return data_list
-
 
 
 #
@@ -225,30 +283,28 @@ import arcus_mon.arcus_view
 import redis_mon.redis_view
 
 
-def system_view(file, item):
-	if isinstance(file, str):
-		files = [ file ]
+def system_view(client, item):
+	if isinstance(client, str):
+		clients = [ client ]
 	else: # list, tuple
-		files = file
+		clients = client
 
 	ret = []
-	for file in files:
-		path = _get_data_path(file)
-		ret += psutil_mon.psutil_view.system_view(path, item)
+	for client in clients:
+		ret += psutil_mon.psutil_view.system_view(client, item)
 
 	return ret
 
 
-def arcus_view(file):
-	if isinstance(file, str):
-		files = [ file ]
+def arcus_view(instance): # client/arcus_port
+	if isinstance(instance, str):
+		instances = [ instance ]
 	else: # list, tuple
-		files = file
+		instances = instance
 
 	ret = []
-	for file in files:
-		path = _get_data_path(file)
-		ret.append(arcus_mon.arcus_view.arcus_view(path))
+	for instance in instances:
+		ret.append(arcus_mon.arcus_view.arcus_view(instance))
 
 	return ret
 
@@ -304,11 +360,10 @@ def for_each(name, filter, fun, start_ts = int(time.time())-60*30, end_ts = int(
 
 	selected = []
 	for name in names:
-		path = _get_data_path(name)
-		loader = default_loader(path)
-		loader.parse(start_ts, end_ts)
+		ldr = loader(name)
+		ldr.parse(start_ts, end_ts)
 			
-		if filter(loader):
+		if filter(ldr):
 			selected.append(name)
 
 	print('# selected: ' + str(selected))

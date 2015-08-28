@@ -32,7 +32,7 @@ import common.settings
 
 def listener(port, path):
 	print('>>> start child listener %d (%d)' % (port, os.getpid()))
-	lsn = collect_listener.CollectListener(port)
+	lsn = collect_listener.CollectListener(port, path)
 	lsn.put_plugin(server_rrd_plugin.server_rrd_plugin(path))
 	
 	#time.sleep(5)

@@ -31,7 +31,7 @@ cubrid_preset = [['N_Q_selects', 'N_Q_inserts', 'N_Q_deletes', 'N_Q_updates'], [
 
 
 def cubrid_view(path, title = ''):
-	return common.core.default_loader(path, cubrid_preset, title)
+	return common.core.loader(path, cubrid_preset, title)
 
 
 
@@ -55,11 +55,11 @@ def init_plugin():
 	print('#### cubrid init ########')
 
 
-	system_list = common.core.get_system_list()
-	for system in system_list:
-		instance_list = common.core.get_data_list(system, 'cubrid_')
+	client_list = common.core.get_client_list()
+	for client in client_list:
+		instance_list = common.core.get_data_list_of_client(client, 'cubrid_')
 		if len(instance_list) > 0:
-			cubrid_cloud_map[system] = instance_list	
+			cubrid_cloud_map[client] = instance_list	
 
 	print (cubrid_cloud_map)
 		
@@ -84,7 +84,7 @@ def get_chart_data(param):
 	if type == 'cubrid_stat':
 		for node in cubrid_cloud_map[server_name]:
 			if node.startswith(instance_name):
-				results = common.core.default_loader(server_name + '/' + node, cubrid_preset, title=node)
+				results = common.core.loader(server_name + '/' + node, cubrid_preset, title=node)
 				break
 
 	return results
