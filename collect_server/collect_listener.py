@@ -112,7 +112,7 @@ class CollectNode:
 
 	def do_op(self):
 		packet = self.sock.recv(4096)
-		print(packet)
+		#print(packet)
 		if not packet:
 			return False
 
@@ -139,7 +139,7 @@ class CollectNode:
 		# STAT VERSION HOST LENGTH
 		if type == 'STAT':
 			#print('recv: %d' % len(body))
-			self.do_stat(version, body.decode('utf-8'))
+			self.do_stat(version, body)
 
 		# GET VERSION CMD INFO
 		elif type == 'GET':
