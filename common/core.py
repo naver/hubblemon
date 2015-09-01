@@ -111,11 +111,11 @@ def get_client_list():
 			if path[0] != '/':
 				path = os.path.join(hubblemon_path, path)
 
-				for dir in os.listdir(path):
-					dir_path = os.path.join(path, dir)
+			for dir in os.listdir(path):
+				dir_path = os.path.join(path, dir)
 
-					if os.path.isdir(dir_path):
-						client_list.append(dir)
+				if os.path.isdir(dir_path):
+					client_list.append(dir)
 
 		else: # remote
 			address = item[0]
