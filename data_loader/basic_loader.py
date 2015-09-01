@@ -180,7 +180,7 @@ class basic_loader:
 		#info = self.rrd.info(self.rrd.filename)
 
 		ret = self.handle.read(ts_start, ts_end)
-		print ('result: ', ret)
+		#print ('result: ', ret)
 		# ((metric1, metric2, metric3), ([0, 0, 0], [1, 1, 1]....)
 
 		ts_start = ret[0][0] * 1000
