@@ -85,7 +85,7 @@ Below expr page is made using python eval. It eval python script expression in i
 
 So, User can do everything with saved data files in this page.
 
-Simply, read data like below. It calls default_loader function which is  pre-defined in hubblemon. That function read cpu stats of test.arcus machine and select user, system, idle stats.
+Simply, read data like below. It calls loader function which is  pre-defined in hubblemon. That function read cpu stats of test.arcus machine and select user, system, idle stats.
 
 ![expr default loader](doc/img/rm_expr_default_loader.png)
 
@@ -111,7 +111,7 @@ And show that lists
 
 With this expression, You can find heavy clients.
 
-	for_each(get_all_data_list('psutil_net'), lambda x: x.max('bytes_sent') + x.max('bytes_recv') > 1000000*60, lambda x: default_loader(x, [['bytes_sent', 'bytes_recv']], title = x))
+	for_each(get_all_data_list('psutil_net'), lambda x: x.max('bytes_sent') + x.max('bytes_recv') > 1000000*60, lambda x: loader(x, [['bytes_sent', 'bytes_recv']], title = x))
 
 ![for_each net](doc/img/rm_for_each_net.png)
 
@@ -119,7 +119,7 @@ Similarly you can find and draw chart with other stat (like CPU usage, disk I/O 
 
 Below another example shows cold arcus clients.
 
-	for_each(arcus_instance_list(arcus_cloud_list()), lambda x: x.avg('cmd_get') < 100, lambda x : default_loader(x, ['cmd_get'], title=x))
+	for_each(arcus_instance_list(arcus_cloud_list()), lambda x: x.avg('cmd_get') < 100, lambda x : loader(x, ['cmd_get'], title=x))
 
 arcus_cloud_list() return all cloud list of hubblemon, arcus_instance_list return each instance of cloud. So first parameter of for_each returns all instance list of arcus.
 Second parameter check average cmd_get QPS is below 100. If so, third lambda parameter draw that instance (whose average QPS is below than 100)
@@ -134,7 +134,7 @@ Second parameter check average cmd_get QPS is below 100. If so, third lambda par
 
 Hubblemon components are Hubblemon Web, collect server, collect listener and collect client.
 
-Collect client connect collect server at first time. 
+Collect client connect collect server at first time.
 Then collect server sends listener info which collect client should connect.
 With this info, collect client connect to correct collect listener.
 
@@ -143,6 +143,7 @@ Collect client collects client stats (system and application stat) and send it t
 Collect listener receives clients stats and save it to disk. And it checks alarm cases or not.
 
 With these saved stats, Hubblemon show to user client stats like above pages.
+Hubblemon web server read stats of listener from local (in same machine) or remote (If listeners run on other machines for scalability)
 
 
 
