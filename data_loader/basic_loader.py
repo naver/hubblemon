@@ -137,40 +137,24 @@ class basic_loader:
 
 			return [(titles, data)]
 
-		elif isinstance(titles, tuple):
-			title = ''
-
-			for func in titles:
-				if not hasattr(func, '__call__'):
-					title = func
+		elif isinstance(titles, tuple) and hasattr(titles[0], '__call__'):
+			func = titles[0]
+			title = titles[1]
 
 			data = []
 			ts_count = 0
-			input = { 'prev':{} }
-
 			for item in items:
 				ts = ts_start + ts_count * ts_step
 				ts_count += 1
 
+				input = {}
 				for name, idx in tmap.items():
 					input[name] = item[idx]
 
-				for func in titles: # only last function result is saved
-					if hasattr(func, '__call__'):
-						try:
-							output = [ts, func(input)]
-						except:
-							output = None
-
-				prev = input['prev']
-				for k, v in input.items():
-					if k == 'prev':
-						continue
-
-					if k not in prev:
-						prev[k] = []
-					
-					prev[k].append(v)
+				try:
+					output = [ts, func(input)]
+				except:
+					output = None
 
 				data.append(output)
 
@@ -197,7 +181,7 @@ class basic_loader:
 
 		ret = self.handle.read(ts_start, ts_end)
 		#print ('result: ', ret)
-		# ((ts_start, ts_end, step), (metric1, metric2, metric3), [(0, 0, 0), (1, 1, 1)....])
+		# ((metric1, metric2, metric3), ([0, 0, 0], [1, 1, 1]....)
 
 		ts_start = ret[0][0] * 1000
 		ts_step = ret[0][2] * 1000

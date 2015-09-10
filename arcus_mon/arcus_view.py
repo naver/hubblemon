@@ -150,7 +150,7 @@ def get_chart_data(param):
 				loader = common.core.loader(node, arcus_preset, title=node)
 				loader_list.append(loader)
 
-			results = data_loader.loader_factory.sum(loader_list)
+			results = data_loader.basic_loader.sum(loader_list)
 			
 		elif server_name == '[EACH]':
 			loader_list = []
@@ -161,7 +161,7 @@ def get_chart_data(param):
 				loader = common.core.loader(node, arcus_preset, title=node)
 				loader_list.append(loader)
 
-			results = data_loader.loader_factory.merge(loader_list)
+			results = data_loader.basic_loader.merge(loader_list)
 
 		else:
 			for node in arcus_cloud_map[cloud_name]:
