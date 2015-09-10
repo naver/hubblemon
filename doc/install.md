@@ -25,7 +25,7 @@ Set port of collect server. Default value is 30000
 Set port of collect listener and directory path to save stats. Default value is 30001 and 'collect_server/listener_30001'
 This value should be set as tuple like below
 
-	listener_list =[('%s:30001' % socket.gethostname(), 'collect_server/listener_30001')]
+	listener_list =[('%s:30001' % socket.gethostname(), 'collect_server/listener_30001', 'local')]
 
 If there are many listeners, add them as list item.
 
@@ -253,16 +253,14 @@ After set up settings.py in hubblemon/collect_client directory.
 run collect clients like below
 
 	nohup python3 run_client.py &
-    
+
 ## hubblemon webserver
 
 hubblemon web is made by Django.
 Run it like below. (IP should be correct)
 
 	nohup python3 manage.py runserver [YOUR_IP]:[PORT] &
-    
-    
-    
+
 
 
 

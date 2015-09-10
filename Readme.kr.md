@@ -81,7 +81,7 @@ return_as_table(cursor, p) 는 cursor 로부터 html table 을 생성하여 출�
 
 따라서, 사용자는 이미 있는 stat 정보로부터 무엇이든 할 수 있다.
 
-간단하게는 아래와 같이 데이터 파일을 읽고 표시할 수 있다. default_loader 함수를 이용해 test.arcus  의 cpu stats 를 선택하고 그 중 user, system, idle 항목으로 차트를 만들어 표시했다.
+간단하게는 아래와 같이 데이터 파일을 읽고 표시할 수 있다. loader 함수를 이용해 test.arcus  의 cpu stats 를 선택하고 그 중 user, system, idle 항목으로 차트를 만들어 표시했다.
 
 ![expr default loader](doc/img/rm_expr_default_loader.png)
 
@@ -104,7 +104,7 @@ return_as_table(cursor, p) 는 cursor 로부터 html table 을 생성하여 출�
 
 이 스크립트로 무거운 클라이언트를 찾을 수 있다.
 
-	for_each(get_all_data_list('psutil_net'), lambda x: x.max('bytes_sent') + x.max('bytes_recv') > 1000000*60, lambda x: default_loader(x, [['bytes_sent', 'bytes_recv']], title = x))
+	for_each(get_all_data_list('psutil_net'), lambda x: x.max('bytes_sent') + x.max('bytes_recv') > 1000000*60, lambda x: loader(x, [['bytes_sent', 'bytes_recv']], title = x))
 
 ![for_each net](doc/img/rm_for_each_net.png)
 
@@ -112,7 +112,7 @@ return_as_table(cursor, p) 는 cursor 로부터 html table 을 생성하여 출�
 
 아래의 다른 예제는 사용율이 낮은 아커스 클라이언트를 찾는다.
 
-	for_each(arcus_instance_list(arcus_cloud_list()), lambda x: x.avg('cmd_get') < 100, lambda x : default_loader(x, ['cmd_get'], title=x))
+	for_each(arcus_instance_list(arcus_cloud_list()), lambda x: x.avg('cmd_get') < 100, lambda x : loader(x, ['cmd_get'], title=x))
 
 arcus_cloud_list() 는 허블몬이 수집하고 있는 모든 아커스 클라우드들의 리스트를 반환하고, arcus_instance_list 는 클라우드를 구성하는 인스턴스들을 반환한다. 따라서 첫번째 파라미터는 허블몬안의 모든 아커스 클라이언트를 목록으로 전달하며,
 
@@ -135,6 +135,7 @@ Collect client 는 정보를 수집한 후 collect listener 로 전송한다.
 Collect listener 는 정보를 수집한 후 저장하고, 알람 케이스에 해당되는 것이 있는지 조사한다.
 
 저장된 정보는 허블몬 웹에서 사용된다.
+허블몬 웹서버는 리스너가 같은 장비에 설치되어 있을 경우 디스크에서 stat 을 바로 읽을 수 있고, 확장성을 위해 리스너가 다른 장비들에 설치되어 있을 경우 원격으로 해당 정보를 읽어올 수 있다.
 
 
 
