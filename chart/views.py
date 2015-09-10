@@ -27,17 +27,18 @@ import urllib
 import json
 
 import os, time, datetime
-import data_loader
+from syslog import syslog
 
 import common.settings
-from common.settings import * # for expr
-from common.core import * # for expr
-from data_loader.basic_loader import *
+
 from chart.chart_data import chart_js_renderer
 from chart.forms import chart_expr_form
 from chart.forms import query_form
 from jqueryui.jqueryui import *
 
+from common.settings import * # for expr
+from common.core import * # for expr
+from data_loader.loader_factory import * # for expr
 
 def _make_main_link():
 	ret = ''
@@ -377,6 +378,7 @@ def expr_page(request):
 	else:
 		param = request.GET
 	print(param)
+
 	
 	expr = ''
 	expr_form = chart_expr_form(data=param)
@@ -388,11 +390,17 @@ def expr_page(request):
 
 	## eval expression
 	js_chart_data = ''
-	if expr != '':
-		if True:
-		#try:
+	if request.method == 'POST' and expr != '':
+		try:
+			x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+			if x_forwarded_for:
+				ip = x_forwarded_for.split(',')[0]
+			else:
+				ip = request.META.get('REMOTE_ADDR')
+
+			syslog('[hubblemon-expr_page:%s] %s' % (ip, query))
 			loader = eval(expr)
-			print(loader)
+			#print(loader)
 
 			if isinstance(loader, list) or isinstance(loader, tuple):
 				loaders = loader
@@ -404,7 +412,6 @@ def expr_page(request):
 			start_ts, end_ts = _get_ts(param)
 
 			for loader in loaders:
-				print(loader)
 				if hasattr(loader, 'load'):
 					chart_data_list = loader.load(start_ts, end_ts)
 					for chart_data in chart_data_list:
@@ -412,8 +419,7 @@ def expr_page(request):
 				else:
 					js_chart_data += str(loader)
 				
-		#except Exception as e:
-		else:
+		except Exception as e:
 			js_chart_data = '''
 				<p>evaluation error</p>
 				<p>source: %s</p>

@@ -24,11 +24,12 @@
 import os, sys, socket
 
 
-collect_server_port = 30000
+collect_server_port = 40000
 
 # should be sorted by addr
 #  add listener if you want
 
+"""
 listener_list =[('%s:30001' % socket.gethostname(), 'collect_server/listener_30001', 'local')]
 
 '''
@@ -38,7 +39,18 @@ listener_list =[('%s.com:30001' % socket.gethostname(), '/collect_server/listene
 		('remoteserver1.com:30001', '/data2/collect_listener/', 'remote'),
 		('remoteserver2.com:30002', '/data3/collect_listener/', 'remote')]
 '''
+"""
 
+listener_list =[('%s.com:40001' % socket.gethostname(), '/data1/collect_listener/', 'local'),
+		('%s.com:40002' % socket.gethostname(), '/data2/collect_listener/', 'local'),
+		('%s.com:40003' % socket.gethostname(), '/data3/collect_listener/', 'local'),
+		('%s.com:40004' % socket.gethostname(), '/data4/collect_listener/', 'local'),
+		('%s.com:40005' % socket.gethostname(), '/data5/collect_listener/', 'local'),
+		('%s.com:40006' % socket.gethostname(), '/data6/collect_listener/', 'local'),
+		('%s.com:40007' % socket.gethostname(), '/data7/collect_listener/', 'local'),
+		('%s.com:40008' % socket.gethostname(), '/data8/collect_listener/', 'local'),
+		('%s.com:40009' % socket.gethostname(), '/data9/collect_listener/', 'local'),
+		('%s.com:40010' % socket.gethostname(), '/data10/collect_listener/', 'local')]
 
 #
 # setting values
@@ -72,6 +84,7 @@ main_link = [	('system', '/system'),
 
 # for arcus_mon
 arcus_zk_addrs = []
+arcus_zk_addrs.append('gasan.arcuscloud.nhncorp.com:17288')
 '''
 # example
 arcus_zk_addrs.append('arcuscloud.yourcompany.com:17288')

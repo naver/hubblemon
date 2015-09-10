@@ -32,41 +32,38 @@ net_filter = [['bytes_recv', 'bytes_sent'], ['packets_recv', 'packets_sent'], ['
 resource_filter = [['tcp_open', 'fd', 'handle'], ['process', 'thread'], 'retransmit', 'ctx_switch']
 
 
-def system_view_brief(path, title = ''):
+def system_view_brief(client, title = ''):
 	loader_list = []
 
-	file_path = os.path.join(path, 'psutil_cpu')
+	file_path = os.path.join(client, 'psutil_cpu')
 	loader_list.append(common.core.loader(file_path, cpu_filter, 'cpu'))
 	
-	file_path = os.path.join(path, 'psutil_memory')
+	file_path = os.path.join(client, 'psutil_memory')
 	loader_list.append(common.core.loader(file_path, mem_filter, 'memory'))
 
-	file_path = os.path.join(path, 'psutil_swap')
+	file_path = os.path.join(client, 'psutil_swap')
 	loader_list.append(common.core.loader(file_path, swap_filter, 'swap'))
 
-	file_path = os.path.join(path, 'psutil_disk')
+	file_path = os.path.join(client, 'psutil_disk')
 	loader_list.append(common.core.loader(file_path, disk_filter, 'disk'))
 	
-	file_path = os.path.join(path, 'psutil_net')
+	file_path = os.path.join(client, 'psutil_net')
 	loader_list.append(common.core.loader(file_path, net_filter, 'net'))
 
-	file_path = os.path.join(path, 'psutil_resource')
+	file_path = os.path.join(client, 'psutil_resource')
 	loader_list.append(common.core.loader(file_path, resource_filter, 'resource'))
 		
 	return loader_list
 
 
-def system_view(path, item, title = ''):
+def system_view(client, item, title = ''):
 	if item == 'brief':
-		return system_view_brief(path, title)
+		return system_view_brief(client, title)
 
 	loader_file_list = []
 	loader_list = []
 
-	for file in sorted(os.listdir(path)):
-		file_path = os.path.join(path, file)
-		if os.path.isfile(file_path) and file.startswith('psutil_' + item):
-			loader_file_list.append(file_path)
+	loader_file_list = common.core.get_data_list_of_client(client, 'psutil_' + item)
 
 	filter = None
 	if item == 'cpu':
@@ -84,7 +81,8 @@ def system_view(path, item, title = ''):
 		
 	
 	for loader_file in loader_file_list:
-		loader_list.append(common.core.loader(loader_file, filter, os.path.basename(loader_file)[:-4]))
+		print(loader_file)
+		loader_list.append(common.core.loader(os.path.join(client, loader_file), filter, loader_file.split('.')[0]))
 
 	return loader_list
 
