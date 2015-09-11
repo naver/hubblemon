@@ -172,7 +172,7 @@ Hubblemon is licensed under the Apache License, Version 2.0
 See [LICENSE](LICENSE) for full license text.
 
 ```
-Copyright 2014 Naver Corp.
+Copyright 2015 Naver Corp.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

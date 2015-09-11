@@ -165,7 +165,7 @@ python modules: pytz, rrdtool and kazoo
 상세 내용은 [LICENSE](LICENSE) 에서 확인할 수 있다.
 
 ```
-Copyright 2014 Naver Corp.
+Copyright 2015 Naver Corp.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
