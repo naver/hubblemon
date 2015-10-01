@@ -80,10 +80,11 @@ def query(param, ip):
 		if server == '[ALL]':
 			server_list = arcus_mon.arcus_view.arcus_cloud_map[cloud]
 		else:
-			server_list = server
+			server_list = [server]
 
 		for server in server_list:
 			addr, port = server.split('/')
+			prefix, port = port.split('_')
 			node = arcus_node(addr, port)
 			result_str += '[%s-%s]<br>%s<br>' % (addr, port, common.core.return_as_string(node.do_arcus_command(query)))
 				

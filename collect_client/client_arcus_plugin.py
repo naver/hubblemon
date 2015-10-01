@@ -113,6 +113,9 @@ class arcus_stat:
 					if line == 'END':
 						continue
 
+					if line.strip() == '':
+						continue
+
 					dummy, key, value = line.split()
 					if key not in self.collect_key:	 # don't send this key
 						continue
@@ -144,6 +147,9 @@ class arcus_stat:
 
 			for line in lines:
 				if line == 'END':
+					continue
+
+				if line.strip() == '':
 					continue
 
 				items = line.split()
