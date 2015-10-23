@@ -77,6 +77,10 @@ class main_alarm:
 			return
 
 		diff_sec = (node.curr['datetime'] - node.prev['datetime']).seconds
+		if diff_sec == 0:
+			print('# diff_sec of %s zero(%s) ' % (node.curr['client'], str(node.curr['datetime'])))
+			return
+
 		for p in self.plugins:
 			plugin_name = p.name
 
