@@ -78,7 +78,7 @@ class main_alarm:
 
 		diff_sec = (node.curr['datetime'] - node.prev['datetime']).seconds
 		if diff_sec == 0:
-			print('# diff_sec of %s zero(%s) ' % (node.curr['client'], str(node.curr['datetime'])))
+			print('# diff_sec of %s zero(%s, %s) ' % (node.curr['client'], str(node.curr['datetime']), str(node.prev['datetime'])))
 			return
 
 		for p in self.plugins:
@@ -111,7 +111,7 @@ class main_alarm:
 			if tm.tm_hour == h:
 				if tm.tm_min == m and ts > self.last_health_check + 60*2:
 					self.last_health_check = ts
-					for method in self.alarm_methods.items():
+					for method in self.alarm_methods:
 						msg = 'Arcus alarm Health check (%d:%d)' % (os.getpid(), ts)
 						method.send(msg, msg)
 			
