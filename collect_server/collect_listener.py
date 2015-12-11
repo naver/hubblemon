@@ -45,7 +45,7 @@ class CollectListener:
 		#print(socket.gethostname())
 		#print(self.port)
 		
-		self.sock.bind((socket.gethostname(), self.port))
+		self.sock.bind(('localhost', self.port))
 		self.sock.listen(5)
 
 		idx = 0
