@@ -2,6 +2,10 @@ language: python
 python:
  - "3.4"
 
+before_install:
+ - sudo apt-get update -qq
+ - sudo apt-get install -qq librrd-dev
+
 install:
  - pip install -r requirements.txt
 
