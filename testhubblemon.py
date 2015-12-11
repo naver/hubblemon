@@ -13,4 +13,4 @@ class SampleTest(TestCase):
 
 	def test_bar(self):
 		print('bar')
-		#self.assertEqual(1, 2)
+		self.assertEqual(1, 2)
