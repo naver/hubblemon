@@ -29,8 +29,11 @@ from client_mysql_plugin import mysql_stat
 from client_jstat_plugin import jstat_stat
 
 
+hostname = socket.gethostname()
 
-server_address = ['1.1.1.1:40000', '2.2.2.2:40000'] # your collect server address
+
+#server_address = ['1.1.1.1:40000', '2.2.2.2:40000'] # your collect server address
+server_address = ['127.0.0.1:30000'] # your collect server address
 
 if True:
 	c = collectd(hostname, server_address)
