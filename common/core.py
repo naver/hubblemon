@@ -429,7 +429,13 @@ def return_as_table(result, p = {}):
 # result zookeeper.load_all()
 from arcus_mon.arcus_driver.arcus_util import zookeeper
 
-arcus_zk_cache = {}
+def get_zk_load_all(addr):
+	zoo = zookeeper(addr)
+	zoo.load_all()
+	return zoo
+
+'''
+#arcus_zk_cache = {}
 
 def get_zk_load_all(addr):
 	global arcus_zk_cache
@@ -455,6 +461,7 @@ def zk_load_background(addr):
 	zoo = zookeeper(addr)
 	zoo.load_all()
 	arcus_zk_cache[addr] = (zoo, time.time())
+'''
 	
 	
 

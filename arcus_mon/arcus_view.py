@@ -287,10 +287,7 @@ def get_graph_data(param):
 
 	# make graph data
 	results = []
-
-	zk_addrs = zk.split(',')
-	graph_data = arcus_graphs(zk_addrs, param)
-
+	graph_data = render_arcus_graph(zoo, param)
 	return graph_data
 
 
@@ -337,6 +334,67 @@ def set_description(zoo, param):
 		for code, cache in sorted(zoo.arcus_cache_map.items()):
 			result += template % (code, cache.meta[0])
 
+	return result
+
+def render_arcus_graph(zoo, param):
+	ts_start = time.time()
+
+	position = 20 # yaxis
+	pool = graph_pool(position)
+
+	node_zk = pool.get_node(zoo.address)
+	node_zk.weight = 300
+	node_zk.color = '0000FF'
+
+	for code, cache in zoo.arcus_cache_map.items():
+		node_cache = pool.get_node(code)
+		node_cache.weight = 200
+		node_cache.color = '00FF00'
+		node_cache.link(node_zk)
+		
+	for code, cache in zoo.arcus_cache_map.items():
+		node_cache = pool.get_node(code)
+
+		for node in cache.active_node:
+			try:
+				hostname, aliaslist, ipaddr = socket.gethostbyaddr(node.ip)
+				ret = hostname.split('.')
+				if len(ret) > 2:
+					hostname = '%s.%s' % (ret[0], ret[1])
+					
+			except socket.herror:
+				hostname = node.ip
+
+			node_node = pool.get_node(hostname)
+			node_node.weight = 100
+			node_node.color = '00FFFF'
+
+			if node.noport:
+				node_node.link(node_cache, node.port, 'FF0000')
+			else:
+				node_node.link(node_cache, node.port, '00FF00')
+
+		for node in cache.dead_node:
+			try:
+				hostname, aliaslist, ipaddr = socket.gethostbyaddr(node.ip)
+				ret = hostname.split('.')
+				if len(ret) > 2:
+					hostname = '%s.%s' % (ret[0], ret[1])
+			except socket.herror:
+				hostname = node.ip
+
+			node_node = pool.get_node(hostname)
+			node_node.weight = 100
+			node_node.color = '303030'
+
+			node_node.link(node_cache, node.port, 'EEEEEE')
+
+	# set meta info
+	pool.description = set_description(zoo, param)
+	result = pool.render()
+
+	ts_end = time.time()
+	print('## %s elapsed: %f' % (zoo.address, ts_end - ts_start))
 	return result
 
 def arcus_graph(addr, position, results, param):
