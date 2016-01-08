@@ -429,39 +429,22 @@ def return_as_table(result, p = {}):
 # result zookeeper.load_all()
 from arcus_mon.arcus_driver.arcus_util import zookeeper
 
-def get_zk_load_all(addr):
+def get_arcus_zk_load_all(addr):
 	zoo = zookeeper(addr)
 	zoo.load_all()
 	return zoo
 
-'''
-#arcus_zk_cache = {}
-
-def get_zk_load_all(addr):
-	global arcus_zk_cache
-
-	if addr not in arcus_zk_cache:
-		zoo = zookeeper(addr)
-		zoo.load_all()
-		arcus_zk_cache[addr] = [zoo, time.time()]
-
-	# always in
-	zoo, last_ts = arcus_zk_cache[addr][0], arcus_zk_cache[addr][1]
-	ts = time.time()
-
-	if ts - arcus_zk_cache[addr][1] > 60*30: # refresh every 30mins
-		arcus_zk_cache[addr][1] = ts
-		threading.Thread(target=zk_load_background, args=(addr,))
-
-	return zoo
-
-def zk_load_background(addr):
-	global arcus_zk_cache
+def get_arcus_zk_node_cloud_map(addr):
+	arcus_node_cloud_map = {}
 
 	zoo = zookeeper(addr)
-	zoo.load_all()
-	arcus_zk_cache[addr] = (zoo, time.time())
-'''
+	nodes = zoo.get_arcus_node_all()
+	for node in nodes:
+		arcus_node_cloud_map[node.ip + ":" + node.port] = node.code
+
+	return arcus_node_cloud_map
+	
+
 	
 	
 

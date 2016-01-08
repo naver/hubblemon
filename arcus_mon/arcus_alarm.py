@@ -16,10 +16,11 @@
 # limitations under the License.
 #
 
-import socket, fnmatch, pickle, sys, os
+import socket, fnmatch, pickle, sys, os, threading
 
 import arcus_mon.settings
 import arcus_mon.arcus_driver.arcus_util
+from arcus_mon.arcus_driver.arcus_util import zookeeper
 
 
 hubblemon_path = os.path.join(os.path.dirname(__file__), '..')
@@ -34,28 +35,24 @@ class arcus_alarm:
 		self.node_cloud_map = {}
 		self.node_cloud_map_init()
 
+	def _node_cloud_map_init(self, addr):
+		zoo = zookeeper(addr)
+		nodes = zoo.get_arcus_node_all()
+		for node in nodes:
+			self.node_cloud_map[node.ip + ":" + node.port] = node.code
+
 	def node_cloud_map_init(self):
-		try:
-			print('## load node cloud map from file')
-			nc_file = open('node_cloud_map.dat', 'rb')
-			self.node_cloud_map = pickle.load(nc_file)
-			nc_file.close()
-			#print(self.node_cloud_map)
-			return 
-
-		except Exception:
-			print('## load node cloud map from zookeeper')
-		
-				
+		print('# cloud map init')
+		threads = []
 		for addr in common.settings.arcus_zk_addrs:
-			zoo = common.core.get_zk_load_all(addr)
-			self.node_cloud_map.update(zoo.arcus_node_map)
+			th = threading.Thread(target = self._node_cloud_map_init, args = (addr,))
+			th.start()
+			threads.append(th)
 
-		nc_file = open('node_cloud_map.dat', 'wb')
-		pickle.dump(self.node_cloud_map, nc_file)
-		nc_file.close()
-		
-
+		for th in threads:
+			th.join()
+		print('# cloud map init done')
+	
 	def get_cloud_of_node(self, name, port):
 		try:
 			ip = socket.gethostbyname(name)
@@ -71,7 +68,7 @@ class arcus_alarm:
 			if key not in self.node_cloud_map:
 				return None
 
-		return self.node_cloud_map[key].code
+		return self.node_cloud_map[key]
 		
 
 	def select_cloud_conf(self, cloud, map):

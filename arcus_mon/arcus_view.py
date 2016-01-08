@@ -19,7 +19,7 @@
 
 
 
-import os, socket, sys, time, copy, datetime
+import os, socket, sys, time, copy, datetime, threading
 import data_loader
 
 hubblemon_path = os.path.join(os.path.dirname(__file__), '..')
@@ -53,6 +53,48 @@ arcus_zk_map = {}
 last_ts = 0
 
 
+def _zk_load(addr, cloud_map, cloud_list_map, zk_map):
+	print('# zookeeper %s load' % addr)
+	zoo = common.core.get_arcus_zk_load_all(addr)
+
+	zk_map[addr] = list(zoo.arcus_cache_map.keys())
+	for code, cache in zoo.arcus_cache_map.items():
+		node_list = cache.node
+		node_str_list = []
+
+		for node in node_list:
+			name = node.name
+			if name == '':
+				try:
+					name = socket.gethostbyaddr(node.ip)[0]
+					name_list = name.split('.')
+					if len(name_list) > 2:
+						del name_list[-1]
+						del name_list[-1] # remove nhncorp.com
+
+						name = ''
+						for n in name_list:
+							name += n
+							name += '.'
+
+
+						name = name[:-1] # remove last .
+					
+				except Exception as e:
+					name = node.ip
+
+			node_str = '%s/arcus_%s' % (name, node.port)
+			node_str_list.append(node_str)
+
+		node_str_list.sort()
+		cloud_list_map[code] = [addr, node_str_list[:], zoo.arcus_cache_map[code].meta]
+
+		cloud_map[code] = node_str_list
+		cloud_map[code].sort()
+
+	print('# zookeeper %s load done' % addr)
+
+
 def init_plugin():
 	global arcus_cloud_map
 	global arcus_cloud_list_map
@@ -70,55 +112,21 @@ def init_plugin():
 	arcus_cloud_list_map_tmp = {}
 	arcus_zk_map_tmp = {}
 
+	threads = []
 	#for addr in ['gasan.arcuscloud.nhncorp.com:17288']:
 	for addr in common.settings.arcus_zk_addrs:
-		print('# zookeeper load')
-		print(addr)
-		zoo = common.core.get_zk_load_all(addr)
-		print('# zookeeper load done')
+		th = threading.Thread(target = _zk_load, args = (addr, arcus_cloud_map_tmp, arcus_cloud_list_map_tmp, arcus_zk_map_tmp))
+		th.start()
+		threads.append(th)
 
-		arcus_zk_map_tmp[addr] = list(zoo.arcus_cache_map.keys())
-		for code, cache in zoo.arcus_cache_map.items():
-			node_list = cache.node
-			node_str_list = []
-
-			for node in node_list:
-				name = node.name
-				if name == '':
-					try:
-						name = socket.gethostbyaddr(node.ip)[0]
-						name_list = name.split('.')
-						if len(name_list) > 2:
-							del name_list[-1]
-							del name_list[-1] # remove nhncorp.com
-
-							name = ''
-							for n in name_list:
-								name += n
-								name += '.'
-
-
-							name = name[:-1] # remove last .
-						
-					except Exception as e:
-						name = node.ip
-
-				node_str = '%s/arcus_%s' % (name, node.port)
-				node_str_list.append(node_str)
-
-			node_str_list.sort()
-			arcus_cloud_list_map_tmp[code] = [addr, node_str_list[:], zoo.arcus_cache_map[code].meta]
-
-			arcus_cloud_map_tmp[code] = node_str_list
-			arcus_cloud_map_tmp[code].sort()
+	for th in threads:
+		th.join()
+		
 
 	arcus_cloud_map = arcus_cloud_map_tmp
 	arcus_cloud_list_map = arcus_cloud_list_map_tmp
 	arcus_zk_map = arcus_zk_map_tmp
-
 	print (arcus_cloud_map)
-		
-	
 	
 
 
@@ -263,7 +271,7 @@ def get_graph_list(param):
 def get_graph_data(param):
 	#print(param)
 	zk = param['zk']
-	zoo = common.core.get_zk_load_all(zk)
+	zoo = common.core.get_arcus_zk_load_all(zk)
 
 	# TODO: enable multi graph modify
 	# modify description if needed
@@ -414,7 +422,7 @@ def get_arcus_cloud_list(param):
 	if 'zk' in param:
 		# modify description if needed
 		zk = param['zk']
-		zoo = common.core.get_zk_load_all(zk)
+		zoo = common.core.get_arcus_zk_load_all(zk)
 
 		for k, v in param.items():
 			#print(k, v)
