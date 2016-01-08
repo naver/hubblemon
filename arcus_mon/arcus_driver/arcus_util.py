@@ -18,6 +18,9 @@
 
 import telnetlib, os, sys
 import socket
+import threading
+
+
 
 from kazoo.client import KazooClient
 import kazoo
@@ -208,57 +211,108 @@ class zookeeper:
 
 		return ret
 
+	def _get_arcus_node(self, child, results):
+		code = self.zk_children_if_exists('/arcus_repl/cache_server_mapping/' + child)
+		if len(code) == 0:
+			code = self.zk_children_if_exists('/arcus/cache_server_mapping/' + child)
+
+		if len(code) == 0:
+			print('no childrens in cache_server_mapping error: %s' % child)
+			print(code)
+			return
+
+		code = code[0]
+
+		tmp = code.split('^') # remove repl info
+		code = tmp[0]
+
+		try:
+			ip, port = child.split(':')
+		except ValueError:
+			print('No port defined in cache_server_mapping: %s' % child)
+			ip = child
+			port = '0'
+
+
+		node = arcus_node(ip, port)
+		node.code = code
+		results.append(node)
+
 	def get_arcus_node_all(self):
 		children = self.zk_children_if_exists('/arcus_repl/cache_server_mapping/')
 		children += self.zk_children_if_exists('/arcus/cache_server_mapping/')
 
 		ret = []
+		threads = []
 
 		#print(children)
 		for child in children:
-			code = self.zk_children_if_exists('/arcus_repl/cache_server_mapping/' + child)
-			if len(code) == 0:
-				code = self.zk_children_if_exists('/arcus/cache_server_mapping/' + child)
+			th = threading.Thread(target = self._get_arcus_node, args = (child, ret))
+			th.start()
+			threads.append(th)
 
-			if len(code) == 0:
-				print('no childrens in cache_server_mapping error: %s' % child)
-				print(code)
-				continue
-
-			code = code[0]
-
-			tmp = code.split('^') # remove repl info
-			code = tmp[0]
-
-			try:
-				ip, port = child.split(':')
-			except ValueError:
-				print('No port defined in cache_server_mapping: %s' % child)
-				ip = child
-				port = '0'
-
-
-			node = arcus_node(ip, port)
-			node.code = code
-			ret.append(node)
+		for th in threads:
+			th.join()
 
 		return ret
+
+	def _get_arcus_meta(self, child, results):
+		data, stat, children = self.zk_read('/arcus/meta/' + child)
+		results[child] = [data.decode('utf-8'), stat]
+
 
 	def get_arcus_meta_all(self):
 		if self.zk.exists('/arcus/meta') == None:
 			self.zk.create('/arcus/meta', b'arcus meta info')
 
 		children = self.zk.get_children('/arcus/meta')
-
-		ret = {}
 		print('# children')
 		print(children)
 
+		threads = []
+		ret = {}
+
+		#print(children)
 		for child in children:
-			data, stat, children = self.zk_read('/arcus/meta/' + child)
-			ret[child] = [data.decode('utf-8'), stat]
+			th = threading.Thread(target = self._get_arcus_meta, args = (child, ret))
+			th.start()
+			threads.append(th)
+
+		for th in threads:
+			th.join()
 
 		return ret
+
+
+	def _match_code_and_nodes(self, code, cache, meta):
+		#repl case
+		children = self.zk_children_if_exists('/arcus_repl/cache_list/' + code)
+		children += self.zk_children_if_exists('/arcus/cache_list/' + code)
+		for child in children:
+			tmp = child.split('^', 2) # remove repl info
+			if len(tmp) == 3:
+				child = tmp[2]
+
+			addr, name = child.split('-')
+			try:
+				node = self.arcus_node_map[addr]
+			except KeyError:
+				print('%s of %s is not defined in cache_server_mapping' % (addr, code))
+				ip, port = addr.split(':')
+				node = arcus_node(ip, port)
+				node.noport = True
+		
+			node.active = True
+			cache.active_node.append(node)
+
+		
+		for node in cache.node:
+			if node.active == False:
+				cache.dead_node.append(node)
+
+		if code in meta:
+			cache.meta = meta[code]
+
 
 
 	def load_all(self):
@@ -280,35 +334,18 @@ class zookeeper:
 		meta = self.get_arcus_meta_all()
 		print('# done')
 
+		print('# match code & nodes')
+		threads = []
+		
 		for code, cache in self.arcus_cache_map.items():
-			#repl case
-			children = self.zk_children_if_exists('/arcus_repl/cache_list/' + code)
-			children += self.zk_children_if_exists('/arcus/cache_list/' + code)
-			for child in children:
-				tmp = child.split('^', 2) # remove repl info
-				if len(tmp) == 3:
-					child = tmp[2]
+			th = threading.Thread(target = self._match_code_and_nodes, args = (code, cache, meta))
+			th.start()
+			threads.append(th)
 
-				addr, name = child.split('-')
-				try:
-					node = self.arcus_node_map[addr]
-				except KeyError:
-					print('%s of %s is not defined in cache_server_mapping' % (addr, code))
-					ip, port = addr.split(':')
-					node = arcus_node(ip, port)
-					node.noport = True
-			
-				node.active = True
-				cache.active_node.append(node)
+		for th in threads:
+			th.join()
 
-			
-			for node in cache.node:
-				if node.active == False:
-					cache.dead_node.append(node)
-
-			if code in meta:
-				cache.meta = meta[code]
-
+		print('#done')
 
 		if 'zookeeper' in meta:
 			self.meta = meta['zookeeper']
