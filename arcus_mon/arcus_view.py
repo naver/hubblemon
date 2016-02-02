@@ -55,7 +55,16 @@ last_ts = 0
 
 def _zk_load(addr, cloud_map, cloud_list_map, zk_map):
 	print('# zookeeper %s load' % addr)
-	zoo = common.core.get_arcus_zk_load_all(addr)
+	try:
+		zoo = common.core.get_arcus_zk_load_all(addr)
+	except kazoo.handlers.threading.TimeoutErrror as e:
+		print('[ERROR] kazoo timeout: %s' % addr)
+		return 
+	except Exception as e:
+		print('[ERROR] kazoo exception: %s' % addr)
+		print(e)
+		return
+		
 
 	zk_map[addr] = list(zoo.arcus_cache_map.keys())
 	for code, cache in zoo.arcus_cache_map.items():
