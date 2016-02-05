@@ -160,7 +160,7 @@ class cytoscape_renderer:
 				    edges: [ %s ]
 				  },
 
-				  layout: { %s },
+				  layout: { %s, spacingFactor: 0.4 },
 
 				  ready : function() {
 				    cy.on('mouseup', function(event){
