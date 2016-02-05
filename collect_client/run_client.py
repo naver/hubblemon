@@ -21,12 +21,12 @@ import sys, socket
 
 from collect_client import *
 from client_psutil_plugin import psutil_stat
-from client_arcus_plugin import arcus_stat
-from client_memcached_plugin import memcached_stat
-from client_redis_plugin import redis_stat
-from client_cubrid_plugin import cubrid_stat
-from client_mysql_plugin import mysql_stat
-from client_jstat_plugin import jstat_stat
+#from client_arcus_plugin import arcus_stat
+#from client_memcached_plugin import memcached_stat
+#from client_redis_plugin import redis_stat
+#from client_cubrid_plugin import cubrid_stat
+#from client_mysql_plugin import mysql_stat
+#from client_jstat_plugin import jstat_stat
 
 
 hostname = socket.gethostname()
