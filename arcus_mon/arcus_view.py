@@ -28,6 +28,7 @@ sys.path.append(hubblemon_path)
 import arcus_mon
 import common.settings
 import common.core
+import kazoo
 
 
 arcus_preset = [['bytes', 'total_malloced', 'engine_maxbytes'], (lambda x: x['get_hits'] / x['cmd_get'] * 100, 'hit_ratio'), ['hb_count', 'hb_latency'], ['rusage_user', 'rusage_system'], 'curr_items', 'evictions', 'reclaimed', ['sticky_bytes', 'sticky_limit'], ['bytes_read', 'bytes_written'], 'curr_connections', ['getattr_hits', 'setattr_hits'], ['cmd_get', 'cmd_set'], 'cmd_get', 'cmd_set', ['cmd_flush', 'cmd_flush_prefix'], ['cmd_lop_create', 'cmd_lop_insert', 'cmd_lop_get', 'cmd_lop_delete'], ['cmd_sop_create', 'cmd_sop_delete'], ['cmd_sop_insert', 'cmd_sop_get', 'cmd_sop_exist'], ['cmd_bop_create', 'cmd_bop_delete'], ['cmd_bop_insert', 'cmd_bop_update', 'cmd_bop_incr', 'cmd_bop_decr'], ['cmd_bop_get', 'bop_get_ehits', 'bop_get_nhits'], ['cmd_bop_count', 'cmd_bop_mget', 'cmd_bop_smget']]
