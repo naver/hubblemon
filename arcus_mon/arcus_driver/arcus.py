@@ -307,6 +307,7 @@ class ArcusLocator:
 		self.addr_node_map = {}
 		self.node_list = []
 		self.zk.stop()
+		self.node_allocator.join()
 
 	def hash_nodes(self, children):
 		arcuslog (self, 'hash_nodes with children: ', children)
@@ -566,7 +567,7 @@ class ArcusOperation:
 		self.request = request
 		self.callback = callback
 		self.q = queue.Queue(1)
-		self.result = None
+		self.result = self # self.result == self : not received, self.result == None : receive None
 		self.invalid = False
 
 		self.noreply = False
@@ -590,7 +591,7 @@ class ArcusOperation:
 		return True
 
 	def get_result(self, timeout=0):
-		if self.result != None:
+		if self.result != self:
 			return self.result
 
 		if timeout > 0:
@@ -598,7 +599,7 @@ class ArcusOperation:
 		else:
 			result = self.q.get()
 
-		if result == None and self.invalid == True:
+		if result == self and self.invalid == True:
 			raise ArcusNodeConnectionException('current async result is unavailable because Arcus node is disconnected now')
 
 		self.result = result

@@ -30,6 +30,8 @@ import datetime, time, sys
 
 #enable_log()
 
+timeout = 20
+
 
 # client which use arcus memcached node & default arcus transcoder
 client = Arcus(ArcusLocator(ArcusMCNodeAllocator(ArcusTranscoder())))
@@ -37,12 +39,13 @@ client = Arcus(ArcusLocator(ArcusMCNodeAllocator(ArcusTranscoder())))
 print('### connect to client')
 client.connect(sys.argv[1], sys.argv[2])
 
+
 #####################################################################################################
 #
 # TEST 1: primitive type
 #
 #####################################################################################################
-ret = client.set('test:string1', 'test...', 3)
+ret = client.set('test:string1', 'test...', timeout)
 print(ret.get_result())
 assert ret.get_result() == True
 
@@ -50,7 +53,7 @@ ret = client.get('test:string1')
 print(ret.get_result())
 assert ret.get_result() == 'test...'
 
-ret = client.set('test:string2', 'test...2', 3)
+ret = client.set('test:string2', 'test...2', timeout)
 print(ret.get_result())
 assert ret.get_result() == True
 
@@ -58,7 +61,7 @@ ret = client.get('test:string2')
 print(ret.get_result())
 assert ret.get_result() == 'test...2'
 
-ret = client.set('test:int', 1, 3)
+ret = client.set('test:int', 1, timeout)
 print(ret.get_result())
 assert ret.get_result() == True
 
@@ -66,7 +69,7 @@ ret = client.get('test:int')
 print(ret.get_result())
 assert ret.get_result() == 1
 
-ret = client.set('test:float', 1.2, 3)
+ret = client.set('test:float', 1.2, timeout)
 print(ret.get_result())
 assert ret.get_result() == True
 
@@ -74,7 +77,7 @@ ret = client.get('test:float')
 print(ret.get_result())
 assert ret.get_result() == 1.2
 
-ret = client.set('test:bool', True, 3)
+ret = client.set('test:bool', True, timeout)
 print(ret.get_result())
 assert ret.get_result() == True
 
@@ -83,7 +86,7 @@ print(ret.get_result())
 assert ret.get_result() == True
 
 now = datetime.datetime.now()
-ret = client.set('test:date', now, 3)
+ret = client.set('test:date', now, timeout)
 print(ret.get_result())
 assert ret.get_result() == True
 
@@ -92,7 +95,7 @@ print(ret.get_result())
 print(now)
 assert (abs(ret.get_result() - now)) < datetime.timedelta(1000)
 
-ret = client.set('test:bytearray', b'bytes array', 3)
+ret = client.set('test:bytearray', b'bytes array', timeout)
 print(ret.get_result())
 assert ret.get_result() == True
 
@@ -101,7 +104,7 @@ print(ret.get_result())
 assert ret.get_result() == b'bytes array'
 
 
-ret = client.set('test:incr', '1', 3)
+ret = client.set('test:incr', '1', timeout)
 print(ret.get_result())
 assert ret.get_result() == True
 
@@ -123,7 +126,7 @@ assert ret.get_result() == 0 # minimum value is 0
 # TEST 2: list
 #
 #####################################################################################################
-ret = client.lop_create('test:list_1', ArcusTranscoder.FLAG_STRING, 3)
+ret = client.lop_create('test:list_1', ArcusTranscoder.FLAG_STRING, timeout)
 print(ret.get_result())
 assert ret.get_result() == True
 
@@ -153,7 +156,7 @@ assert ret.get_result() == items[1:-2+1]
 # TEST 3: set
 #
 #####################################################################################################
-ret = client.sop_create('test:set_1', ArcusTranscoder.FLAG_STRING, 3)
+ret = client.sop_create('test:set_1', ArcusTranscoder.FLAG_STRING, timeout)
 print(ret.get_result())
 assert ret.get_result() == True
 
@@ -199,7 +202,7 @@ def itoh(i):
 
 
 # int key
-ret = client.bop_create('test:btree_int', ArcusTranscoder.FLAG_INTEGER, 3)
+ret = client.bop_create('test:btree_int', ArcusTranscoder.FLAG_INTEGER, timeout)
 print (ret.get_result())
 assert ret.get_result() == True
 
@@ -224,7 +227,7 @@ assert ret.get_result() == 100
 
 
 # hex key
-ret = client.bop_create('test:btree_hex', ArcusTranscoder.FLAG_STRING, 3)
+ret = client.bop_create('test:btree_hex', ArcusTranscoder.FLAG_STRING, timeout)
 print (ret.get_result())
 assert ret.get_result() == True
 
@@ -245,7 +248,7 @@ for i in range(0x10050, 0x10150):
 
 # eflag test
 
-ret = client.bop_create('test:btree_eflag', ArcusTranscoder.FLAG_INTEGER, 3)
+ret = client.bop_create('test:btree_eflag', ArcusTranscoder.FLAG_INTEGER, timeout)
 print (ret.get_result())
 assert ret.get_result() == True
 
@@ -285,7 +288,7 @@ for i in range(200, 401):
 #
 #####################################################################################################
 # int key
-ret = client.bop_create('test:btree_1', ArcusTranscoder.FLAG_INTEGER, 3)
+ret = client.bop_create('test:btree_1', ArcusTranscoder.FLAG_INTEGER, timeout)
 print (ret.get_result())
 assert ret.get_result() == True
 
@@ -295,7 +298,7 @@ for i in range(0, 1000):
 	assert ret.get_result() == True
 
 
-ret = client.bop_create('test:btree_2', ArcusTranscoder.FLAG_INTEGER, 3)
+ret = client.bop_create('test:btree_2', ArcusTranscoder.FLAG_INTEGER, timeout)
 print (ret.get_result())
 assert ret.get_result() == True
 
@@ -304,7 +307,7 @@ for i in range(1000, 2000):
 	print(ret.get_result())
 	assert ret.get_result() == True
 
-ret = client.bop_create('test:btree_3', ArcusTranscoder.FLAG_INTEGER, 3)
+ret = client.bop_create('test:btree_3', ArcusTranscoder.FLAG_INTEGER, timeout)
 print (ret.get_result())
 assert ret.get_result() == True
 
@@ -327,6 +330,10 @@ missed_key = ret.get_missed_key()
 
 idx = 500
 for item in result:
+	if item[0] != idx: # bkey
+		print(item[0])
+		print(idx)
+
 	assert item[0] == idx # bkey
 	assert item[1][:11] == 'test:btree_' # key
 	assert item[2] == itoh(idx) # eflag
