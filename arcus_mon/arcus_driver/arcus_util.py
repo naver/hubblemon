@@ -109,14 +109,17 @@ class zookeeper:
 		children = self.zk.get_children(path)
 		return data, stat, children
 
-	def zk_children(self, path):
-		return self.zk.get_children(path)
+	def zk_children(self, path, watch=None):
+		if watch != None:
+			return self.zk.get_children(path, watch = watch)
+		else:
+			return self.zk.get_children(path)
 
-	def zk_children_if_exists(self, path):
+	def zk_children_if_exists(self, path, watch=None):
 		if self.zk_exists(path) == False:
 			return []
 
-		return self.zk_children(path)
+		return self.zk_children(path, watch)
 	
 	def zk_exists(self, path):
 		if self.zk.exists(path) == None:
