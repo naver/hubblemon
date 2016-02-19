@@ -28,6 +28,8 @@ import data_loader.loader_factory
 
 
 hubblemon_path = os.path.join(os.path.dirname(__file__), '..')
+mod_cache = {}
+mod_query_cache = {}
 
 #
 # default loader settings
@@ -184,10 +186,13 @@ def get_chart_list(param):
 	type = param['type']
 	type = type.split('_')[0]
 
-	pkg = __import__('%s_mon.%s_view' % (type, type))
-	mod = getattr(pkg, '%s_view' % type)
-	mod.init_plugin()
-	return mod.get_chart_list(param)
+	if type not in mod_cache:
+		pkg = __import__('%s_mon.%s_view' % (type, type))
+		mod = getattr(pkg, '%s_view' % type)
+		mod.init_plugin()
+		mod_cache[type] = mod
+
+	return mod_cache[type].get_chart_list(param)
 
 
 def get_chart_data(param):
@@ -197,10 +202,13 @@ def get_chart_data(param):
 	type = param['type']
 	type = type.split('_')[0]
 
-	pkg = __import__('%s_mon.%s_view' % (type, type))
-	mod = getattr(pkg, '%s_view' % type)
-	mod.init_plugin()
-	return mod.get_chart_data(param)
+	if type not in mod_cache:
+		pkg = __import__('%s_mon.%s_view' % (type, type))
+		mod = getattr(pkg, '%s_view' % type)
+		mod.init_plugin()
+		mod_cache[type] = mod
+
+	return mod_cache[type].get_chart_data(param)
 
 
 def get_graph_list(param):
@@ -210,10 +218,14 @@ def get_graph_list(param):
 	type = param['type']
 	type = type.split('_')[0]
 
-	pkg = __import__('%s_mon.%s_view' % (type, type))
-	mod = getattr(pkg, '%s_view' % type)
-	mod.init_plugin()
-	return mod.get_graph_list(param)
+	if type not in mod_cache:
+		pkg = __import__('%s_mon.%s_view' % (type, type))
+		mod = getattr(pkg, '%s_view' % type)
+		mod.init_plugin()
+		mod_cache[type] = mod
+
+	return mod_cache[type].get_graph_list(param)
+
 
 def get_graph_data(param):
 	if 'type' not in param:
@@ -222,10 +234,13 @@ def get_graph_data(param):
 	type = param['type']
 	type = type.split('_')[0]
 
-	pkg = __import__('%s_mon.%s_view' % (type, type))
-	mod = getattr(pkg, '%s_view' % type)
-	mod.init_plugin()
-	return mod.get_graph_data(param)
+	if type not in mod_cache:
+		pkg = __import__('%s_mon.%s_view' % (type, type))
+		mod = getattr(pkg, '%s_view' % type)
+		mod.init_plugin()
+		mod_cache[type] = mod
+
+	return mod_cache[type].get_graph_data(param)
 
 def auth_fields(param):
 	if 'type' not in param:
@@ -234,13 +249,18 @@ def auth_fields(param):
 	type = param['type']
 	type = type.split('_')[0]
 
-	pkg = __import__('%s_mon.%s_view' % (type, type))
-	mod = getattr(pkg, '%s_view' % type)
-	mod.init_plugin()
+	if type not in mod_cache:
+		pkg = __import__('%s_mon.%s_view' % (type, type))
+		mod = getattr(pkg, '%s_view' % type)
+		mod.init_plugin()
+		mod_cache[type] = mod
 
-	pkg = __import__('%s_mon.%s_query' % (type, type))
-	mod = getattr(pkg, '%s_query' % type)
-	return mod.auth_fields(param)
+	if type not in mod_query_cache:
+		pkg = __import__('%s_mon.%s_query' % (type, type))
+		mod = getattr(pkg, '%s_query' % type)
+		mod_query_cache[type] = mod
+
+	return mod_query_cache[type].auth_fields(param)
 
 
 def query(param, ip):
@@ -250,13 +270,18 @@ def query(param, ip):
 	type = param['type']
 	type = type.split('_')[0]
 
-	pkg = __import__('%s_mon.%s_view' % (type, type))
-	mod = getattr(pkg, '%s_view' % type)
-	mod.init_plugin()
+	if type not in mod_cache:
+		pkg = __import__('%s_mon.%s_view' % (type, type))
+		mod = getattr(pkg, '%s_view' % type)
+		mod.init_plugin()
+		mod_cache[type] = mod
 
-	pkg = __import__('%s_mon.%s_query' % (type, type))
-	mod = getattr(pkg, '%s_query' % type)
-	return mod.query(param, ip)
+	if type not in mod_query_cache:
+		pkg = __import__('%s_mon.%s_query' % (type, type))
+		mod = getattr(pkg, '%s_query' % type)
+		mod_query_cache[type] = mod
+
+	return mod_query_cache[type].query(param, ip)
 
 
 def get_addon_page(param):
@@ -266,10 +291,13 @@ def get_addon_page(param):
 	type = param['type']
 	type = type.split('_')[0]
 
-	pkg = __import__('%s_mon.%s_view' % (type, type))
-	mod = getattr(pkg, '%s_view' % type)
-	mod.init_plugin()
-	return mod.get_addon_page(param)
+	if type not in mod_cache:
+		pkg = __import__('%s_mon.%s_view' % (type, type))
+		mod = getattr(pkg, '%s_view' % type)
+		mod.init_plugin()
+		mod_cache[type] = mod
+
+	return mod_cache[type].get_addon_page(param)
 
 
 
