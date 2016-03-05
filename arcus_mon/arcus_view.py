@@ -544,13 +544,18 @@ def get_arcus_util_page(param):
 			if 'set' in param:
 				value = param['value']
 				etime = param['exp_time']
-				if etime.isdigit():
-					etime = int(etime)
-				else:
-					etime = 0
 
-				ret = conn.set(key, value, etime)
-				result = ret.get_result()
+				if value == '': # prevent miss click
+					result = 'empty value'
+				else:
+					if etime.isdigit():
+						etime = int(etime)
+					else:
+						etime = 0
+
+					ret = conn.set(key, value, etime)
+					result = ret.get_result()
+
 			elif 'get' in param:
 				ret = conn.get(key)
 				result = ret.get_result()
