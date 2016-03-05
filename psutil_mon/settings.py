@@ -42,8 +42,8 @@ alarm_conf_absolute = {
 
 alarm_conf_absolute = {
 		'*:net-*':{ 
-				'bytes_recv':(50000000, 60000000, 90000000),
-				'bytes_sent':(50000000, 60000000, 90000000),
+				'bytes_recv':(90000000, 100000000, 110000000),
+				'bytes_sent':(90000000, 100000000, 110000000),
 		},
 
 		'*:resource': {

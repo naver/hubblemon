@@ -100,6 +100,7 @@ def query(param, ip):
 
 		syslog('[hubblemon-arcus-eval:%s-%s(%s)] %s' % (cloud, id, ip, query))
 		exec(query)
+		conn.disconnect()
 
 		return p['result']
 		

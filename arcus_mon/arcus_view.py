@@ -420,12 +420,14 @@ def get_addon_page(param):
 		return ''
 
 	if param['type'] == 'arcus_list':
-		return get_arcus_cloud_list(param)
+		return get_arcus_cloud_page(param)
+	elif param['type'] == 'arcus_util':
+		return get_arcus_util_page(param)
 
 	return ''
 	
 
-def get_arcus_cloud_list(param):
+def get_arcus_cloud_page(param):
 	if 'zk' in param:
 		# modify description if needed
 		zk = param['zk']
@@ -519,6 +521,88 @@ def get_arcus_cloud_list(param):
 		
 		
 	return cloud_list
+
+
+
+arcus_driver_path = os.path.abspath('./arcus_mon/arcus_driver')
+sys.path.append(arcus_driver_path)
+from arcus import *
+from arcus_mc_node import *
+from arcus_util import *
+
+def get_arcus_util_page(param):
+
+	zk = ''
+	cloud = ''
+	key = ''
+	result = ''
+	value = ''
+	exp_time = ''
+
+	if 'zk' in param and 'cloud' in param and 'key' in param:
+		zk = param['zk']
+		cloud = param['cloud']
+		key = param['key']
+		
+
+		if zk != '' and cloud != '' and key != '':
+			conn = Arcus(ArcusLocator(ArcusMCNodeAllocator(ArcusTranscoder())))
+			conn.connect(zk, cloud)
+
+			if 'set' in param:
+				value = param['value']
+				etime = param['exp_time']
+				if etime.isdigit():
+					etime = int(etime)
+				else:
+					etime = 0
+
+				ret = conn.set(key, value, etime)
+				result = ret.get_result()
+			elif 'get' in param:
+				ret = conn.get(key)
+				result = ret.get_result()
+				if result is None:
+					result = 'Not Found'
+
+
+			conn.disconnect()
+
+	util_page = '''
+		<div>
+		<h3>value test</h3>
+		<form action='.'>
+			zookeeper (ex: gasan.arcuscloud.nhncorp.com:17288)
+			<br>
+			<input id="id_zk" name="zk" type="text" value="%s"/>
+			<br>
+			cloud (ex: apigw)
+			<br>
+			<input id="id_cloud" name="cloud" type="text" value="%s"/>
+			<br>
+			key
+			<br>
+			<input id="id_key" name="key" type="text" value="%s"/>
+			<input type="submit" name="get" value="get">
+			<br>
+			value
+			<br>
+			<input id="id_value" name="value" type="text" value="%s"/>
+			<br>
+			expire time (default: 0)
+			<br>
+			<input id="id_expiretime" name="exp_time" type="text" value="%s"/>
+			<input type="submit" name="set" value="set">
+			<input type="hidden" name="type" value="arcus_util">
+		</form>
+		</div>
+		<br><br>
+		<div>
+		%s
+		</div>
+		''' % (zk, cloud, key, value, exp_time, result)
+		
+	return util_page
 
 
 
