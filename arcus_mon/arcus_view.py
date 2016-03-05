@@ -517,11 +517,10 @@ def get_arcus_cloud_page(param):
 
 
 
-arcus_driver_path = os.path.abspath('./arcus_mon/arcus_driver')
+arcus_driver_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'arcus_driver')
 sys.path.append(arcus_driver_path)
-from arcus import *
-from arcus_mc_node import *
-from arcus_util import *
+from arcus_mon.arcus_driver.arcus import *
+from arcus_mon.arcus_driver.arcus_mc_node import *
 
 def get_arcus_util_page(param):
 
