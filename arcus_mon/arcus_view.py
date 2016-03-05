@@ -146,17 +146,17 @@ def get_chart_data(param):
 	if 'type' in param:
 		type = param['type']
 
-	if 'cloud' not in param or 'server' not in param:
+	if 'cloud' not in param or 'instance' not in param:
 		return None
 
 	cloud_name = param['cloud']
-	server_name = param['server']
+	instance_name = param['instance']
 
 	if cloud_name not in arcus_cloud_map and cloud_name != '[SUM]':
 		return None
 
 	if type == 'arcus_stat':
-		if server_name == '[SUM]':
+		if instance_name == '[SUM]':
 			loader_list = []
 			for node in arcus_cloud_map[cloud_name]:
 				if node.startswith('['):
@@ -167,7 +167,7 @@ def get_chart_data(param):
 
 			results = data_loader.loader_factory.sum(loader_list)
 			
-		elif server_name == '[EACH]':
+		elif instance_name == '[EACH]':
 			loader_list = []
 			for node in arcus_cloud_map[cloud_name]:
 				if node.startswith('['):
@@ -180,7 +180,7 @@ def get_chart_data(param):
 
 		else:
 			for node in arcus_cloud_map[cloud_name]:
-				if node.startswith(server_name):
+				if node.startswith(instance_name):
 					results = common.core.loader(node, arcus_preset, title=node)
 					break
 
@@ -189,22 +189,22 @@ def get_chart_data(param):
 			return None
 
 		prefix = param['prefix']
-		port = os.path.basename(server_name)
-		server = os.path.dirname(server_name)
+		port = os.path.basename(instance_name)
+		instance = os.path.dirname(instance_name)
 
 		if prefix == '[ALL]':
 			results = []
-			client, port = server_name.split('/')
+			client, port = instance_name.split('/')
 			file_list = common.core.get_data_list_of_client(client, port + '-')
 
 			for file in file_list:
-				file_path = os.path.join(server, file)
+				file_path = os.path.join(instance, file)
 
 				tmp_port, prefix_name = file.split('-', 1)
 				curr_prefix, tmp_name = prefix_name.split('.')
 				results.append(common.core.loader(file_path, arcus_prefix_preset, curr_prefix)) # all lists
 		else:
-			path = os.path.join(server, '%s-%s' % (port, prefix))
+			path = os.path.join(instance, '%s-%s' % (port, prefix))
 			results = common.core.loader(path, arcus_prefix_preset, title=prefix)
 		
 	return results
@@ -218,37 +218,37 @@ def get_chart_list(param):
 		type = param['type']
 
 	cloud = ''
-	server = ''
+	instance = ''
 
 	if 'cloud' in param:
 		cloud = param['cloud']
 
-	if 'server' in param:
-		server = param['server']
+	if 'instance' in param:
+		instance = param['instance']
 
 	if type == 'arcus_stat':
 		if cloud == '':
-			return (['cloud', 'server'], arcus_cloud_map)
+			return (['cloud', 'instance'], arcus_cloud_map)
 		else:
 			str_list = copy.copy(arcus_cloud_map[cloud])
 			str_list.insert(0, '[SUM]')
 			str_list.insert(0, '[EACH]')
-			return (['cloud', 'server'], {cloud:str_list})
+			return (['cloud', 'instance'], {cloud:str_list})
 
 	elif type == 'arcus_query':
 		if cloud == '':
-			return (['cloud', 'server'], arcus_cloud_map)
+			return (['cloud', 'instance'], arcus_cloud_map)
 		else:
 			str_list = copy.copy(arcus_cloud_map[cloud])
 			str_list.insert(0, '[ALL]')
-			return (['cloud', 'server'], {cloud:str_list})
+			return (['cloud', 'instance'], {cloud:str_list})
 
 
 	elif type == 'arcus_prefix':
-		if cloud == '' or server == '':
-			return (['cloud', 'server', 'prefix'], arcus_cloud_map)
+		if cloud == '' or instance == '':
+			return (['cloud', 'instance', 'prefix'], arcus_cloud_map)
 
-		client, port = server.split('/')
+		client, port = instance.split('/')
 
 		file_list = common.core.get_data_list_of_client(client, port + '-')
 
@@ -259,11 +259,11 @@ def get_chart_list(param):
 			prefix_list.append(prefix)
 		
 		prefix_map = {}
-		prefix_map[cloud] = { server:prefix_list }
+		prefix_map[cloud] = { instance:prefix_list }
 
-		return (['cloud', 'server', 'prefix'], prefix_map)
+		return (['cloud', 'instance', 'prefix'], prefix_map)
 
-	return (['cloud', 'server'], arcus_cloud_map)
+	return (['cloud', 'instance'], arcus_cloud_map)
 
 
 def get_graph_list(param):
@@ -454,14 +454,7 @@ def get_arcus_cloud_page(param):
 
 
 
-	cloud_list = """
-              <div style="float:left; width:3%%;">#</div>
-              <div style="float:left; width:12%%;">CLOUD</div>
-              <div style="float:left; width:25%%;">ZOOKEEPER</div>
-              <div style="float:left; width:20%%;">NODES</div>
-              <div style="float:left; width:40%%;">DESC</div>
-              <div style="clear:both;"></div>"""
-
+	cloud_list = ''
 	color = '#EEEEFF'
 
 	idx = 1 
@@ -476,20 +469,20 @@ def get_arcus_cloud_page(param):
 			color = '#EEEEFF'
 
 		tmp ="""<div style="float:left; width:3%%;">%d</div>
-			<div style="float:left; width:12%%;"><a href="/chart?type=arcus_stat&cloud=%s&server=[EACH]">%s</a></div>
+			<div style="float:left; width:12%%;"><a href="/chart?type=arcus_stat&cloud=%s&instance=[EACH]">%s</a></div>
 			<div style="float:left; width:25%%;"><a href="/graph?type=arcus_graph&zk=%s">%s</a></div>
 			""" % (idx, cloud_name, cloud_name, zookeeper, zookeeper)
 		idx += 1
 
-		tmp_server = ''
+		tmp_instance = ''
 		for node in v[1]:
-			tmp_server +="""<div><a href="/chart?type=arcus_stat&cloud=%s&server=%s">%s</a></div>""" % (cloud_name, node, node)
+			tmp_instance +="""<div><a href="/chart?type=arcus_stat&cloud=%s&instance=%s">%s</a></div>""" % (cloud_name, node, node)
 
 
-		tmp_server += "<div><b>total instances: %d</b></div>" % len(node_str_list)
+		tmp_instance += "<div><b>total instances: %d</b></div>" % len(node_str_list)
 		
 
-		tmp += '<div style="float:left; width:20%%;">%s</div>' % (tmp_server)
+		tmp += '<div style="float:left; width:20%%;">%s</div>' % (tmp_instance)
 
 		mtime = ''
 		if isinstance(meta, list) and hasattr(meta[1], 'mtime'):
@@ -570,7 +563,6 @@ def get_arcus_util_page(param):
 
 	util_page = '''
 		<div>
-		<h3>value test</h3>
 		<form action='.'>
 			zookeeper (ex: gasan.arcuscloud.nhncorp.com:17288)
 			<br>

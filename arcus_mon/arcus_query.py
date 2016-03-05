@@ -47,11 +47,11 @@ def query(param, ip):
 	if 'cloud' not in param:
 		return 'select cloud'	
 
-	if 'server' not in param:
-		return 'select server'	
+	if 'instance' not in param:
+		return 'select instance'	
 
 	cloud = param['cloud']
-	server = param['server']
+	instance = param['instance']
 
 	id = ''
 	pw = ''
@@ -74,16 +74,16 @@ def query(param, ip):
 
 
 	if param['query_type'] == 'query':
-		syslog('[hubblemon-arcus-query:%s-%s-%s(%s)] %s' % (cloud, server, id, ip, query))
+		syslog('[hubblemon-arcus-query:%s-%s-%s(%s)] %s' % (cloud, instance, id, ip, query))
 		result_str = ''
 
-		if server == '[ALL]':
-			server_list = arcus_mon.arcus_view.arcus_cloud_map[cloud]
+		if instance == '[ALL]':
+			instance_list = arcus_mon.arcus_view.arcus_cloud_map[cloud]
 		else:
-			server_list = [server]
+			instance_list = [instance]
 
-		for server in server_list:
-			addr, port = server.split('/')
+		for instance in instance_list:
+			addr, port = instance.split('/')
 			prefix, port = port.split('_')
 			node = arcus_node(addr, port)
 			result_str += '[%s-%s]<br>%s<br>' % (addr, port, common.core.return_as_string(node.do_arcus_command(query)))
