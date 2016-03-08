@@ -250,10 +250,10 @@ class psutil_stat:
 				   ('retransmit', 'DERIVE', 60, '0', 'U')]
 
 
-		self.key['RRA'] = [('MAX', 0.5, 5, (3600/5)*24), 	# 5sec  (to 1day)
-				   ('MAX', 0.5, 60, (3600/60)*24*7), 	# 1min (to 7day)
-				   ('MAX', 0.5, 3600, 24*31),		# 1hour (to 1month)
-				   ('MAX', 0.5, 3600*3, (24/3)*366*3) ]	# 3hour (to 3year)
+		self.key['RRA'] = [('MAX', 0.5, 5/5, (3600/5)*24), 	# 5sec  (to 1day)
+				   ('MAX', 0.5, 60/5, (3600/60)*24*7), 	# 1min (to 7day)
+				   ('MAX', 0.5, 3600/5, 24*31),		# 1hour (to 1month)
+				   ('MAX', 0.5, 3600*3/5, (24/3)*366*3) ]	# 3hour (to 3year)
 
 
 

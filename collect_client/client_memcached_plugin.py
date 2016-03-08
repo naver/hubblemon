@@ -226,10 +226,10 @@ class memcached_stat:
 					('cmd_del', 'DERIVE', 60, '0', 'U')]
 
 		# used for RRA
-		self.rra_list =	[  ('MAX', 0.5, 5, (3600/5)*24), 	# 5sec  (to 1day), 17280
-				   ('MAX', 0.5, 60, (3600/60)*24*7), 	# 1min (to 7day), 10080
-				   ('MAX', 0.5, 3600, 24*31),		# 1hour (to 1month), 744
-				   ('MAX', 0.5, 3600*3, (24/3)*366*3) ]	# 3hour (to 3year), 8734
+		self.rra_list =	[  ('MAX', 0.5, 5/5, (3600/5)*24), 	# 5sec  (to 1day), 17280
+				   ('MAX', 0.5, 60/5, (3600/60)*24*7), 	# 1min (to 7day), 10080
+				   ('MAX', 0.5, 3600/5, 24*31),		# 1hour (to 1month), 744
+				   ('MAX', 0.5, 3600*3/5, (24/3)*366*3) ]	# 3hour (to 3year), 8734
 
 
 	def collect_prefix_key_init(self):
