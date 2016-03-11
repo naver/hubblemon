@@ -165,7 +165,7 @@ def get_chart_data(param):
 				loader = common.core.loader(node, arcus_preset, title=node)
 				loader_list.append(loader)
 
-			results = data_loader.loader_factory.sum(loader_list)
+			results = data_loader.loader_factory.sum_all(loader_list)
 			
 		elif instance_name == '[EACH]':
 			loader_list = []

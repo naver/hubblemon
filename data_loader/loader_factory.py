@@ -51,7 +51,7 @@ def merge(loaders):
 	ret = merge_loader(loaders)
 	return ret
 	
-def sum(loaders):
+def sum_all(loaders):
 	ret = sum_loader(loaders)
 	return ret
 
