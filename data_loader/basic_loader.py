@@ -186,6 +186,9 @@ class basic_loader:
 		elif isinstance(titles, list):
 			ret = []
 			for title in titles:
+				if title.startswith('#'):
+					continue
+
 				ret += self.make_chart(title, tmap, items, ts_start, ts_step)
 		
 			return ret
@@ -237,7 +240,7 @@ class basic_loader:
 
 			renderer_name = 'default'
 			if isinstance(titles, list) and titles[0].startswith('#'): # renderer
-				renderer_name = titles[1:]
+				renderer_name = titles[0][1:]
 
 			if renderer_name in self.renderer:
 				new_chart.renderer = self.renderer[renderer_name]
