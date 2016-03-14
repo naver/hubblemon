@@ -19,6 +19,7 @@
 
 import os
 from chart.chart_data import chart_data
+import common.settings
 
               
 class basic_loader:
@@ -32,6 +33,12 @@ class basic_loader:
 
 		self.ts_start = None
 		self.ts_end = None
+
+		self.renderer = {}
+		flot_line = flot_line_renderer()
+		self.renderer['default'] = flot_line
+		self.renderer['line'] = flot_line
+		self.renderer['title'] = title_renderer()
 
 	def count(self, name):
 		if self.handle is None:
@@ -209,11 +216,12 @@ class basic_loader:
 		for i in range(0, len(names)):
 			tmap[names[i]] = i
 			
-
+		# loader title
 		chart_data_list = []
 		if self.title != '':
 			title_chart = chart_data()
 			title_chart.title = self.title
+			title_chart.renderer = self.renderer['title']
 			chart_data_list.append(title_chart)
 
 		if self.filter == None: 	# select all
@@ -227,12 +235,101 @@ class basic_loader:
 			for tmp in tmp_list:
 				new_chart.push_data(tmp[0], tmp[1])
 
+			renderer_name = 'default'
+			if isinstance(titles, list) and titles[0].startswith('#'): # renderer
+				renderer_name = titles[1:]
+
+			if renderer_name in self.renderer:
+				new_chart.renderer = self.renderer[renderer_name]
+
 			chart_data_list.append(new_chart) 
 
 		return chart_data_list
 
 
+class title_renderer:
+	def render(self, chart_data):
+		title_template = self.get_title_template()
+		return title_template % chart_data.title
 
+	def get_title_template(self):
+		title_template = '''
+			<div class="chart-seperator" style="clear:both">
+				<p>%s</p>
+			</div>
+		'''
+
+		return title_template
+
+
+
+class flot_line_renderer:
+	idx = 1
+
+	def render(self, chart_data):
+		chart_data.sampling(common.settings.chart_resolution)
+
+		# adjust timezone if needed
+		mode = ''
+		if chart_data.mode == 'time':
+			mode = 'xaxis: { mode: "time" }, yaxis: { tickFormatter: tickFunc, min: 0 }, lines: { fillOpacity:1.0, show: true, lineWidth:1 },'
+			chart_data.adjust_timezone()
+
+		# convert python array to js array
+		raw_data = ''
+		if len(chart_data.items) == 1: # one item
+			raw_data = chart_data.items[0].data.__repr__().replace('None', 'null')
+		else: # multi item (display label)
+			for item in chart_data.items:
+				tmp = item.data.__repr__().replace('None', 'null')
+				if len(chart_data.items) > 7:
+					raw_data += '%s,' % tmp
+				else:
+					raw_data += '{ label: "%s", data: %s },' % (item.title, tmp)
+
+		idx = flot_line_renderer.idx + id(chart_data) # to get unique idx
+		flot_line_renderer.idx += 1
+
+		#print (raw_data)
+		js_template = self.get_js_template()
+		return  js_template % ('[ %s ]' % raw_data, idx, mode, chart_data.title, idx)
+
+		
+	def get_js_template(self):
+		js_template = '''
+			<script type="text/javascript">
+
+			$(function() {
+				tickFunc = function(val, axis) {
+					if (val > 1000000000 && (val %% 1000000000) == 0) {
+						return val/1000000000 + "G";
+					}
+					else if (val > 1000000 && (val %% 1000000) == 0) {
+						return val/1000000 + "M";
+					}
+					else if (val < 1) {
+						return Math.round(val*1000)/1000
+					}
+
+					return val;
+				};
+
+				var data_list = %s
+				$.plot("#placeholder_%s", data_list, {
+					%s
+				});
+			});
+			</script>
+
+			<div>
+			<div class="chart-container">
+				<div class="chart-title">%s</div>
+				<div id="placeholder_%s" class="chart-placeholder" style="float:left"></div>
+			</div>
+			</div>
+		'''
+
+		return js_template
 
 
 

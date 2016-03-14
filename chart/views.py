@@ -31,7 +31,6 @@ from syslog import syslog
 
 import common.settings
 
-from chart.chart_data import chart_js_renderer
 from chart.forms import chart_expr_form
 from chart.forms import query_form
 from jqueryui.jqueryui import *
@@ -347,7 +346,6 @@ def system_page(request):
 	js_chart_list = _make_static_chart_list(request.GET, 'system', levels, [ system_list, item_list ])
 
 	# chart data
-	chart = chart_js_renderer()
 	js_chart_data = ''
 	chart_data_list = []
 	start_ts, end_ts = _get_ts(request.GET)
@@ -360,7 +358,7 @@ def system_page(request):
 
 		js_chart_data = ''
 		for chart_data in chart_data_list:
-			js_chart_data += chart.render(chart_data)
+			js_chart_data += chart_data.render()
 		
 	## make view
 	variables = RequestContext(request, { 'main_link':_make_main_link(), 'chart_list':js_chart_list, 'chart_data':js_chart_data } )
@@ -408,14 +406,13 @@ def expr_page(request):
 				loaders = [loader]
 		
 			## chart rendering
-			chart = chart_js_renderer()
 			start_ts, end_ts = _get_ts(param)
 
 			for loader in loaders:
 				if hasattr(loader, 'load'):
 					chart_data_list = loader.load(start_ts, end_ts)
 					for chart_data in chart_data_list:
-						js_chart_data += chart.render(chart_data)
+						js_chart_data += chart_data.render()
 				else:
 					js_chart_data += str(loader)
 				
@@ -491,7 +488,6 @@ def chart_page(request):
 	loaders = ret
 
 	## chart rendering
-	chart = chart_js_renderer()
 	chart_data_list = []
 	start_ts, end_ts = _get_ts(request.GET)
 
@@ -503,7 +499,7 @@ def chart_page(request):
 
 	js_chart_data = ''
 	for chart_data in chart_data_list:
-		js_chart_data += chart.render(chart_data)
+		js_chart_data += chart_data.render()
 
 
 	## make view
