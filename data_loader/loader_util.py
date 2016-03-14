@@ -18,6 +18,7 @@
 #
 
 from chart.chart_data import chart_data
+from data_loader.basic_loader import flot_line_renderer
 
 class merge_loader:
 	def __init__(self, loaders):
@@ -44,10 +45,12 @@ class merge_loader:
 		
 		for x in range(0, chart_len):
 			new_chart = chart_data()
+
 			for y in range(0, len(chart_list_list)):
 				chart = chart_list_list[y][x]
 				new_chart.merge(chart)
 				new_chart.mode = chart.mode
+				new_chart.renderer = chart.renderer
 			
 			chart_data_list.append(new_chart)
 
@@ -87,6 +90,7 @@ class sum_loader:
 				chart = chart_list_list[y][x]
 				new_chart.sum(chart)
 				new_chart.mode = chart.mode
+				new_chart.renderer = chart.renderer
 
 			chart_data_list.append(new_chart)
 
@@ -120,6 +124,7 @@ class draw_loader:
 	def load(self, ts_start, ts_end):
 		chart = chart_data()
 		chart.mode = 'number'
+		chart.renderer = flot_line_renderer()
 
 		for data in self.datas:
 			new_data = []
