@@ -34,11 +34,11 @@ class CollectListener:
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		self.sock_node_map = {}
-		self.plugins = []
+		self.plugins = {}
 		self.basedir = basedir
 
-	def put_plugin(self, plug):
-		self.plugins.append(plug)
+	def put_plugin(self, name, plug):
+		self.plugins[name] = plug
 
 	def listen(self, count = -1):
 		print('# CollectListener listen (%s)' % (self.port))
@@ -102,11 +102,9 @@ class CollectNode:
 	def __init__(self, socket, plugins, basedir):
 		self.sock = socket
 
-		self.name_plugin_map = {}
-		self.plugins = []
+		self.plugins = {}
 		for p in plugins:
-			self.name_plugin_map[p.name] = p
-			self.plugins.append(p.clone())
+			self.plugins[p.name] = p.clone()
 
 		self.basedir = basedir
 
@@ -211,11 +209,14 @@ class CollectNode:
 				if k == 'client' or k == 'datetime':
 					continue
 
-				if k not in self.name_plugin_map:
+				if k not in self.plugins:
+					k = 'default' # retry as 'defaut'
+
+				if k not in self.plugins:
 					# TODO: error
 					continue
 
-				p = self.name_plugin_map[k]
+				p = self.plugins[k]
 				p.create_data(hostname, v)
 				self.sock.send(b'OK')
 		else:
@@ -232,11 +233,14 @@ class CollectNode:
 					if k == 'client' or k == 'datetime':
 						continue
 
-					if k not in self.name_plugin_map:
+					if k not in self.plugins:
+						k = 'default' # retry as 'defaut'
+
+					if k not in self.plugins:
 						# TODO: error
 						continue
 
-					p = self.name_plugin_map[k]
+					p = self.plugins[k]
 					p.update_data(hostname, result['datetime'].timestamp(), v)
 
 					# tmp: add client, ts

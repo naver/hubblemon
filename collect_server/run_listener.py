@@ -33,7 +33,8 @@ import common.settings
 def listener(port, path):
 	print('>>> start child listener %d (%d)' % (port, os.getpid()))
 	lsn = collect_listener.CollectListener(port, path)
-	lsn.put_plugin(server_rrd_plugin.server_rrd_plugin(path))
+	lsn.put_plugin('default', server_rrd_plugin.server_rrd_plugin(path))
+	lsn.put_plugin('rrd', server_rrd_plugin.server_rrd_plugin(path))
 	
 	#time.sleep(5)
 	lsn.listen(50000) # set repeat count, because some leak in rrdtool
