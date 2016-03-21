@@ -103,8 +103,8 @@ class CollectNode:
 		self.sock = socket
 
 		self.plugins = {}
-		for p in plugins:
-			self.plugins[p.name] = p.clone()
+		for k, v in plugins.items():
+			self.plugins[k] = v.clone()
 
 		self.basedir = basedir
 
@@ -206,7 +206,7 @@ class CollectNode:
 		if 'create' in result and result['create'] == True:
 			for k, v in result.items():
 				#print('## ', k)
-				if k == 'client' or k == 'datetime':
+				if k == 'client' or k == 'datetime' or k == 'create':
 					continue
 
 				if k not in self.plugins:
@@ -230,7 +230,7 @@ class CollectNode:
 			for result in results:
 				for k, v in result.items():
 					#print('## ', k)
-					if k == 'client' or k == 'datetime':
+					if k == 'client' or k == 'datetime' or k == 'create':
 						continue
 
 					if k not in self.plugins:
