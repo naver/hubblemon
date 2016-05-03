@@ -29,7 +29,7 @@ class arcus_stat:
 		self.name = 'arcus'
 		self.type = 'rrd'
 		self.addr = []
-		self.flag_collect_prefix = False
+		self.collect_prefix_limit = 32
 
 		self.collect_key_init()
 		self.collect_prefix_key_init()
@@ -150,7 +150,7 @@ class arcus_stat:
 			lines = result.split('\r\n')
 			stat = {}
 
-			if len(lines) > 128: # ignore too many prefixes
+			if len(lines) > self.collect_prefix_limit: # ignore too many prefixes
 				return 
 
 			for line in lines:
@@ -189,8 +189,7 @@ class arcus_stat:
 				return None # for create new file
 			
 		self.collect_stat(all_stats)
-		if self.flag_collect_prefix == True:
-			self.collect_prefix(all_stats)
+		self.collect_prefix(all_stats)
 
 		return all_stats
 		
@@ -203,10 +202,9 @@ class arcus_stat:
 
 		prefix_stat = {}
 
-		if self.flag_collect_prefix == True:
-			self.collect_prefix(prefix_stat)
-			for key in prefix_stat:
-				all_map[key] = self.create_prefix_key_list # stats per port-prefix
+		self.collect_prefix(prefix_stat)
+		for key in prefix_stat:
+			all_map[key] = self.create_prefix_key_list # stats per port-prefix
 	
 		all_map['RRA'] = self.rra_list
 		return all_map
