@@ -132,7 +132,7 @@ class arcus_stat:
 
 					stat[alias_key] = value # real name in rrd file
 
-			if end_count != len(comds): # timout or bad communication. ignore current stats
+			if end_count != len(cmds): # timout or bad communication. ignore current stats
 				return
 
 			for k, v in self.collect_key.items():
