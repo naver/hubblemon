@@ -29,6 +29,7 @@ class arcus_stat:
 		self.name = 'arcus'
 		self.type = 'rrd'
 		self.addr = []
+		self.flag_collect_prefix = False
 
 		self.collect_key_init()
 		self.collect_prefix_key_init()
@@ -104,6 +105,7 @@ class arcus_stat:
 		for addr in self.addr:
 			stat = {}
 
+			end_count = 0
 			cmds = ['stats', 'stats slabs']
 			for cmd in cmds:
 				result = self.do_arcus_command(addr[0], addr[1], cmd)
@@ -111,6 +113,7 @@ class arcus_stat:
 
 				for line in lines:
 					if line == 'END':
+						end_count += 1
 						continue
 
 					if line.strip() == '':
@@ -129,6 +132,8 @@ class arcus_stat:
 
 					stat[alias_key] = value # real name in rrd file
 
+			if end_count != len(comds): # timout or bad communication. ignore current stats
+				return
 
 			for k, v in self.collect_key.items():
 				if v not in stat:
@@ -139,10 +144,13 @@ class arcus_stat:
 	def collect_prefix(self, all_stats):
 		for addr in self.addr:
 			result = self.do_arcus_command(addr[0], addr[1], 'stats detail dump')
+			if 'END' not in result: # ignore this result. timeout or bad packet
+				continue
+
 			lines = result.split('\r\n')
 			stat = {}
 
-			if len(lines) > 32: # ignore too many prefixes
+			if len(lines) > 128: # ignore too many prefixes
 				return 
 
 			for line in lines:
@@ -181,7 +189,9 @@ class arcus_stat:
 				return None # for create new file
 			
 		self.collect_stat(all_stats)
-		self.collect_prefix(all_stats)
+		if self.flag_collect_prefix == True:
+			self.collect_prefix(all_stats)
+
 		return all_stats
 		
 
@@ -192,9 +202,11 @@ class arcus_stat:
 			all_map['arcus_%s' % addr[1]] = self.create_key_list # stats per port
 
 		prefix_stat = {}
-		self.collect_prefix(prefix_stat)
-		for key in prefix_stat:
-			all_map[key] = self.create_prefix_key_list # stats per port-prefix
+
+		if self.flag_collect_prefix == True:
+			self.collect_prefix(prefix_stat)
+			for key in prefix_stat:
+				all_map[key] = self.create_prefix_key_list # stats per port-prefix
 	
 		all_map['RRA'] = self.rra_list
 		return all_map
