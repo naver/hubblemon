@@ -112,7 +112,7 @@ class main_alarm:
 				if tm.tm_min == m and ts > self.last_health_check + 60*2:
 					self.last_health_check = ts
 					for method in self.alarm_methods:
-						msg = 'Arcus alarm Health check (%d:%d)' % (os.getpid(), ts)
+						msg = 'alarm health check (%d:%d)' % (os.getpid(), ts)
 						method.send(msg, msg)
 			
 	def check(self, msg_head, prev_item, curr_item, abs_conf, lambda_conf, diff_sec):

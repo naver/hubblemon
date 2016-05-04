@@ -19,15 +19,37 @@
 
 
 import urllib.request
-import os
+import os, time
 
 
 
 class alarm_wget:
-	def __init__(self, encoder):
+	def __init__(self, encoder, block_time = None):
 		self.encoder = encoder
+		self.block_time = block_time
 
 	def send(self, subject, body):
+		if self.block_time is not None:
+			start = self.block_time[0]
+			ret = start.split(':')
+			sm = int(ret[0])*60 + int(ret[1])
+			
+			end = self.block_time[1]
+			ret = end.split(':')
+			em = int(ret[0])*60 + int(ret[1])
+
+			tm = time.localtime()
+			cm = tm.tm_hour * 60 + tm.tm_min
+		
+			if em > sm: # not cross midnight
+				if cm > sm and cm < em:
+					print('alarm blocked')
+					return
+			else: # cross midnight
+				if cm > sm or cm < em:
+					print('alarm blocked')
+					return
+
 		url = self.encoder(subject, body)
 		os.system('wget -O /dev/null "%s" > /dev/null' % url)
 

@@ -59,3 +59,7 @@ target/
 
 # sqlite file
 *.sqlite3
+
+
+nohup.out
+
