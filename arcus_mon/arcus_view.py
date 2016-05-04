@@ -201,7 +201,7 @@ def get_chart_data(param):
 				file_path = os.path.join(instance, file)
 
 				tmp_port, prefix_name = file.split('-', 1)
-				curr_prefix, tmp_name = prefix_name.split('.')
+				curr_prefix, dummy = prefix_name.split('.rrd')
 				results.append(common.core.loader(file_path, arcus_prefix_preset, curr_prefix)) # all lists
 		else:
 			path = os.path.join(instance, '%s-%s' % (port, prefix))
@@ -253,9 +253,10 @@ def get_chart_list(param):
 		file_list = common.core.get_data_list_of_client(client, port + '-')
 
 		prefix_list = ['[ALL]']
+
 		for file in file_list:
 			port, prefix_name = file.split('-', 1)
-			prefix, name = prefix_name.split('.')
+			prefix, dummy = prefix_name.split('.rrd')
 			prefix_list.append(prefix)
 		
 		prefix_map = {}

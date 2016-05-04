@@ -81,10 +81,16 @@ class arcus_node:
 
 
 class zookeeper:
-	def __init__(self, address):
+	def __init__(self, address, timeout=20.0):
 		self.address = address
-		self.zk = KazooClient(address)
-		self.zk.start()
+		try:
+			self.zk = KazooClient(address, timeout)
+			self.zk.start()
+		except Exception as e:
+			print('failed to init %s' % address)
+			print(e)
+			raise e
+		
 
 		self.arcus_cache_map = {} 
 		self.arcus_node_map = {}
