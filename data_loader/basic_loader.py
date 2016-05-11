@@ -131,10 +131,14 @@ class basic_loader:
 		if isinstance(titles, str):
 			idx = tmap[titles]
 			data = []
+
 			ts_count = 0
 			for item in items:
-				ts = ts_start + ts_count * ts_step
-				ts_count += 1
+				if ts_start is None:
+					ts = item[0]
+				else:
+					ts = ts_start + ts_count * ts_step
+					ts_count += 1
 
 				if item[idx] == None:
 					data.append(None)
@@ -156,8 +160,11 @@ class basic_loader:
 			input = { 'prev':{} }
 
 			for item in items:
-				ts = ts_start + ts_count * ts_step
-				ts_count += 1
+				if ts_start is None:
+					ts = item[0]
+				else:
+					ts = ts_start + ts_count * ts_step
+					ts_count += 1
 
 				for name, idx in tmap.items():
 					input[name] = item[idx]
@@ -203,21 +210,45 @@ class basic_loader:
 		if self.handle is None:
 			return []
 
-		#info = self.rrd.info(self.rrd.filename)
-
 		ret = self.handle.read(ts_start, ts_end)
 		#print ('result: ', ret)
-		# ((ts_start, ts_end, step), (metric1, metric2, metric3), [(0, 0, 0), (1, 1, 1)....])
-
-		ts_start = ret[0][0] * 1000
-		ts_step = ret[0][2] * 1000
-		
-		names = ret[1]
-		items = ret[2]
+		# default(rrd) type ((ts_start, ts_end, step), (metric1, metric2, metric3), [(0, 0, 0), (1, 1, 1)....])
+		# rrd type ('#rrd', (ts_start, ts_end, step), (metric1, metric2, metric3), [(0, 0, 0), (1, 1, 1)....])
+		# tsdb type ('#timestamp', (metric1, metric2, metric3), [(ts, 0, 0, 0), (ts, 1, 1, 1)....])
 
 		tmap = {}
-		for i in range(0, len(names)):
-			tmap[names[i]] = i
+
+		if isinstance(ret[0], str):
+			if ret[0] == '#timestamp':
+				ts_start = None
+				ts_step = None
+
+				names = ret[1]
+				items = ret[2]
+			else:
+				ts_start = ret[1][0] * 1000
+				ts_step = ret[1][2] * 1000
+				
+				names = ret[2]
+				items = ret[3]
+
+			for i in range(0, len(names)):
+				tmap[names[i]] = i+1 # skip 1 for tag
+
+		else:	# implicit rrd style
+			ts_start = ret[0][0] * 1000
+			ts_step = ret[0][2] * 1000
+			
+			names = ret[1]
+			items = ret[2]
+
+			for i in range(0, len(names)):
+				tmap[names[i]] = i
+
+		# for debug
+		#print(tmap)
+		#print(names)
+		#print(items)
 			
 		# loader title
 		chart_data_list = []

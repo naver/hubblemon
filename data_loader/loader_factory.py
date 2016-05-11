@@ -41,6 +41,46 @@ def get_rrd_handle(path):
 	except:
 		return None
 
+
+class tsdb_test_handle:
+	def __init__(self, rrd):
+		self.rrd = rrd
+
+	def read(self, start, end):
+		ret = self.rrd.read(start, end)
+		# ((start, end, step), (metric1, metric2, metric3), [(0, 0, 0), (1, 1, 1), ...]
+		range = ret[0]
+		start = range[0]
+		step = range[2]
+
+		names = ret[1]
+		items = ret[2]
+
+		ts = start
+		result = []
+		for item in items:
+			new_item = (ts,) + item
+			result.append(new_item)
+			ts += step
+		
+		return ('#timestamp', names, result)
+
+# for tsdb layer development
+def get_tsdb_test_handle(path):
+	if not path.endswith('.rrd'):
+		path += '.rrd'
+
+	try:
+		fd = common.core.get_local_data_handle(path)
+		rrd_handle =  common.rrd_data.rrd_data(fd.path)
+		return tsdb_test_handle(rrd_handle)
+
+	except:
+		return None
+
+
+
+
 def get_remote_handle(host, port, file = None):
 	handle = common.remote_data_reader.remote_data_reader(host, port, file)
 	return handle

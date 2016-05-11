@@ -35,6 +35,8 @@ mod_query_cache = {}
 # default loader settings
 #
 get_default_local_handle = data_loader.loader_factory.get_rrd_handle
+#get_default_local_handle = data_loader.loader_factory.get_tsdb_test_handle
+
 get_default_remote_handle = data_loader.loader_factory.get_remote_handle
 
 def loader(path, filter = None, title = ''):
