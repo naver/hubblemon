@@ -51,7 +51,7 @@ chart_resolution = 400
 
 #
 # main link settings
-# 
+#
 # remove or add links you want
 #
 main_link = [	('system', '/system'),
@@ -74,6 +74,9 @@ main_link = [	('system', '/system'),
 
 # for arcus_mon
 arcus_zk_addrs = []
+if 'ARCUS_ZK_ADDRESSES' in os.environ:
+    arcus_zk_addrs = os.environ['ARCUS_ZK_ADDRESSES'].split(',')
+
 '''
 # example
 arcus_zk_addrs.append('arcuscloud.yourcompany.com:17288')
