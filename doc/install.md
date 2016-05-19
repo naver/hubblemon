@@ -160,6 +160,7 @@ Then edit run_client.py before run.
 In that file, you should change collect server addresses and add plugins to collect and send to server
 
 Default run_client.py template is like below.
+
     from collect_client import *
     from client_psutil_plugin import psutil_stat
     from client_arcus_plugin import arcus_stat
