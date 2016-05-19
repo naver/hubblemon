@@ -20,7 +20,12 @@ from kazoo.client import KazooClient
 from threading import Lock
 import hashlib, bisect, re
 import struct, datetime, time
-import queue
+import sys
+
+if sys.version_info[0] < 3:
+    import Queue as queue
+else:
+    import queue
 
 
 g_log = False
