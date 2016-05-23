@@ -79,8 +79,9 @@ class cytoscape_renderer:
 
 		result = ''
 
-		result = self.get_template() % (pos, pos, pos, pos, pos, pos, pool.description, pos, nodes, edges, layout)
+		result = self.get_template() % (pos, pos, pos, pos, pos, pos, pool.description,  pos, nodes, edges,layout, pos)
 		return result
+		
 		
 
 	def get_template(self):
@@ -107,12 +108,11 @@ class cytoscape_renderer:
 
 		<div id="cy_%d"></div>
 		<div id="desc_%d">%s</div>
+		
 
 	       <script type="text/javascript">
 			$(function(){ // on dom ready
-				var cy = cytoscape({
-				  container: document.getElementById('cy_%d'),
-
+				$('#cy_%d').cytoscape({
 				  style: [
 				    {
 				      selector: 'node',
@@ -161,9 +161,16 @@ class cytoscape_renderer:
 				  },
 
 				  layout: { %s, spacingFactor: 0.4 },
-
+				  
+  				  minZoom: 0.5,
+  				  maxZoom: 3,
+  				  
 				  ready : function() {
-				    cy.on('mouseup', function(event){
+				  	
+					$('#cy_%d').cytoscapeNavigator({
+					});
+			
+				   /* cy.on('mouseup', function(event){
 				      if (event.cyTarget === cy) {
 					  console.log('background');
 				      }
@@ -171,16 +178,14 @@ class cytoscape_renderer:
 					console.log(event.cyTarget.position());
 					console.log(event.cyTarget.id());
 				      }
-
-				    });
-
-
+				    }); */ 
 				  },
+	
 				});
-
-			console.log(cy.$('#b').position());
+				  			
+				/*console.log(cy.$('#b').position());*/
+				
 			}); // on dom ready
-			
 		</script>
 		'''
 
