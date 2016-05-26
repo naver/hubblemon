@@ -1,0 +1,43 @@
+.cytoscape-navigator{
+	position: absolute;
+	border: 1px solid #aaa;
+	background: #fff;
+	z-index: 99999;
+	width: 15%;
+	height: 20%;
+	top: 20%;
+	margin-top:13px;
+	left:10px;	
+	-moz-opacity: 0.97;
+	opacity:0.97;
+	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha"(Opacity=97);
+	overflow: hidden;
+}
+
+.cytoscape-navigator > canvas{
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 101;
+}
+
+.cytoscape-navigatorView{
+	position: absolute;
+	top: 0;
+	left: 0;
+	cursor: move;
+	background: #e6e6fa;
+	-moz-opacity: 0.50;
+	opacity: 0.50;
+	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha"(Opacity=50);
+	z-index: 102;
+}
+
+.cytoscape-navigatorOverlay{
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	z-index: 103;
+}
