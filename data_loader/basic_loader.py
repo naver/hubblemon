@@ -208,6 +208,7 @@ class basic_loader:
 		self.ts_end = ts_end
 
 		if self.handle is None:
+			print ('invalid handle')
 			return []
 
 		ret = self.handle.read(ts_start, ts_end)

@@ -31,10 +31,50 @@ class redis_stat:
 
 		self.collect_alias_key_init()
 		self.create_key_init()
+		self.flag_auto_register = False
 
 	def __repr__(self):
 		return '[%s-(%s,%s)]' % (self.addr.__repr__(), self.name, self.type)
 
+	def auto_arc_register(self):
+		self.flag_auto_register = True
+
+		proc1 = subprocess.Popen(shlex.split('ps -ef'), stdout=subprocess.PIPE)
+		proc2 = subprocess.Popen(shlex.split('grep redis-arc'), stdin=proc1.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+		proc1.stdout.close()
+		out, err = proc2.communicate()
+		out = out.decode('utf-8')
+		lines = out.split('\n')
+
+		tmp_addr = []
+		for line in lines:
+				lst = line.split()
+
+				port = 0
+				for a in lst:
+						if a.endswith('.conf'):
+								try:
+										port = int(a.split('.')[0]) + 9
+								except ValueError:
+										port = 0
+
+								break
+
+				if port > 0:
+						tmp_addr.append( ('127.0.0.1', str(port)) )
+
+
+		tmp_addr.sort()
+
+		if self.addr != tmp_addr:
+				print('## auto register arc port')
+				self.addr = tmp_addr
+				return True
+
+		return False
+ 
+  
 	def push_addr(self, addr):
 		ip, port = addr.split(':')
 		ip = socket.gethostbyname(ip)
@@ -109,6 +149,10 @@ class redis_stat:
 	def collect(self):
 		all_stats = {}
 		
+		if self.flag_auto_register == True:
+				if self.auto_arc_register() == True:
+						return None # for create new file
+
 		self.collect_stat(all_stats)
 		return all_stats
 		

@@ -453,6 +453,7 @@ def chart_page(request):
 	
 	js_chart_list = _make_dynamic_chart_list(param, 'chart', levels, chart_map)
 	print(levels)
+	#print(chart_map)
 
 	# case 1. not selected anyone
 	if levels[0] not in param:
