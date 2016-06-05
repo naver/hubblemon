@@ -89,7 +89,7 @@ def get_client_list():
 	for item in common.settings.listener_list:
 		if item[2] == 'local':
 			param = item[1]
-			client_list = local_storage_manager.get_client_list(param)
+			client_list += local_storage_manager.get_client_list(param)
 
 		else: # remote
 			address = item[0]
@@ -108,7 +108,7 @@ def get_data_list_of_client(client, prefix):
 
 	if info[2] == 'local':
 		param = info[1]
-		data_list = local_storage_manager.get_data_list_of_client(param, client, prefix)
+		data_list += local_storage_manager.get_data_list_of_client(param, client, prefix)
 
 	else: # remote
 		address = info[0]
