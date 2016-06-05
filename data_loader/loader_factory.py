@@ -148,6 +148,7 @@ class sqlite3_storage_manager:
 	def connector(self):
 		# sqlite open with self.db_path
 		# and return
+		pass
 
 	def get_handle(self, param, path):
 		return sql_gw('sqlite3', self.connector)
