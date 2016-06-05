@@ -34,10 +34,10 @@ mod_query_cache = {}
 #
 # default loader settings
 #
-get_default_local_handle = data_loader.loader_factory.get_rrd_handle
-#get_default_local_handle = data_loader.loader_factory.get_tsdb_test_handle
+local_storage_manager = data_loader.loader_factory.rrd_storage_manager(hubblemon_path)
+#local_storage_manager = data_loader.loader_factory.tsdb_test_storage_manager(hubblemon_path)
 
-get_default_remote_handle = data_loader.loader_factory.get_remote_handle
+remote_storage_manager = data_loader.loader_factory.remote_manager()
 
 def loader(path, filter = None, title = ''):
 	results = []
@@ -46,14 +46,15 @@ def loader(path, filter = None, title = ''):
 	
 	if info[2] == 'local':
 		try:
-			handle = get_default_local_handle(path)
+			param = info[1]
+			handle = local_storage_manager.get_handle(param, path)
 			return data_loader.basic_loader.basic_loader(handle, filter, title)
 		except:
 			return data_loader.basic_loader.basic_loader(None, [])
 	else: # remote
 		try:
 			host, port = info[0].split(':')
-			handle = get_default_remote_handle(host, int(port), path)
+			handle = remote_storage_manager.get_handle(host, int(port), path)
 			return data_loader.basic_loader.basic_loader(handle, filter, title)
 		except:
 			return data_loader.basic_loader.basic_loader(None, [])
@@ -80,30 +81,6 @@ def _get_listener_info(file):
 	
 
 
-def _get_local_data_path(file):
-	data_path = _get_listener_info(file)[1]
-	if data_path[0] != '/':
-		data_path = os.path.join(hubblemon_path, data_path)
-	
-	return os.path.join(data_path, file)
-
-
-def _get_local_client_pathes():
-	result = []
-	for item in common.settings.listener_list:
-		path = item[1]
-		if path[0] != '/':
-			path = os.path.join(hubblemon_path, path)
-
-		result.append(path)
-
-	return result
-
-def get_local_data_handle(path):
-	path = _get_local_data_path(path)
-	fd = open(path)
-	fd.path = path
-	return fd
 
 # local or remote
 def get_client_list():
@@ -111,15 +88,8 @@ def get_client_list():
 
 	for item in common.settings.listener_list:
 		if item[2] == 'local':
-			path = item[1]
-			if path[0] != '/':
-				path = os.path.join(hubblemon_path, path)
-
-			for dir in os.listdir(path):
-				dir_path = os.path.join(path, dir)
-
-				if os.path.isdir(dir_path):
-					client_list.append(dir)
+			param = item[1]
+			client_list = local_storage_manager.get_client_list(param)
 
 		else: # remote
 			address = item[0]
@@ -137,11 +107,8 @@ def get_data_list_of_client(client, prefix):
 	data_list = []
 
 	if info[2] == 'local':
-		path = _get_local_data_path(client)
-
-		for file in os.listdir(path):
-			if file.startswith(prefix):
-				data_list.append(file)
+		param = info[1]
+		data_list = local_storage_manager.get_data_list_of_client(param, client, prefix)
 
 	else: # remote
 		address = info[0]
@@ -159,14 +126,8 @@ def get_all_data_list(prefix):
 
 	for item in common.settings.listener_list:
 		if item[2] == 'local':
-			path = item[1]
-			for dir in os.listdir(path):
-				dir_path = os.path.join(path, dir)
-
-				if os.path.isdir(dir_path):
-					for file in os.listdir(dir_path):
-						if file.startswith(prefix):
-							data_list.append(dir + '/' + file)						
+			base = item[1]
+			data_list += local_storage_manager.get_all_data_list(base, prefix)
 		else:
 			address = item[0]
 			host, port = address.split(':')

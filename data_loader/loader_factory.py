@@ -19,7 +19,6 @@
 
 import os
 
-import common.core
 import common.rrd_data
 import common.remote_data_reader
 from data_loader.loader_util import merge_loader
@@ -30,18 +29,75 @@ from data_loader.loader_util import draw_loader
 
 # rrd
 
-def get_rrd_handle(path):
+class rrd_storage_manager:
+	def __init__(self, hubblemon_path):
+		self.hubblemon_path = hubblemon_path
 
-	if not path.endswith('.rrd'):
-		path += '.rrd'
+	def get_handle(self, base, path):
+		if not path.endswith('.rrd'):
+			path += '.rrd'
 
-	try:
-		fd = common.core.get_local_data_handle(path)
-		return common.rrd_data.rrd_data(fd.path)
-	except:
-		return None
+		try:
+			fd = self.get_local_data_handle(base, path)
+			return common.rrd_data.rrd_data(fd.path)
+		except:
+			return None
+
+	def get_local_data_handle(self, base, path):
+		if base[0] != '/':
+			base = os.path.join(self.hubblemon_path, base)
+		
+		path = os.path.join(base, path)
+
+		fd = open(path)
+		fd.path = path
+		return fd
+
+	def get_client_list(self, base):
+		client_list = []
+
+		if base[0] != '/':
+			base = os.path.join(self.hubblemon_path, base)
+
+		for dir in os.listdir(base):
+			dir_path = os.path.join(base, dir)
+
+			if os.path.isdir(dir_path):
+				client_list.append(dir)
+
+		return client_list
 
 
+	def get_data_list_of_client(self, base, client, prefix):
+		data_list = []
+
+		if base[0] != '/':
+			base = os.path.join(self.hubblemon_path, base)
+
+		path = os.path.join(base, client)
+
+		for file in os.listdir(path):
+			if file.startswith(prefix):
+				data_list.append(file)
+
+		return data_list
+
+
+
+	def get_all_data_list(self, base, prefix):
+		data_list = []
+		for dir in os.listdir(base):
+			dir_path = os.path.join(base, dir)
+
+			if os.path.isdir(dir_path):
+				for file in os.listdir(dir_path):
+					if file.startswith(prefix):
+						data_list.append(dir + '/' + file)						
+
+		return data_list
+
+
+# test for tsdb storage
 class tsdb_test_handle:
 	def __init__(self, rrd):
 		self.rrd = rrd
@@ -65,25 +121,62 @@ class tsdb_test_handle:
 		
 		return ('#timestamp', names, result)
 
-# for tsdb layer development
-def get_tsdb_test_handle(path):
-	if not path.endswith('.rrd'):
-		path += '.rrd'
 
-	try:
-		fd = common.core.get_local_data_handle(path)
-		rrd_handle =  common.rrd_data.rrd_data(fd.path)
-		return tsdb_test_handle(rrd_handle)
+class tsdb_test_storage_manager(rrd_storage_manager):
+	def __init__(self, hubblemon_path):
+		self.hubblemon_path = hubblemon_path
+		rrd_storage_manager.__init__(self, hubblemon_path)
 
-	except:
-		return None
+	def get_handle(self, base, path):
+		if not path.endswith('.rrd'):
+			path += '.rrd'
+
+		try:
+			fd = self.get_local_data_handle(base, path)
+			rrd_handle =  common.rrd_data.rrd_data(fd.path)
+			return tsdb_test_handle(rrd_handle)
+
+		except:
+			return None
+
+
+# template for sqlite3 manager
+class sqlite3_storage_manager:
+	def __init__(self, db_path):
+		self.db_path = db_path
+
+	def connector(self):
+		# sqlite open with self.db_path
+		# and return
+
+	def get_handle(self, param, path):
+		return sql_gw('sqlite3', self.connector)
+
+	def get_client_list(self, param):
+		client_list = []
+		# select name from client_list
+		return client_list
+
+	def get_data_list_of_client(self, param, client, prefix):
+		data_list = []
+		# select name from sqlite_master where type = 'table' and name like 'D_%s_%s%%' % (client, prefix)
+		return data_list
+
+	def get_all_data_list(self, param, prefix):
+		data_list = []
+		# select name from sqlite_master where type = 'table' and name like 'D_%%_%s%%' % (prefix)
+		return data_list
 
 
 
 
-def get_remote_handle(host, port, file = None):
-	handle = common.remote_data_reader.remote_data_reader(host, port, file)
-	return handle
+class remote_manager:
+	def __init__(self):
+		pass
+
+	def get_handle(host, port, file = None):
+		handle = common.remote_data_reader.remote_data_reader(host, port, file)
+		return handle
 
 		
 # utility
