@@ -141,9 +141,41 @@ class tsdb_test_storage_manager(rrd_storage_manager):
 
 
 # template for sqlite3 manager
+class sql_gw:
+	def __init__(self, type, connector):
+		self.type = type
+		self.connector = connector
+		# connect
+
+	def create(self, query):
+		cursor = self.handle.cursor()
+		cursor.execute() # TODO: return check
+
+	def select(self, query):
+		cursor = self.handle.cursor()
+		cursor.execute()
+		return cursor.fetchall()
+
+	def insert(self, table_name, values):
+		cursor = self.handle.cursor()
+		cursor.execute() # TODO: return check
+	
+
+class sql_handle:
+	def __init__(self, gw, name):
+		self.gw = gw
+		self.name = name
+
+	def read(self, start, end):
+		# make query using table name, start, end
+		results = self.gw.select(query)
+		# make tsdb style result lists and return
+
+
 class sqlite3_storage_manager:
 	def __init__(self, db_path):
 		self.db_path = db_path
+		self.sql_gw = sql_gw('sqlite3', self.connector)
 
 	def connector(self):
 		# sqlite open with self.db_path
@@ -151,7 +183,7 @@ class sqlite3_storage_manager:
 		pass
 
 	def get_handle(self, param, path):
-		return sql_gw('sqlite3', self.connector)
+		sql_handle(gw, name)
 
 	def get_client_list(self, param):
 		client_list = []
