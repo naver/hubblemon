@@ -18,6 +18,7 @@
 #
 
 import os
+import random
 from chart.chart_data import chart_data
 import common.settings
 
@@ -36,9 +37,11 @@ class basic_loader:
 
 		self.renderer = {}
 		flot_line = flot_line_renderer()
-		self.renderer['default'] = flot_line
+		flot_pie = flot_pie_renderer()
+		self.renderer['default'] = flot_pie
 		self.renderer['line'] = flot_line
 		self.renderer['title'] = title_renderer()
+		self.renderer['pie'] = flot_pie
 
 	def count(self, name):
 		if self.handle is None:
@@ -295,6 +298,71 @@ class title_renderer:
 		'''
 
 		return title_template
+
+class flot_pie_renderer:
+	idx = 1
+
+	def render(self, chart_data):
+		chart_data.sampling(common.settings.chart_resolution)
+		# adjust timezone if needed
+		mode = ''
+		if chart_data.mode == 'time':
+			chart_data.adjust_timezone()
+
+		# order value color description
+		td_template = "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>"
+		tds = []
+		pie_idx = 0
+		r = lambda: random.randint(0,255)
+		if len(chart_data.items) == 1: # one item
+			tmp = list(filter(None.__ne__, chart_data.items[0].data))
+			tds.append(td_template % ('[ %s ]' % str(pie_idx), str(tmp[-1][1]), '#%02X%02X%02X' % (r(), r(), r()), chart_data.items[0].title))
+		else: # multi item (display label)
+			for item in chart_data.items:
+				#tmp = item.data
+				tmp = list(filter(None.__ne__, item.data))
+				if len(chart_data.items) > 7:
+					tds.append(td_template % ('[ %s ]' % str(pie_idx), str(tmp[-1][1]), '#%02X%02X%02X' % (r(), r(), r()), item.title))
+				else:
+					tds.append(td_template % ('%s' % str(pie_idx), str(tmp[-1][1]), '#%02X%02X%02X' % (r(), r(), r()), item.title))
+				pie_idx += 1			
+		idx = flot_pie_renderer.idx + id(chart_data) # to get unique idx
+		flot_pie_renderer.idx += 1
+		js_template = self.get_js_template()
+		return  js_template % (' %s ' % chart_data.title, idx, "\n".join(tds))
+
+		
+	def get_js_template(self):
+		js_template = '''
+			<script src="/static/jquery.chart.js"></script>
+			<script type="text/javascript">
+			
+			$(function() {
+				$(".donutchart").donutChart({
+				  width: 400,
+				  height: 180,
+				  legendSize: 15,
+				  label: "",
+				  legendSizePadding: 0.05,
+				  hasBorder: false
+				}).css("border","solid 1px black");
+			});
+
+			</script>
+
+			<div>
+			<div class="chart-container">
+				<div class="chart-title">%s</div>
+				<div id="placeholder_%s" class="chart-placeholder" style="float:left" align="center">
+					<table class="donutchart">
+					<tr><th>sortOrder</th><th>value</th><th>color</th><th>description</th></tr>
+					%s</tr>
+					</table>
+				</div>
+			</div>
+			</div>
+		'''
+		return js_template
 
 
 
