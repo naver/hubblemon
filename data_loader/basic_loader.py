@@ -310,6 +310,7 @@ class flot_line_renderer:
 			mode = 'xaxis: { mode: "time" }, yaxis: { tickFormatter: tickFunc, min: 0 }, lines: { fillOpacity:1.0, show: true, lineWidth:1 },'
 			chart_data.adjust_timezone()
 
+		mode = mode + "grid: {hoverable: true, clickable: true},"
 		# convert python array to js array
 		raw_data = ''
 		if len(chart_data.items) == 1: # one item
@@ -327,13 +328,13 @@ class flot_line_renderer:
 
 		#print (raw_data)
 		js_template = self.get_js_template()
-		return  js_template % ('[ %s ]' % raw_data, idx, mode, chart_data.title, idx)
+		return  js_template % ('[ %s ]' % raw_data, idx, mode, idx, chart_data.title, chart_data.title, idx)
 
 		
 	def get_js_template(self):
 		js_template = '''
 			<script type="text/javascript">
-
+			var plot;
 			$(function() {
 				tickFunc = function(val, axis) {
 					if (val > 1000000000 && (val %% 1000000000) == 0) {
@@ -350,11 +351,40 @@ class flot_line_renderer:
 				};
 
 				var data_list = %s
-				$.plot("#placeholder_%s", data_list, {
+				plot = $.plot("#placeholder_%s", data_list, {
 					%s
 				});
 			});
 			</script>
+
+			<script>
+			// add tooltip to show point information
+			$("<div id='tooltip'></div>").css({
+					position: "absolute",
+					display: "none",
+					border: "1px solid #fdd",
+					padding: "2px",
+					"background-color": "#fee",
+					opacity: 0.80
+				}).appendTo("body");
+
+			// attach event listener to show point information, triggered when mouse pointer is near graph 
+			$(function(){
+				$("#placeholder_%s").bind("plothover", function (event, pos, item) {
+					if (item) {
+						var x = item.datapoint[0].toFixed(2),
+							y = item.datapoint[1].toFixed(2);
+						if (item.series.label == null ){
+							item.series.label = "%s";
+						};
+						$("#tooltip").html(item.series.label + "(" + x + ", " + y + ")")
+							.css({top: item.pageY+5, left: item.pageX+5})
+							.fadeIn(200);
+					} else {
+						$("#tooltip").hide();
+					}
+				});
+			}); </script>
 
 			<div>
 			<div class="chart-container">
