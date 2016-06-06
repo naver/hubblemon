@@ -66,7 +66,7 @@ class cytoscape_renderer:
 		edges = ''
 
 		for node in lists:
-			nodes += "{ data: { id:'%s', name:'%s', color: '#%s' } },\n" % (node.id, node.name, node.color)
+			nodes += "{ data: { id:'%s', name:'%s', color: '#%s', foo: 3, bar: 5, baz: 2 } },\n" % (node.id, node.name, node.color)
 
 			link_no = 0
 			for link in node.links:
@@ -121,7 +121,15 @@ class cytoscape_renderer:
 					'text-valign': 'center',
 					'text-halign': 'center',
 					'background-color': 'data(color)',
-				      }
+					'pie-size': '90%%',
+        				'pie-1-background-color': '#696969',
+        				'pie-1-background-size': 'mapData(foo, 0, 10, 0, 100)',
+        				'pie-2-background-color': '#A9A9A9',
+        				'pie-2-background-size': 'mapData(bar, 0, 10, 0, 100)',
+        				'pie-3-background-color': '#D3D3D3',
+        				'pie-3-background-size': 'mapData(baz, 0, 10, 0, 100)'
+					
+					}
 				    },
 				    {
 				      selector: '$node > node',
@@ -148,10 +156,15 @@ class cytoscape_renderer:
 				      selector: ':selected',
 				      css: {
 					'background-color': 'black',
-					'line-color': 'black',
 					'target-arrow-color': 'black',
-					'source-arrow-color': 'black'
-				      }
+					'source-arrow-color': 'black',
+					'pie-size': '95%%',
+					'pie-1-background-color': '#E8747C',
+        				'pie-2-background-color': '#74CBE8',
+        				'pie-3-background-color': '#74E883',
+        				'opacity': 1
+					
+					}
 				    }
 				  ],
 

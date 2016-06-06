@@ -21,7 +21,7 @@ import sys, socket
 
 from collect_client import *
 from client_psutil_plugin import psutil_stat
-#from client_arcus_plugin import arcus_stat
+from client_arcus_plugin import arcus_stat
 #from client_memcached_plugin import memcached_stat
 #from client_redis_plugin import redis_stat
 #from client_cubrid_plugin import cubrid_stat
@@ -42,12 +42,12 @@ else:
 	c = collectd(hostname, server_address, stack=10)
 
 
-"""
+
 # arcus stat example
 arcus = arcus_stat()
 arcus.auto_register()
 c.plugins.append(arcus)
-
+"""
 # memcached stat example
 mc = memcached_stat()
 mc.auto_register()
@@ -55,7 +55,7 @@ c.plugins.append(mc)
 
 # mysql stat example
 my = mysql_stat()
-my.push_db('dbname', 'mysql.sock_path', 'id', 'pw')
+my.push_db('arcus_test', 'mysql.sock', 'root', '12345678')
 c.plugins.append(my)
 
 # cubrid stat example
