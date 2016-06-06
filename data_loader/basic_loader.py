@@ -358,7 +358,7 @@ class flot_line_renderer:
 			</script>
 
 			<script>
-			# add tooltip to show point information
+			// add tooltip to show point information
 			$("<div id='tooltip'></div>").css({
 					position: "absolute",
 					display: "none",
@@ -368,7 +368,7 @@ class flot_line_renderer:
 					opacity: 0.80
 				}).appendTo("body");
 
-			# attach event listener to show point information, triggered when mouse pointer is near graph 
+			// attach event listener to show point information, triggered when mouse pointer is near graph 
 			$(function(){
 				$("#placeholder_%s").bind("plothover", function (event, pos, item) {
 					if (item) {
