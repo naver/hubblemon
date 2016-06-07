@@ -334,24 +334,22 @@ class flot_line_renderer:
 	def get_js_template(self):
 		js_template = '''
 			<script type="text/javascript">
-			var plot;
-			var tickFunc = function(val, axis) {
-				if (val > 1000000000 && (val %% 1000000000) == 0) {
-					return val/1000000000 + "G";
-				}
-				else if (val > 1000000 && (val %% 1000000) == 0) {
-					return val/1000000 + "M";
-				}
-				else if (val < 1) {
-					return Math.round(val*1000)/1000
-				}
-
-				return val;
-			};
-
-
+			var plot;	
 			$(function() {
-				
+				tickFunc = function(val, axis) {
+					if (val > 1000000000 && (val %% 1000000000) == 0) {
+						return val/1000000000 + "G";
+					}
+					else if (val > 1000000 && (val %% 1000000) == 0) {
+						return val/1000000 + "M";
+					}
+					else if (val < 1) {
+						return Math.round(val*1000)/1000
+					}
+
+					return val;
+				};
+
 				var data_list = %s
 				plot = $.plot("#placeholder_%s", data_list, {
 					%s
@@ -378,9 +376,9 @@ class flot_line_renderer:
 							y = item.datapoint[1].toFixed(2);
 						var t = parseFloat(x);
 						var date = new Date(t);// Milliseconds to date
-						date.setTime(t + date.getTimezoneOffset()*60*1000); // timezone offset
+						date.setTime(t + date.getTimezoneOffset()*60*1000); // timezone offset 
 						
-                        var formatted = date.toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1"); // change time format as HH:MM:SS
+						var formatted = date.toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1"); // change time format as HH:MM:SS
 						if (item.series.label == null ){
 							item.series.label = "%s";
 						};
