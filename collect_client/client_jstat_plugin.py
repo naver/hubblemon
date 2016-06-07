@@ -94,7 +94,10 @@ class jstat_stat:
 				factor = self.collect_key[i][1]
 
 				value = float(items[i]) * factor
-				stat[alias_key] = int(value) * self.sleep_info
+				stat[alias_key] = int(value)
+
+				if self.collec_key[i][2] == 'DERIVE':
+					stat[alias_key] *= self.sleep_info
 
 			all_stats['jstat_%d' % pid] = stat
 
@@ -140,15 +143,15 @@ class jstat_stat:
 	def collect_key_init(self):
 		self.collect_key = []
 		 
-		self.collect_key.append(('Survivor_0', 1))
-		self.collect_key.append(('Survivor_1', 1))
-		self.collect_key.append(('Eden', 1))
-		self.collect_key.append(('Old', 1))
-		self.collect_key.append(('Permanent', 1))
-		self.collect_key.append(('YGC', 1))
-		self.collect_key.append(('YGCT', 1000))
-		self.collect_key.append(('FGC', 1))
-		self.collect_key.append(('FGCT', 1000))
-		self.collect_key.append(('GCT', 1000))
+		self.collect_key.append(('Survivor_0', 1, 'GAUGE'))
+		self.collect_key.append(('Survivor_1', 1, 'GAUGE'))
+		self.collect_key.append(('Eden', 1, 'GAUGE'))
+		self.collect_key.append(('Old', 1, 'GEUGE'))
+		self.collect_key.append(('Permanent', 1, 'GAUGE'))
+		self.collect_key.append(('YGC', 1, 'DERIVE'))
+		self.collect_key.append(('YGCT', 1000, 'DERIVE'))
+		self.collect_key.append(('FGC', 1, 'DERIVE'))
+		self.collect_key.append(('FGCT', 1000, 'DERIVE'))
+		self.collect_key.append(('GCT', 1000, 'DERIVE'))
 
 
