@@ -38,7 +38,7 @@ class basic_loader:
 		self.renderer = {}
 		flot_line = flot_line_renderer()
 		flot_pie = flot_pie_renderer()
-		self.renderer['default'] = flot_pie
+		self.renderer['default'] = flot_line
 		self.renderer['line'] = flot_line
 		self.renderer['title'] = title_renderer()
 		self.renderer['pie'] = flot_pie
