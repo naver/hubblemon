@@ -61,26 +61,9 @@ mysql_cloud_map = {}
 last_ts = 0
 
 def init_plugin():
-	global mysql_cloud_map
-	global last_ts
-
-	ts = time.time()
-	if ts - last_ts < 300:
-		return
-	last_ts = ts
-
 	print('#### mysql init ########')
-
-
-	client_list = common.core.get_client_list()
-	for client in client_list:
-		instance_list = common.core.get_data_list_of_client(client, 'mysql_')
-		if len(instance_list) > 0:
-			mysql_cloud_map[client] = instance_list	
-
-	print (mysql_cloud_map)
-		
-	
+	ret = get_chart_list({})
+	print(ret)
 
 
 def get_chart_data(param):
@@ -110,6 +93,22 @@ def get_chart_data(param):
 
 def get_chart_list(param):
 	#print(param)
+	global mysql_cloud_map
+	global last_ts
+
+	ts = time.time()
+	if ts - last_ts >= 300:
+		mysql_cloud_map_tmp = {}
+		client_list = common.core.get_client_list()
+		for client in client_list:
+			instance_list = common.core.get_data_list_of_client(client, 'mysql_')
+			if len(instance_list) > 0:
+				mysql_cloud_map_tmp[client] = instance_list	
+
+		mysql_cloud_map = mysql_cloud_map_tmp
+
+
+	last_ts = ts
 
 	if 'type' in param:
 		type = param['type']
