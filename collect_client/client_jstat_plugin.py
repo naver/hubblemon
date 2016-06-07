@@ -94,7 +94,7 @@ class jstat_stat:
 				factor = self.collect_key[i][1]
 
 				value = float(items[i]) * factor
-				stat[alias_key] = int(value)
+				stat[alias_key] = int(value) * self.sleep_info
 
 			all_stats['jstat_%d' % pid] = stat
 
@@ -145,9 +145,9 @@ class jstat_stat:
 		self.collect_key.append(('Eden', 1))
 		self.collect_key.append(('Old', 1))
 		self.collect_key.append(('Permanent', 1))
-		self.collect_key.append(('YGC', 1000))
+		self.collect_key.append(('YGC', 1))
 		self.collect_key.append(('YGCT', 1000))
-		self.collect_key.append(('FGC', 1000))
+		self.collect_key.append(('FGC', 1))
 		self.collect_key.append(('FGCT', 1000))
 		self.collect_key.append(('GCT', 1000))
 
