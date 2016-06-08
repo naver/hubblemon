@@ -319,12 +319,13 @@ class flot_pie_renderer:
 			tds.append(td_template % ('[ %s ]' % str(pie_idx), str(tmp[-1][1]), '#%02X%02X%02X' % (r(), r(), r()), chart_data.items[0].title))
 		else: # multi item (display label)
 			for item in chart_data.items:
-				#tmp = item.data
 				tmp = list(filter(None.__ne__, item.data))
 				if len(chart_data.items) > 7:
-					tds.append(td_template % ('[ %s ]' % str(pie_idx), str(tmp[-1][1]), '#%02X%02X%02X' % (r(), r(), r()), item.title))
+					if item.title != "total":
+						ds.append(td_template % ('%s' % str(pie_idx), str(tmp[-1][1]), '#%02X%02X%02X' % (r(), r(), r()), item.title))
 				else:
-					tds.append(td_template % ('%s' % str(pie_idx), str(tmp[-1][1]), '#%02X%02X%02X' % (r(), r(), r()), item.title))
+					if item.title != "total":
+						tds.append(td_template % ('%s' % str(pie_idx), str(tmp[-1][1]), '#%02X%02X%02X' % (r(), r(), r()), item.title))
 				pie_idx += 1			
 		idx = flot_pie_renderer.idx + id(chart_data) # to get unique idx
 		flot_pie_renderer.idx += 1

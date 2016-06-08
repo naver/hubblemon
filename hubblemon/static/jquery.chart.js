@@ -1,3 +1,8 @@
+/* Author : akumagamo
+ * License : CCL
+ * Link : https://github.com/akumagamo/jquery-plugin-chart
+ */
+
 
 (function($){
 	$.fn.donutChart = function(options) {
