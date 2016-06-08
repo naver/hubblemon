@@ -23,6 +23,11 @@
 
 import os, sys, socket
 
+sql_type ="sqlite3"
+if(sql_type=="sqlite3"):
+	import sqlite3
+	conn=sqlite3.connect("hubblemon.db", check_same_thread=False, isolation_level=None)
+	#conn=sqlite3.connect(":memory:", check_same_thread=False, isolation_level=None)
 
 collect_server_port = 30000
 
