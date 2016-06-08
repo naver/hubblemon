@@ -335,7 +335,6 @@ class flot_pie_renderer:
 		
 	def get_js_template(self):
 		js_template = '''
-			<script src="/static/jquery.chart.js"></script>
 			<script type="text/javascript">
 			
 			$(function() {
