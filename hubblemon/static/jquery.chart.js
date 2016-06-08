@@ -1,5 +1,5 @@
 /* Author : akumagamo
- * License : CCL
+ * License : https://github.com/akumagamo/jquery-plugin-chart/blob/master/LICENSE
  * Link : https://github.com/akumagamo/jquery-plugin-chart
  */
 
