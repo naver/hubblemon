@@ -37,10 +37,12 @@ class basic_loader:
 		self.renderer = {}
 		flot_line = flot_line_renderer()
 		flot_pie = flot_pie_renderer()
+		flot_bar = flot_bar_renderer()
 		self.renderer['default'] = flot_line
 		self.renderer['line'] = flot_line
 		self.renderer['title'] = title_renderer()
 		self.renderer['pie'] = flot_pie
+		self.renderer['bar'] = flot_bar
 
 	def count(self, name):
 		if self.handle is None:
@@ -445,4 +447,92 @@ class flot_line_renderer:
 		return js_template
 
 
+class flot_bar_renderer:
+	idx = 1
 
+	def render(self, chart_data):
+		chart_data.sampling(common.settings.chart_resolution)
+
+		# adjust timezone if needed
+		mode = ''
+		if chart_data.mode == 'time':
+			# add click event listener to label
+			labelFormatter = '''
+                               function(label, series, idx = %s, labelList = %s){
+                                        return "<a name=" + "'" + idx + " " + label + " " + labelList + "'" + " onclick='(function(elem){\
+									var data = elem.name.split(/ /);\
+									var id = data[0];\
+									var label = data[1];\
+									var labelList = data[2].split(/,/);\
+                                                                        var bars = dic_plot[id].getData()[labelList.indexOf(label)].bars;\
+									bars.show ? bars.show=false : bars.show=true;\
+                                                                        dic_plot[id].draw();\
+                                                                })(this)'>" + label + "</a>";
+                                }
+                        '''
+
+			mode = 'xaxis: { mode: "time" }, yaxis: { tickFormatter: tickFunc, min: 0 }, bars: { fillOpacity:1.0, show: true, barWidth:1 }, legend: { labelFormatter: %s } ' %(labelFormatter)
+			chart_data.adjust_timezone()
+
+		# convert python array to js array
+		raw_data = ''
+		labelList = [] # list of all label
+		if len(chart_data.items) == 1: # one item
+			raw_data = chart_data.items[0].data.__repr__().replace('None', 'null')
+		else: # multi item (display label)
+			for item in chart_data.items:
+				tmp = item.data.__repr__().replace('None', 'null')
+				if len(chart_data.items) > 7:
+					raw_data += '%s,' % tmp
+				else:
+					labelList.append(item.title)
+					raw_data += '{ label: "%s", data: %s, },' % (item.title, tmp)
+
+		idx = flot_bar_renderer.idx + id(chart_data) # to get unique idx
+		flot_bar_renderer.idx += 1
+
+		#print (raw_data)
+		js_template = self.get_js_template()
+		return  js_template % ('[ %s ]' % raw_data, idx, mode %(idx, labelList), idx, chart_data.title, idx)
+
+		
+	def get_js_template(self):
+		js_template = '''
+			<script type="text/javascript">
+
+			$(function() {
+				tickFunc = function(val, axis) {
+					if (val > 1000000000 && (val %% 1000000000) == 0) {
+						return val/1000000000 + "G";
+					}
+					else if (val > 1000000 && (val %% 1000000) == 0) {
+						return val/1000000 + "M";
+					}
+					else if (val < 1) {
+						return Math.round(val*1000)/1000
+					}
+
+					return val;
+				};
+
+				var data_list = %s;
+
+				var plot = $.plot("#placeholder_%s", data_list, {
+					%s
+				});
+
+				if (typeof(dic_plot) == "undefined")	
+					dic_plot = Object();
+				dic_plot["%s"] = plot;
+			});
+			</script>
+
+			<div>
+			<div class="chart-container">
+				<div class="chart-title">%s</div>
+				<div id="placeholder_%s" class="chart-placeholder" style="float:left"></div>
+			</div>
+			</div>
+		'''
+
+		return js_template
