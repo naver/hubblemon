@@ -22,9 +22,8 @@ class server_sql_plugin:
 			if name =='RRA':                                                              
 				continue                                                                  
 			
-			name =name.replace('-', '_')
-			name = "D_"+basedir+"_"+name
-			check_table ="SELECT count(*) FROM sqlite_master WHERE type='table' AND name='" + name + "'"
+			name = '"D_'+basedir+"_"+name+'"'
+			check_table ="SELECT count(*) FROM sqlite_master WHERE type='table' AND name=" + name 
 			is_exist=self.sql_manager.select(check_table)[0][0]
 			if(is_exist==0):
 				query = "CREATE TABLE " + name
@@ -42,8 +41,7 @@ class server_sql_plugin:
 	def update_data(self, hostname, timestamp, name_data_map):
 		for name, data in name_data_map.items():
 
-			name = name.replace('-', '_')
-			name = "D_"+hostname+"_"+name
+			name = '"D_'+hostname+"_"+name+'"'
 			query = "INSERT INTO " + name
 			attr_query ="("+"timestamp"
 			val_query=" VALUES(" + str(int(timestamp))
