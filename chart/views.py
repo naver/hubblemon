@@ -185,6 +185,10 @@ def _make_time_range(param, link):
 	end_date = datetime.datetime.now()
 	start_date = end_date - datetime.timedelta(0, 60*30)
 	if 'auto_update' in param:
+		try:
+			auto_update_time = int(param['auto_update']) * 1000
+		except:
+			auto_update_time = 5000
 		auto_update = """
 		    <script type="text/javascript">
 		    setInterval(function() {
@@ -223,13 +227,13 @@ def _make_time_range(param, link):
 				}
 			    }
 			});
-		    }, 5000);
+		    }, %d);
 		    </script>
 		"""
 		if 'diff' in param:
-			auto_update = auto_update %(param['diff'], link)
+			auto_update = auto_update %(param['diff'], link, auto_update_time)
 		else:
-			auto_update = auto_update %('30', link)
+			auto_update = auto_update %('30', link, auto_update_time)
 		js_chart_list += date_template % (start_date.strftime("%Y-%m-%d %H:%M"), link, end_date.strftime("%Y-%m-%d %H:%M"), link, range_radio.render(), auto_update) # set initial time
 	else:
 		js_chart_list += date_template % (start_date.strftime("%Y-%m-%d %H:%M"), link, end_date.strftime("%Y-%m-%d %H:%M"), link, range_radio.render(), '') # set initial time
