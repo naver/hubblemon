@@ -229,7 +229,7 @@ def _make_time_range(param, link):
 		if 'diff' in param:
 			auto_update = auto_update %(param['diff'], link)
 		else:
-			auto_update = auto_update %('60', link)
+			auto_update = auto_update %('30', link)
 		js_chart_list += date_template % (start_date.strftime("%Y-%m-%d %H:%M"), link, end_date.strftime("%Y-%m-%d %H:%M"), link, range_radio.render(), auto_update) # set initial time
 	else:
 		js_chart_list += date_template % (start_date.strftime("%Y-%m-%d %H:%M"), link, end_date.strftime("%Y-%m-%d %H:%M"), link, range_radio.render(), '') # set initial time
