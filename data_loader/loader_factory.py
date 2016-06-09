@@ -54,6 +54,7 @@ class rrd_storage_manager:
 		fd.path = path
 		return fd
 
+
 	def get_client_list(self, base):
 		client_list = []
 
@@ -67,6 +68,17 @@ class rrd_storage_manager:
 				client_list.append(dir)
 
 		return client_list
+
+	def get_data_of_client(self, base, client, name):
+		if base[0] != '/':
+			base = os.path.join(self.hubblemon_path, base)
+
+		path = os.path.join(base, client)
+
+		for file in os.listdir(path):
+			if file == name:
+				break
+		return file
 
 
 	def get_data_list_of_client(self, base, client, prefix):
@@ -149,6 +161,7 @@ class sql_storage_manager:
 
 	def get_handle(self, base, path):
 			try:
+					print("get handle: ", base, path)
 					return common.sql_data.sql_gw(path)
 
 			except:
@@ -168,6 +181,18 @@ class sql_storage_manager:
 
 			print ("client_list:", client_list)
 			return client_list
+	
+	def get_data_of_client(self, param, client, name):
+			query = "SELECT name FROM sqlite_master WHERE type='table'"
+			table_list =self.sql_manager.select(query);
+			target_name ="D_"+client+"_"+name
+			for table in table_list:
+				table=table[0]
+				if (table==target_name):
+					break
+			print ("data_client: ", table)
+			return table 
+			
 
 	def get_data_list_of_client(self, param, client, prefix):
 			data_list = []

@@ -101,6 +101,24 @@ def get_client_list():
 
 	return client_list
 
+def get_data_of_client(client, prefix):
+	info = _get_listener_info(client)
+	data=""
+
+	if info[2] == 'local':
+		param = info[1]
+		data= local_storage_manager.get_data_of_client(param, client, prefix)
+
+	else: # remote
+		address = info[0]
+		host, port = address.split(':')
+		port = int(port)
+		handle = get_default_remote_handle(host, port)
+		data= handle.get_data_of_client(client, prefix)
+
+	return data
+
+
 
 # local or remote
 def get_data_list_of_client(client, prefix):

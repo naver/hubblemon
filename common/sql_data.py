@@ -27,6 +27,7 @@ class sql_gw:
 		cursor.execute(query)
 
 	def read(self, ts_from, ts_to, filter=None):
+		print(self.filename)
 		filename_list = self.filename.split("/")
 		table_name = '"'+filename_list[-1]+'"'
 		query = "SELECT * FROM " + table_name
