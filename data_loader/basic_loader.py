@@ -458,7 +458,9 @@ class flot_bar_renderer:
 		if chart_data.mode == 'time':
 			# add click event listener to label
 			labelFormatter = '''
-                               function(label, series, idx = %s, labelList = %s){
+                               function(label, series){
+					var idx = %;
+					var labelList = %s;
                                         return "<a name=" + "'" + idx + " " + label + " " + labelList + "'" + " onclick='(function(elem){\
 									var data = elem.name.split(/ /);\
 									var id = data[0];\
