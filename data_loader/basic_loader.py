@@ -36,9 +36,11 @@ class basic_loader:
 
 		self.renderer = {}
 		flot_line = flot_line_renderer()
+		flot_pie = flot_pie_renderer()
 		self.renderer['default'] = flot_line
 		self.renderer['line'] = flot_line
 		self.renderer['title'] = title_renderer()
+		self.renderer['pie'] = flot_pie
 
 	def count(self, name):
 		if self.handle is None:
@@ -296,6 +298,82 @@ class title_renderer:
 
 		return title_template
 
+
+class flot_pie_renderer:
+	idx = 1
+
+	def render(self, chart_data):
+		chart_data.sampling(common.settings.chart_resolution)
+
+		# adjust timezone if needed
+		mode = 'series: {pie: {show: true, radius:1, label: {show:true, radius:2/3, formatter:labelFormatter, threshold:0.1}}}, legend: {show:false}'
+		if chart_data.mode == 'time':
+			chart_data.adjust_timezone()
+
+		# convert python array to js array
+		raw_data = ''
+		if len(chart_data.items) == 1: # one item
+			item = chart_data.items[-1]
+			last_data = list(filter(None.__ne__, item.data))[-1][1]
+			raw_data = '{ label: "%s", data: %s }'% (item.title , last_data)
+		else: # multi item (display label)
+			for item in chart_data.items:
+				tmp = list(filter(None.__ne__, item.data))
+				if len(chart_data.items) > 7:
+					if (item.title != "total"):
+						raw_data += '{ label: "%s", data: %s },' % (item.title, tmp[-1][1])
+				else:
+					if (item.title != "total"):
+						raw_data += '{ label: "%s", data: %s },' % (item.title, tmp[-1][1])
+
+		idx = flot_line_renderer.idx + id(chart_data) # to get unique idx
+		flot_line_renderer.idx += 1
+
+		js_template = self.get_js_template()
+		return  js_template % ('[ %s ]' % raw_data, idx, mode, chart_data.title, idx)
+
+		
+	def get_js_template(self):
+		js_template = '''
+			<script type="text/javascript">
+			// A custom label formatter used by several of the plots
+
+			function labelFormatter(label, series) {
+				return "<div style='font-size:8pt; text-align:center; padding:2px; color:white;'>" + label + "<br/>" + Math.round(series.percent) + "%%</div>";
+			}
+
+			$(function(){
+				tickFunc = function(val, axis) {
+					if (val > 1000000000 && (val %% 1000000000) == 0) {
+						return val/1000000000 + "G";
+					}
+					else if (val > 1000000 && (val %% 1000000) == 0) {
+						return val/1000000 + "M";
+					}
+					else if (val < 1) {
+						return Math.round(val*1000)/1000
+					}
+
+					return val;
+				};
+
+				var data_list = %s;
+
+				$.plot($("#placeholder_%s"), data_list, {
+					%s		
+				});
+			});
+			</script>
+
+			<div>
+			<div class="chart-container">
+				<div class="chart-title">%s</div>
+				<div id="placeholder_%s" class="chart-placeholder" style="float:left" align="center">
+				</div>
+			</div>
+			</div>
+		'''
+		return js_template
 
 
 class flot_line_renderer:
