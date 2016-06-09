@@ -310,31 +310,33 @@ class flot_line_renderer:
 			mode = 'xaxis: { mode: "time" }, yaxis: { tickFormatter: tickFunc, min: 0 }, lines: { fillOpacity:1.0, show: true, lineWidth:1 },'
 			chart_data.adjust_timezone()
 
-		mode = mode + "grid: {hoverable: true, clickable: true},"
+		mode = mode + "crosshair: { mode: 'x' }, grid: {hoverable: true, autoHighlight: false },"
 		# convert python array to js array
 		raw_data = ''
 		if len(chart_data.items) == 1: # one item
-			raw_data = chart_data.items[0].data.__repr__().replace('None', 'null')
+			item = chart_data.items[0];
+			tmp = item.data.__repr__().replace('None', 'null')
+			raw_data = '{ label: "%s = 0.00", data: %s}' %(item.title, tmp)
 		else: # multi item (display label)
 			for item in chart_data.items:
 				tmp = item.data.__repr__().replace('None', 'null')
 				if len(chart_data.items) > 7:
 					raw_data += '%s,' % tmp
 				else:
-					raw_data += '{ label: "%s", data: %s },' % (item.title, tmp)
+					raw_data += '{ label: "%s = 0.00", data: %s },' % (item.title, tmp)
 
 		idx = flot_line_renderer.idx + id(chart_data) # to get unique idx
 		flot_line_renderer.idx += 1
 
 		#print (raw_data)
 		js_template = self.get_js_template()
-		return  js_template % ('[ %s ]' % raw_data, idx, mode, idx, chart_data.title, chart_data.title, idx)
+		return  js_template % ('%s' %idx, raw_data,idx, idx, mode,idx,idx,idx, idx, idx,idx, chart_data.title, idx)
 
 		
 	def get_js_template(self):
 		js_template = '''
 			<script type="text/javascript">
-			var plot;	
+			var plot_%s;	
 			$(function() {
 				tickFunc = function(val, axis) {
 					if (val > 1000000000 && (val %% 1000000000) == 0) {
@@ -350,46 +352,65 @@ class flot_line_renderer:
 					return val;
 				};
 
-				var data_list = %s
-				plot = $.plot("#placeholder_%s", data_list, {
+				var data_list = [%s];
+				plot_%s = $.plot("#placeholder_%s", data_list, {
 					%s
 				});
 			});
 			</script>
 
 			<script>
-			// add tooltip to show point information
-			$("<div id='tooltip'></div>").css({
-					position: "absolute",
-					display: "none",
-					border: "1px solid #fdd",
-					padding: "2px",
-					"background-color": "#fee",
-					opacity: 0.80
-				}).appendTo("body");
-
-			// attach event listener to show point information, triggered when mouse pointer is near graph 
 			$(function(){
-				$("#placeholder_%s").bind("plothover", function (event, pos, item) {
-					if (item) {
-						var x = item.datapoint[0].toFixed(2),
-							y = item.datapoint[1].toFixed(2);
-						var t = parseFloat(x);
-						var date = new Date(t);// Milliseconds to date
-						date.setTime(t + date.getTimezoneOffset()*60*1000); // timezone offset 
-						
-						var formatted = date.toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1"); // change time format as HH:MM:SS
-						if (item.series.label == null ){
-							item.series.label = "%s";
-						};
-						$("#tooltip").html(item.series.label + "(" + formatted + ", " + y + ")")
-							.css({top: item.pageY+5, left: item.pageX+5})
-							.fadeIn(200);
-					} else {
-						$("#tooltip").hide();
-					}
-				});
-			}); </script>
+			var legends = $("#placeholder_%s .legendLabel");
+			    legends.each(function () {
+				// fix the widths so they don't jump around
+				$(this).css('width', $(this).width());
+			    });
+
+			    var updateLegendTimeout = null;
+			    var latestPosition = null;
+			    
+			    function updateLegend_%s() {
+				updateLegendTimeout = null;
+				
+				var pos = latestPosition;
+				console.log(pos);	
+				var axes = plot_%s.getAxes();
+				console.log(axes);
+				console.log("end2");
+				if (pos.x < axes.xaxis.min || pos.x > axes.xaxis.max ||
+				    pos.y < axes.yaxis.min || pos.y > axes.yaxis.max)
+			    		return;
+
+				var i, j, dataset = plot_%s.getData();
+				for (i = 0; i < dataset.length; ++i) {
+				    var series = dataset[i];
+
+				    // find the nearest points, x-wise
+				    for (j = 0; j < series.data.length; ++j)
+					if (series.data[j][0] > pos.x)
+					    break;
+				    
+				    // now interpolate
+				    var y, p1 = series.data[j - 1], p2 = series.data[j];
+				    if (p1 == null)
+					y = p2[1];
+				    else if (p2 == null)
+					y = p1[1];
+				    else
+					y = p1[1] + (p2[1] - p1[1]) * (pos.x - p1[0]) / (p2[0] - p1[0]);
+				    legends.eq(i).text(series.label.replace(/=.*/, "= " + y.toFixed(2)));
+				}
+			    }	
+			var placeholder = $("#placeholder_%s");
+			placeholder.bind("plothover",  function (event, pos, item) {
+				latestPosition = pos;
+				if (!updateLegendTimeout)
+				    updateLegendTimeout = setTimeout(updateLegend_%s, 50);
+			    });
+			});
+
+</script>
 
 			<div>
 			<div class="chart-container">
