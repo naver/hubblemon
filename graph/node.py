@@ -64,9 +64,9 @@ class cytoscape_renderer:
 
 		nodes = ''
 		edges = ''
-
+		datas = [20, 30, 50]
 		for node in lists:
-			nodes += "{ data: { id:'%s', name:'%s', color: '#%s', foo: 3, bar: 5, baz: 2 } },\n" % (node.id, node.name, node.color)
+			nodes += "{ data: { id:'%s', name:'%s', color: '#%s', datas: '%s' } },\n" % (node.id, node.name, node.color, datas)
 
 			link_no = 0
 			for link in node.links:
@@ -121,14 +121,15 @@ class cytoscape_renderer:
 					'text-valign': 'center',
 					'text-halign': 'center',
 					'background-color': 'data(color)',
+					
+					
 					'pie-size': '90%%',
         				'pie-1-background-color': '#696969',
-        				'pie-1-background-size': 'mapData(foo, 0, 10, 0, 100)',
+        				'pie-1-background-size': function(ele) { return ele.data('datas')[1]+ele.data('datas')[2] },
         				'pie-2-background-color': '#A9A9A9',
-        				'pie-2-background-size': 'mapData(bar, 0, 10, 0, 100)',
-        				'pie-3-background-color': '#D3D3D3',
-        				'pie-3-background-size': 'mapData(baz, 0, 10, 0, 100)'
-					
+        				'pie-2-background-size': function(ele) { return ele.data('datas')[2] },
+       					'pie-3-background-color': '#D3D3D3',
+       					'pie-3-background-size': function(ele) { return ele.data('datas')[2] }
 					}
 				    },
 				    {
