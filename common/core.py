@@ -34,7 +34,8 @@ mod_query_cache = {}
 #
 # default loader settings
 #
-local_storage_manager = data_loader.loader_factory.rrd_storage_manager(hubblemon_path)
+local_storage_manager = data_loader.loader_factory.sql_storage_manager(hubblemon_path)
+#local_storage_manager = data_loader.loader_factory.rrd_storage_manager(hubblemon_path)
 #local_storage_manager = data_loader.loader_factory.tsdb_test_storage_manager(hubblemon_path)
 
 remote_storage_manager = data_loader.loader_factory.remote_manager()
@@ -99,6 +100,24 @@ def get_client_list():
 			client_list += handle.get_client_list()
 
 	return client_list
+
+def get_data_of_client(client, prefix):
+	info = _get_listener_info(client)
+	data=""
+
+	if info[2] == 'local':
+		param = info[1]
+		data= local_storage_manager.get_data_of_client(param, client, prefix)
+
+	else: # remote
+		address = info[0]
+		host, port = address.split(':')
+		port = int(port)
+		handle = get_default_remote_handle(host, port)
+		data= handle.get_data_of_client(client, prefix)
+
+	return data
+
 
 
 # local or remote

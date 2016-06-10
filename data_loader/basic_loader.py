@@ -137,7 +137,7 @@ class basic_loader:
 			ts_count = 0
 			for item in items:
 				if ts_start is None:
-					ts = item[0]
+					ts = item[0] * 1000
 				else:
 					ts = ts_start + ts_count * ts_step
 					ts_count += 1
@@ -163,7 +163,7 @@ class basic_loader:
 
 			for item in items:
 				if ts_start is None:
-					ts = item[0]
+					ts = item[0] * 1000
 				else:
 					ts = ts_start + ts_count * ts_step
 					ts_count += 1

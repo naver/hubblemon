@@ -35,6 +35,25 @@ resource_filter = [['tcp_open', 'fd', 'handle'], ['process', 'thread'], 'retrans
 def system_view_brief(client, title = ''):
 	loader_list = []
 
+	loader_file =common.core.get_data_of_client(client, 'psutil_'+'cpu')
+	loader_list.append(common.core.loader(os.path.join(client, loader_file), cpu_filter, loader_file.replace(".rrd", "").split('_',)[2]))
+
+	loader_file =common.core.get_data_of_client(client, 'psutil_'+'memory')
+	loader_list.append(common.core.loader(os.path.join(client, loader_file), mem_filter, loader_file.replace(".rrd", "").split('_',2)[2]))
+
+	loader_file =common.core.get_data_of_client(client, 'psutil_'+'swap')
+	loader_list.append(common.core.loader(os.path.join(client, loader_file), swap_filter, loader_file.replace(".rrd","").split('_',2)[2]))
+
+	loader_file =common.core.get_data_of_client(client, 'psutil_'+'disk')
+	loader_list.append(common.core.loader(os.path.join(client, loader_file), disk_filter, loader_file.replace(".rrd","").split('_',2)[2]))
+
+	loader_file =common.core.get_data_of_client(client, 'psutil_'+'net')
+	loader_list.append(common.core.loader(os.path.join(client, loader_file), net_filter, loader_file.replace(".rrd","").split('_',2)[2]))
+
+	loader_file =common.core.get_data_of_client(client, 'psutil_'+'resource')
+	loader_list.append(common.core.loader(os.path.join(client, loader_file), resource_filter, loader_file.replace(".rrd","").split('_',2)[2]))
+
+	'''
 	file_path = os.path.join(client, 'psutil_cpu')
 	loader_list.append(common.core.loader(file_path, cpu_filter, 'cpu'))
 	
@@ -52,7 +71,8 @@ def system_view_brief(client, title = ''):
 
 	file_path = os.path.join(client, 'psutil_resource')
 	loader_list.append(common.core.loader(file_path, resource_filter, 'resource'))
-		
+	'''
+
 	return loader_list
 
 
@@ -82,7 +102,7 @@ def system_view(client, item, title = ''):
 	
 	for loader_file in loader_file_list:
 		print(loader_file)
-		loader_list.append(common.core.loader(os.path.join(client, loader_file), filter, loader_file.split('.')[0]))
+		loader_list.append(common.core.loader(os.path.join(client, loader_file), filter, loader_file.replace(".rrd","").split('_',2)[2]))
 
 	return loader_list
 
