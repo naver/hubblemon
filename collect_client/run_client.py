@@ -42,7 +42,7 @@ else:
 	c = collectd(hostname, server_address, stack=10)
 
 
-'''
+"""
 # arcus stat example
 arcus = arcus_stat()
 arcus.auto_register()
