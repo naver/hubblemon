@@ -42,7 +42,7 @@ class graph_pool:
 
 
 class graph_node:
-	def __init__(self, id, name='', datas=[]):
+	def __init__(self, id, name='', data_list=[1]):
 		self.id = id 
 		if name == '':
 			self.name = id
@@ -51,16 +51,20 @@ class graph_node:
 
 		self.links = []
 		self.color = 'EEEEEE'
-		result_datas = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-		datas = [5,8,7,1,4,0,0,0,0,0,0,0,0,0,0,0]
+		result_list = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+		#Clear annotation if you want to show random pie charts
+		#data_list = []
+		#for i in range(16):
+		#	data_list.append(random.randrange(0,10))
+		
 		total = 0
 		i=0
-		for val in datas:
+		for val in data_list:
 			total += val
-			result_datas[i] = val
+			result_list[i] = val
 			i += 1;
-		datas = map(lambda x: x/total*100, result_datas)
-		self.datas = result_datas
+		result_list = list(map(lambda x: x/total*100, result_list))
+		self.datas = result_list
 
 	def link(self, node, edge_name='', color='000000'):
 		self.links.append( (node.name, edge_name, color) )
@@ -74,9 +78,6 @@ class cytoscape_renderer:
 
 		nodes = ''
 		edges = ''
-		datas = []
-		for i in range(16):
-			datas.append(random.randrange(0,10))
 
 		for node in lists:
 			nodes += "{ data: { id:'%s', name:'%s', color: '#%s'" % (node.id, node.name, node.color)
@@ -140,38 +141,38 @@ class cytoscape_renderer:
 					
 					
 					'pie-size': '90%%',
-					
-'pie-1-background-color': '#A9A9A9',
-'pie-1-background-size': function( ele ){
-	for( var i = 0; i < 16; i++ ){
-		console.log(i);
-		var k = i++;
-		if( ele.data('data'+k.toString()) !== 0){
-			console.log('pie-'+k.toString()+'-background-size');
-			var j = i+1;
-			ele.data('pie-'+j.toString()+'-background-size', ele.data('data'+k.toString()));
-		};
-	};
-},
-
-
-
-'pie-2-background-color': '#696969',
-'pie-3-background-color': '#A9A9A9',
-'pie-4-background-color': '#D3D3D3',
-'pie-5-background-color': '#33FF00',
-'pie-6-background-color': '#D3D3D1',
-'pie-7-background-color': '#99FFFF',
-'pie-8-background-color': '#FF0033',
-'pie-9-background-color': '#D3D3D3',
-'pie-10-background-color': '#FF3366',
-'pie-11-background-color': '#9933FF',
-'pie-12-background-color': '#33FF33',
-'pie-13-background-color': '#990033',
-'pie-14-background-color': '#D3D3D3',
-'pie-15-background-color': '#33FF00',
-'pie-16-background-color': '#FFFF00',
-
+					'pie-1-background-color': '#8956e2',
+					'pie-1-background-size': 'data(data0)',
+					'pie-2-background-color': '#b556e2',
+					'pie-2-background-size': 'data(data1)',
+					'pie-3-background-color': '#e056e2',
+					'pie-3-background-size': 'data(data2)',
+					'pie-4-background-color': '#e256b7',
+					'pie-4-background-size': 'data(data3)',
+					'pie-5-background-color': '#e2568b',
+					'pie-5-background-size': 'data(data4)',
+					'pie-6-background-color': '#e25660',
+					'pie-6-background-size': 'data(data5)',
+					'pie-7-background-color': '#e27756',
+					'pie-7-background-size': 'data(data6)',
+					'pie-8-background-color': '#e2a356',
+					'pie-8-background-size': 'data(data7)',
+					'pie-9-background-color': '#e2cf56',
+					'pie-9-background-size': 'data(data8)',
+					'pie-10-background-color': '#c8e256',
+					'pie-10-background-size': 'data(data9)',
+					'pie-11-background-color': '#9de256',
+					'pie-11-background-size': 'data(data10)',
+					'pie-12-background-color': '#71e256',
+					'pie-12-background-size': 'data(data11)',
+					'pie-13-background-color': '#56e266',
+					'pie-13-background-size': 'data(data12)',
+					'pie-14-background-color': '#56e292',
+					'pie-14-background-size': 'data(data13)',
+					'pie-15-background-color': '#56e2bd',
+					'pie-15-background-size': 'data(data14)',
+					'pie-16-background-color': '#56dae2',
+					'pie-16-background-size': 'data(data15)'
 					}
 				    },
 				    {
@@ -199,13 +200,9 @@ class cytoscape_renderer:
 				      selector: ':selected',
 				      css: {
 					'background-color': 'black',
+					'line-color': 'black',
 					'target-arrow-color': 'black',
 					'source-arrow-color': 'black',
-					'pie-size': '95%%',
-					'pie-1-background-color': '#E8747C',
-        				'pie-2-background-color': '#74CBE8',
-        				'pie-3-background-color': '#74E883',
-        				'opacity': 1
 					
 					}
 				    }
