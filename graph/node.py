@@ -59,7 +59,7 @@ class graph_node:
 			total += val
 			result_datas[i] = val
 			i += 1;
-		result_datas = list(map(lambda x: x/total*100, result_datas))
+		datas = map(lambda x: x/total*100, result_datas)
 		self.datas = result_datas
 
 	def link(self, node, edge_name='', color='000000'):
@@ -141,38 +141,36 @@ class cytoscape_renderer:
 					
 					'pie-size': '90%%',
 					
-					'pie-1-background-color': '#A9A9A9',
-					'pie-1-background-size': 'data(data0)',
-					'pie-2-background-color': '#696969',
-					'pie-2-background-size': 'data(data1)',
-					'pie-3-background-color': '#A9A9A9',
-					'pie-3-background-size': 'data(data2)',
-					'pie-4-background-color': '#D3D3D3',
-					'pie-4-background-size': 'data(data3)',
-					'pie-5-background-color': '#33FF00',
-					'pie-5-background-size': 'data(data4)',
-					'pie-6-background-color': '#D3D3D1',
-					'pie-6-background-size': 'data(data5)',
-					'pie-7-background-color': '#99FFFF',
-					'pie-7-background-size': 'data(data6)',
-					'pie-8-background-color': '#FF0033',
-					'pie-8-background-size': 'data(data7)',
-					'pie-9-background-color': '#D3D3D3',
-					'pie-9-background-size': 'data(data8)',
-					'pie-10-background-color': '#FF3366',
-					'pie-10-background-size': 'data(data9)',
-					'pie-11-background-color': '#9933FF',
-					'pie-11-background-size': 'data(data10)',
-					'pie-12-background-color': '#33FF33',
-					'pie-12-background-size': 'data(data11)',
-					'pie-13-background-color': '#990033',
-					'pie-13-background-size': 'data(data12)',
-					'pie-14-background-color': '#D3D3D3',
-					'pie-14-background-size': 'data(data13)',
-					'pie-15-background-color': '#33FF00',
-					'pie-15-background-size': 'data(data14)',
-					'pie-16-background-color': '#FFFF00',
-					'pie-16-background-size': 'data(data15)'
+'pie-1-background-color': '#A9A9A9',
+'pie-1-background-size': function( ele ){
+	for( var i = 0; i < 16; i++ ){
+		console.log(i);
+		var k = i++;
+		if( ele.data('data'+k.toString()) !== 0){
+			console.log('pie-'+k.toString()+'-background-size');
+			var j = i+1;
+			ele.data('pie-'+j.toString()+'-background-size', ele.data('data'+k.toString()));
+		};
+	};
+},
+
+
+
+'pie-2-background-color': '#696969',
+'pie-3-background-color': '#A9A9A9',
+'pie-4-background-color': '#D3D3D3',
+'pie-5-background-color': '#33FF00',
+'pie-6-background-color': '#D3D3D1',
+'pie-7-background-color': '#99FFFF',
+'pie-8-background-color': '#FF0033',
+'pie-9-background-color': '#D3D3D3',
+'pie-10-background-color': '#FF3366',
+'pie-11-background-color': '#9933FF',
+'pie-12-background-color': '#33FF33',
+'pie-13-background-color': '#990033',
+'pie-14-background-color': '#D3D3D3',
+'pie-15-background-color': '#33FF00',
+'pie-16-background-color': '#FFFF00',
 
 					}
 				    },

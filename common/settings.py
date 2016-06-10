@@ -73,7 +73,7 @@ main_link = [	('system', '/system'),
 
 
 # for arcus_mon
-arcus_zk_addrs = ['143.248.47.210:2181']
+arcus_zk_addrs = []
 if 'ARCUS_ZK_ADDRESSES' in os.environ:
     arcus_zk_addrs = os.environ['ARCUS_ZK_ADDRESSES'].split(',')
 
