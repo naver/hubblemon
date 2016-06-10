@@ -459,7 +459,7 @@ class flot_bar_renderer:
 			# add click event listener to label
 			labelFormatter = '''
                                function(label, series){
-					var idx = %;
+					var idx = %s;
 					var labelList = %s;
                                         return "<a name=" + "'" + idx + " " + label + " " + labelList + "'" + " onclick='(function(elem){\
 									var data = elem.name.split(/ /);\
@@ -473,7 +473,7 @@ class flot_bar_renderer:
                                 }
                         '''
 
-			mode = 'xaxis: { mode: "time" }, yaxis: { tickFormatter: tickFunc, min: 0 }, bars: { fillOpacity:1.0, show: true, barWidth:1 }, legend: { labelFormatter: %s } ' %(labelFormatter)
+			mode = 'xaxis: { mode: "time" }, yaxis: { tickFormatter: tickFunc, min: 0 }, bars: { fillOpacity:1.0, show: true, lineWidth:3 }, legend: { labelFormatter: %s } ' %(labelFormatter)
 			chart_data.adjust_timezone()
 
 		# convert python array to js array
