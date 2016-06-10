@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-
+import random
 
 class graph_pool:
 	def __init__(self, position):
@@ -42,7 +42,7 @@ class graph_pool:
 
 
 class graph_node:
-	def __init__(self, id, name=''):
+	def __init__(self, id, name='', data_list=[1]):
 		self.id = id 
 		if name == '':
 			self.name = id
@@ -51,6 +51,20 @@ class graph_node:
 
 		self.links = []
 		self.color = 'EEEEEE'
+		result_list = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+		#Clear annotation if you want to show random pie charts
+		#data_list = []
+		#for i in range(16):
+		#	data_list.append(random.randrange(0,10))
+		
+		total = 0
+		i=0
+		for val in data_list:
+			total += val
+			result_list[i] = val
+			i += 1;
+		result_list = list(map(lambda x: x/total*100, result_list))
+		self.datas = result_list
 
 	def link(self, node, edge_name='', color='000000'):
 		self.links.append( (node.name, edge_name, color) )
@@ -66,7 +80,10 @@ class cytoscape_renderer:
 		edges = ''
 
 		for node in lists:
-			nodes += "{ data: { id:'%s', name:'%s', color: '#%s' } },\n" % (node.id, node.name, node.color)
+			nodes += "{ data: { id:'%s', name:'%s', color: '#%s'" % (node.id, node.name, node.color)
+			for i in range(16):
+				nodes += ", data"+str(i)+": '%s'" % (node.datas[i])
+			nodes += " } },\n"
 
 			link_no = 0
 			for link in node.links:
@@ -121,7 +138,42 @@ class cytoscape_renderer:
 					'text-valign': 'center',
 					'text-halign': 'center',
 					'background-color': 'data(color)',
-				      }
+					
+					
+					'pie-size': '90%%',
+					'pie-1-background-color': '#8956e2',
+					'pie-1-background-size': 'data(data0)',
+					'pie-2-background-color': '#b556e2',
+					'pie-2-background-size': 'data(data1)',
+					'pie-3-background-color': '#e056e2',
+					'pie-3-background-size': 'data(data2)',
+					'pie-4-background-color': '#e256b7',
+					'pie-4-background-size': 'data(data3)',
+					'pie-5-background-color': '#e2568b',
+					'pie-5-background-size': 'data(data4)',
+					'pie-6-background-color': '#e25660',
+					'pie-6-background-size': 'data(data5)',
+					'pie-7-background-color': '#e27756',
+					'pie-7-background-size': 'data(data6)',
+					'pie-8-background-color': '#e2a356',
+					'pie-8-background-size': 'data(data7)',
+					'pie-9-background-color': '#e2cf56',
+					'pie-9-background-size': 'data(data8)',
+					'pie-10-background-color': '#c8e256',
+					'pie-10-background-size': 'data(data9)',
+					'pie-11-background-color': '#9de256',
+					'pie-11-background-size': 'data(data10)',
+					'pie-12-background-color': '#71e256',
+					'pie-12-background-size': 'data(data11)',
+					'pie-13-background-color': '#56e266',
+					'pie-13-background-size': 'data(data12)',
+					'pie-14-background-color': '#56e292',
+					'pie-14-background-size': 'data(data13)',
+					'pie-15-background-color': '#56e2bd',
+					'pie-15-background-size': 'data(data14)',
+					'pie-16-background-color': '#56dae2',
+					'pie-16-background-size': 'data(data15)'
+					}
 				    },
 				    {
 				      selector: '$node > node',
@@ -150,8 +202,9 @@ class cytoscape_renderer:
 					'background-color': 'black',
 					'line-color': 'black',
 					'target-arrow-color': 'black',
-					'source-arrow-color': 'black'
-				      }
+					'source-arrow-color': 'black',
+					
+					}
 				    }
 				  ],
 
