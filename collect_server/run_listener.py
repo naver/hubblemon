@@ -22,7 +22,7 @@ import os, sys, time
 
 import collect_listener
 import server_rrd_plugin
-import server_sql_plugin
+#import server_sql_plugin
 
 hubblemon_path = os.path.join(os.path.dirname(__file__), '..')
 sys.path.append(hubblemon_path)
@@ -33,8 +33,8 @@ import common.settings
 def listener(port, path):
 	print('>>> start child listener %d (%d)' % (port, os.getpid()))
 	lsn = collect_listener.CollectListener(port, path)
-	lsn.put_plugin('default', server_sql_plugin.server_sql_plugin(path))
-	#lsn.put_plugin('rrd', server_rrd_plugin.server_rrd_plugin(path))
+	#lsn.put_plugin('default', server_sql_plugin.server_sql_plugin(path))
+	lsn.put_plugin('rrd', server_rrd_plugin.server_rrd_plugin(path))
 	
 	#time.sleep(5)
 	lsn.listen(50000) # set repeat count, because some leak in rrdtool
