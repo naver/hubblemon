@@ -46,31 +46,10 @@ memcached_cloud_map = {}
 last_ts = 0
 
 def init_plugin():
-	global memcached_cloud_map
-	global last_ts
-
-	ts = time.time()
-	if ts - last_ts < 300:
-		return
-	last_ts = ts
-
-
 	print('#### memcached init ########')
+	ret = get_chart_list({})
+	print(ret)
 
-	client_list = common.core.get_client_list()
-	for client in client_list:
-		instance_list = common.core.get_data_list_of_client(client, 'memcached_')
-		if len(instance_list) > 0:
-
-			new_list = []
-			for instance in instance_list:
-				if not instance.startswith('memcached_prefix_'): # skip prefix
-					new_list.append(instance)
-
-				memcached_cloud_map[client] = new_list
-
-	print (memcached_cloud_map)
-		
 	
 
 
@@ -101,6 +80,28 @@ def get_chart_data(param):
 
 def get_chart_list(param):
 	#print(param)
+	global memcached_cloud_map
+	global last_ts
+
+
+	ts = time.time()
+	if ts - last_ts >= 300:
+		memcached_cloud_map_tmp = {}
+		client_list = common.core.get_client_list()
+		for client in client_list:
+			instance_list = common.core.get_data_list_of_client(client, 'memcached_')
+			if len(instance_list) > 0:
+
+				new_list = []
+				for instance in instance_list:
+					if not instance.startswith('memcached_prefix_'): # skip prefix
+						new_list.append(instance)
+
+					memcached_cloud_map_tmp[client] = new_list
+
+		memcached_cloud_map = memcached_cloud_map_tmp
+
+	last_ts = ts
 
 	if 'type' in param:
 		type = param['type']

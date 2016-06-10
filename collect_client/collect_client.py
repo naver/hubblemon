@@ -170,6 +170,9 @@ class collectd:
 			lst.close()
 
 	def daemon(self):
+		for p in self.plugins:
+			p.sleep_info = self.sleep
+
 		while True:
 			try:
 				self.connect(); # try connect if disconnect

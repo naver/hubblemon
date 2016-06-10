@@ -5,6 +5,7 @@ class jstat_stat:
 	def __init__(self):
 		self.name = 'jstat'
 		self.type = 'rrd'
+		self.trace = False
 
 		self.pidlist = []
 		self.proc = {}
@@ -17,9 +18,10 @@ class jstat_stat:
 	def __repr__(self):
 		return '[%s-(%s,%s)]' % (self.applist.__repr__(), self.name, self.type)
 
-	def auto_register(self, filters = ['java']):
+	def auto_register(self, filters = ['java'], trace=False):
 		self.flag_auto_register = True
 		self.auto_register_filters = filters
+		self.trace = trace
 
 		proc1 = subprocess.Popen(shlex.split('ps -ef'), stdout=subprocess.PIPE)
 		proc2 = subprocess.Popen(shlex.split('grep java'), stdin=proc1.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -42,6 +44,9 @@ class jstat_stat:
 				lst = line.split()
 				if lst[1].isnumeric():
 					tmp_pidlist.append(int(lst[1]))
+
+				if self.trace == True: # trace one
+					break
 
 
 		tmp_pidlist.sort()
@@ -66,7 +71,7 @@ class jstat_stat:
 		all_stats = {}
 
 		if self.flag_auto_register == True:
-			if self.auto_register(self.auto_register_filters) == True:
+			if self.auto_register(self.auto_register_filters, self.trace) == True:
 				return None # for create new file
 
 		for pid in self.pidlist:
@@ -96,7 +101,13 @@ class jstat_stat:
 				value = float(items[i]) * factor
 				stat[alias_key] = int(value)
 
-			all_stats['jstat_%d' % pid] = stat
+				if self.collect_key[i][2] == 'DERIVE':
+					stat[alias_key] *= self.sleep_info
+
+			if self.trace == True:
+				all_stats['jstat_gc'] = stat
+			else:
+				all_stats['jstat_%d' % pid] = stat
 
 			#print(all_stats)
 
@@ -107,8 +118,11 @@ class jstat_stat:
 	def create(self):
 		all_map = {}
 
-		for pid in self.pidlist:
-			all_map['jstat_%d' % pid] = self.create_key_list # stats per port
+		if self.trace == True:
+			all_map['jstat_gc'] = self.create_key_list # stats per port
+		else:
+			for pid in self.pidlist:
+				all_map['jstat_%d' % pid] = self.create_key_list # stats per port
 
 		all_map['RRA'] = self.rra_list
 		return all_map
@@ -140,15 +154,15 @@ class jstat_stat:
 	def collect_key_init(self):
 		self.collect_key = []
 		 
-		self.collect_key.append(('Survivor_0', 1))
-		self.collect_key.append(('Survivor_1', 1))
-		self.collect_key.append(('Eden', 1))
-		self.collect_key.append(('Old', 1))
-		self.collect_key.append(('Permanent', 1))
-		self.collect_key.append(('YGC', 1000))
-		self.collect_key.append(('YGCT', 1000))
-		self.collect_key.append(('FGC', 1000))
-		self.collect_key.append(('FGCT', 1000))
-		self.collect_key.append(('GCT', 1000))
+		self.collect_key.append(('Survivor_0', 1, 'GAUGE'))
+		self.collect_key.append(('Survivor_1', 1, 'GAUGE'))
+		self.collect_key.append(('Eden', 1, 'GAUGE'))
+		self.collect_key.append(('Old', 1, 'GEUGE'))
+		self.collect_key.append(('Permanent', 1, 'GAUGE'))
+		self.collect_key.append(('YGC', 1, 'DERIVE'))
+		self.collect_key.append(('YGCT', 1000, 'DERIVE'))
+		self.collect_key.append(('FGC', 1, 'DERIVE'))
+		self.collect_key.append(('FGCT', 1000, 'DERIVE'))
+		self.collect_key.append(('GCT', 1000, 'DERIVE'))
 
 

@@ -21,6 +21,7 @@ import os
 
 import common.rrd_data
 import common.remote_data_reader
+import common.sql_data
 from data_loader.loader_util import merge_loader
 from data_loader.loader_util import sum_loader
 from data_loader.loader_util import filter_loader
@@ -53,6 +54,7 @@ class rrd_storage_manager:
 		fd.path = path
 		return fd
 
+
 	def get_client_list(self, base):
 		client_list = []
 
@@ -66,6 +68,17 @@ class rrd_storage_manager:
 				client_list.append(dir)
 
 		return client_list
+
+	def get_data_of_client(self, base, client, name):
+		if base[0] != '/':
+			base = os.path.join(self.hubblemon_path, base)
+
+		path = os.path.join(base, client)
+
+		for file in os.listdir(path):
+			if file == name:
+				break
+		return file
 
 
 	def get_data_list_of_client(self, base, client, prefix):
@@ -140,65 +153,70 @@ class tsdb_test_storage_manager(rrd_storage_manager):
 			return None
 
 
-# template for sqlite3 manager
-class sql_gw:
-	def __init__(self, type, connector):
-		self.type = type
-		self.connector = connector
-		# connect
-
-	def create(self, query):
-		cursor = self.handle.cursor()
-		cursor.execute() # TODO: return check
-
-	def select(self, query):
-		cursor = self.handle.cursor()
-		cursor.execute()
-		return cursor.fetchall()
-
-	def insert(self, table_name, values):
-		cursor = self.handle.cursor()
-		cursor.execute() # TODO: return check
-	
-
-class sql_handle:
-	def __init__(self, gw, name):
-		self.gw = gw
-		self.name = name
-
-	def read(self, start, end):
-		# make query using table name, start, end
-		results = self.gw.select(query)
-		# make tsdb style result lists and return
-
-
-class sqlite3_storage_manager:
+class sql_storage_manager:
 	def __init__(self, db_path):
-		self.db_path = db_path
-		self.sql_gw = sql_gw('sqlite3', self.connector)
+			self.db_path = db_path
+			self.sql_manager=common.sql_data.sql_gw(db_path)
 
-	def connector(self):
-		# sqlite open with self.db_path
-		# and return
-		pass
 
-	def get_handle(self, param, path):
-		sql_handle(gw, name)
+	def get_handle(self, base, path):
+			try:
+					return common.sql_data.sql_gw(path)
+
+			except:
+					return None
+
 
 	def get_client_list(self, param):
-		client_list = []
-		# select name from client_list
-		return client_list
+			client_list = []
+			query = "SELECT name FROM sqlite_master WHERE type='table'"
+			table_list =self.sql_manager.select(query);
+			for table in table_list:
+				client_name = table[0].split("_")[1]
+				if client_name not in client_list:
+					client_list.append(client_name)
+
+			#print ("client_list:", client_list)
+			return client_list
+	
+	def get_data_of_client(self, param, client, name):
+			query = "SELECT name FROM sqlite_master WHERE type='table'"
+			table_list =self.sql_manager.select(query);
+			target_name ="D_"+client+"_"+name
+			for table in table_list:
+				table=table[0]
+				if (table==target_name):
+					break
+			#print ("data_client: ", table)
+			return table 
+			
 
 	def get_data_list_of_client(self, param, client, prefix):
-		data_list = []
-		# select name from sqlite_master where type = 'table' and name like 'D_%s_%s%%' % (client, prefix)
-		return data_list
+			data_list = []
+			# select name from sqlite_master where type = 'table' and name like 'D_%s_%s%%' % (client, prefix)
+			query = "SELECT name FROM sqlite_master WHERE type='table'"
+			table_list =self.sql_manager.select(query);
+			target_name ="D_"+client+"_"+prefix
+			for table in table_list:
+				table=table[0]
+				if table.startswith(target_name):
+					data_list.append(table)
+			#print ("data_list_of_client_list:", data_list)
+			return data_list
 
 	def get_all_data_list(self, param, prefix):
-		data_list = []
-		# select name from sqlite_master where type = 'table' and name like 'D_%%_%s%%' % (prefix)
-		return data_list
+			data_list = []
+			# select name from sqlite_master where type = 'table' and name like 'D_%%_%s%%' % (prefix)
+			query = "SELECT name FROM sqlite_master WHERE type='table'"
+			table_list =self.sql_manager.select(query);
+			for table in table_list:
+				table=table[0]
+				client_name = table.split("_")[1]
+				target_name = "D_"+client_name+"_"+prefix
+				if table.startswith(target_name):
+					data_list.append(table)
+			#print ("all_data_list:", data_list)
+			return data_list
 
 
 

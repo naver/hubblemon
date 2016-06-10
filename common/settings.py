@@ -23,6 +23,14 @@
 
 import os, sys, socket
 
+'''
+sql_type ="sqlite3"
+if(sql_type=="sqlite3"):
+	import sqlite3
+	hubblemon_path = os.path.join(os.path.dirname(__file__), '..')
+	db_path = os.path.join(hubblemon_path, 'hubblemon.db')
+	conn=sqlite3.connect(db_path, check_same_thread=False, isolation_level=None)
+'''
 
 collect_server_port = 30000
 

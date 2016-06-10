@@ -65,13 +65,14 @@ sms_by_wget = alarm_wget.alarm_wget(wget_callback)
 
 
 # [ mail_info, mail_warning, sms_by_wget ]
-main_alarm.alarm_methods.append(mail_info)
-main_alarm.alarm_methods.append(mail_warning)
-main_alarm.alarm_methods.append(sms_by_wget)
+#main_alarm.alarm_methods.append(mail_info)
+#main_alarm.alarm_methods.append(mail_warning)
+#main_alarm.alarm_methods.append(sms_by_wget)
 
 
 
 # add client plugins
+'''
 from arcus_mon.arcus_alarm import arcus_alarm
 main_alarm.add_plugin(arcus_alarm())
 
@@ -89,5 +90,5 @@ main_alarm.add_plugin(memcached_alarm())
 
 from redis_mon.redis_alarm import redis_alarm
 main_alarm.add_plugin(redis_alarm())
-
+'''
 
