@@ -473,7 +473,13 @@ class flot_bar_renderer:
                                 }
                         '''
 
-			mode = 'xaxis: { mode: "time" }, yaxis: { tickFormatter: tickFunc, min: 0 }, bars: { fillOpacity:1.0, show: true, lineWidth:3 }, legend: { labelFormatter: %s } ' %(labelFormatter)
+
+                        width = common.settings.chart_resolution / len(chart_data.items[0].data)
+                        width *= 2
+                        if width < 1:
+                                width = 1
+
+			mode = 'xaxis: { mode: "time" }, yaxis: { tickFormatter: tickFunc, min: 0 }, bars: { fillOpacity:1.0, show: true, lineWidth:%d }, legend: { labelFormatter: %s } ' %(width, labelFormatter)
 			chart_data.adjust_timezone()
 
 		# convert python array to js array
