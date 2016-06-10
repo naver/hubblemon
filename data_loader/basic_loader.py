@@ -20,7 +20,7 @@
 import os
 from chart.chart_data import chart_data
 import common.settings
-
+import re
               
 class basic_loader:
 	def __init__(self, handle, filter, title=''):
@@ -473,13 +473,16 @@ class flot_bar_renderer:
                                 }
                         '''
 
+			tmp_data = re.split('[,\[\] ]', chart_data.items[0].data.__repr__())
+			tmp_dataList = [x for x in tmp_data if (x != "None" and x != "")]
+			time_gap = int(tmp_dataList[-2]) - int(tmp_dataList[0])
+			barWidth = time_gap / len(chart_data.items[0].data)
+			if barWidth < 1:
+				barWidth = 1
 
-			width = common.settings.chart_resolution / len(chart_data.items[0].data)
-			width *= 2
-			if width < 1:
-				width = 1
+			mode = 'xaxis: { mode: "time" }, yaxis: { tickFormatter: tickFunc, min: 0 }, bars: { fill: 0.8, show: true, lineWidth: 0, barWidth: %d, fillColors: false}, legend: { labelFormatter: %s }, ' %(barWidth, labelFormatter)
 
-			mode = 'xaxis: { mode: "time" }, yaxis: { tickFormatter: tickFunc, min: 0 }, bars: { fillOpacity:1.0, show: true, lineWidth:%d }, legend: { labelFormatter: %s } ' %(width, labelFormatter)
+
 			chart_data.adjust_timezone()
 
 		# convert python array to js array
