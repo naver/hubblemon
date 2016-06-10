@@ -161,7 +161,6 @@ class sql_storage_manager:
 
 	def get_handle(self, base, path):
 			try:
-					print("get handle: ", base, path)
 					return common.sql_data.sql_gw(path)
 
 			except:
@@ -171,15 +170,13 @@ class sql_storage_manager:
 	def get_client_list(self, param):
 			client_list = []
 			query = "SELECT name FROM sqlite_master WHERE type='table'"
-			print (query)
 			table_list =self.sql_manager.select(query);
-			print (table_list)
 			for table in table_list:
 				client_name = table[0].split("_")[1]
 				if client_name not in client_list:
 					client_list.append(client_name)
 
-			print ("client_list:", client_list)
+			#print ("client_list:", client_list)
 			return client_list
 	
 	def get_data_of_client(self, param, client, name):
@@ -190,7 +187,7 @@ class sql_storage_manager:
 				table=table[0]
 				if (table==target_name):
 					break
-			print ("data_client: ", table)
+			#print ("data_client: ", table)
 			return table 
 			
 
@@ -204,7 +201,7 @@ class sql_storage_manager:
 				table=table[0]
 				if table.startswith(target_name):
 					data_list.append(table)
-			print ("data_list_of_client_list:", data_list)
+			#print ("data_list_of_client_list:", data_list)
 			return data_list
 
 	def get_all_data_list(self, param, prefix):
@@ -218,7 +215,7 @@ class sql_storage_manager:
 				target_name = "D_"+client_name+"_"+prefix
 				if table.startswith(target_name):
 					data_list.append(table)
-			print ("all_data_list:", data_list)
+			#print ("all_data_list:", data_list)
 			return data_list
 
 

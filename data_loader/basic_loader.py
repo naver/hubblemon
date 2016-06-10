@@ -212,7 +212,7 @@ class basic_loader:
 			return []
 
 		ret = self.handle.read(ts_start, ts_end)
-		print ('result: ', ret)
+		#print ('result: ', ret)
 		# default(rrd) type ((ts_start, ts_end, step), (metric1, metric2, metric3), [(0, 0, 0), (1, 1, 1)....])
 		# rrd type ('#rrd', (ts_start, ts_end, step), (metric1, metric2, metric3), [(0, 0, 0), (1, 1, 1)....])
 		# tsdb type ('#timestamp', (metric1, metric2, metric3), [(ts, 0, 0, 0), (ts, 1, 1, 1)....])
