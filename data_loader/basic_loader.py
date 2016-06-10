@@ -388,13 +388,18 @@ class flot_line_renderer:
 			mode = 'xaxis: { mode: "time" }, yaxis: { tickFormatter: tickFunc, min: 0 }, lines: { fillOpacity:1.0, show: true, lineWidth:1 },'
 			chart_data.adjust_timezone()
 
+		mode = mode + "cursors: [ { mode: 'x', showIntersections: true, showLabel: false,snapToPlot: 0, symbol: 'diamond', position: { relativeX: 0, relativeY:0} }], grid: {hoverable: true, autoHighlight: false },"
 		# convert python array to js array
 		raw_data = ''
 		if len(chart_data.items) == 1: # one item
-			raw_data = chart_data.items[0].data.__repr__().replace('None', 'null')
+			item = chart_data.items[0];
+			tmp = list(filter(None.__ne__, item.data))
+			tmp = tmp.__repr__()
+			raw_data = '{ label: "%s", data: %s}' %(item.title, tmp)
 		else: # multi item (display label)
 			for item in chart_data.items:
-				tmp = item.data.__repr__().replace('None', 'null')
+				tmp = list(filter(None.__ne__, item.data))
+				tmp = tmp.__repr__()
 				if len(chart_data.items) > 7:
 					raw_data += '%s,' % tmp
 				else:
@@ -405,13 +410,13 @@ class flot_line_renderer:
 
 		#print (raw_data)
 		js_template = self.get_js_template()
-		return  js_template % ('[ %s ]' % raw_data, idx, mode, chart_data.title, idx)
+		return  js_template % ('%s' %idx, raw_data,idx, idx, mode,idx,idx,idx,idx,idx, idx,idx,chart_data.title, idx,idx,idx, chart_data.title, idx)
 
 		
 	def get_js_template(self):
 		js_template = '''
 			<script type="text/javascript">
-
+			var plot_%s;	
 			$(function() {
 				tickFunc = function(val, axis) {
 					if (val > 1000000000 && (val %% 1000000000) == 0) {
@@ -427,16 +432,61 @@ class flot_line_renderer:
 					return val;
 				};
 
-				var data_list = %s
-				$.plot("#placeholder_%s", data_list, {
+				var data_list = [%s];
+				plot_%s = $.plot("#placeholder_%s", data_list, {
 					%s
 				});
 			});
 			</script>
 
+			<script>
+			$(function(){
+			var legends = $("#placeholder_%s .legendLabel");
+			    legends.each(function () {
+				// fix the widths so they don't jump around
+				$(this).css('width', $(this).width());
+			    });
+
+			    var updateLegendTimeout = null;
+			    var latestPosition = null;
+			    
+			    function updateLegend_%s() {
+				updateLegendTimeout = null;
+				
+				var pos = latestPosition;
+				var axes = plot_%s.getAxes();
+				if (pos.x < axes.xaxis.min || pos.x > axes.xaxis.max ||
+				    pos.y < axes.yaxis.min || pos.y > axes.yaxis.max)
+			    		return;
+
+				var i, j, dataset = plot_%s.getData();
+				for (i = 0; i < dataset.length; ++i) {
+				    var series = dataset[i];
+				    // find the nearest points, x-wise
+				    for (j = 0; j < series.data.length; ++j)
+					if (series.data[j][0] > pos.x)
+					    break;
+				    plot_%s.setCursor(plot_%s.getCursors()[0], {position:{x:series.data[j-1][0]}}); 
+				    var t = parseFloat(series.data[j-1][0]);
+				    var date = new Date(t);// Milliseconds to date
+				    date.setTime(t + date.getTimezoneOffset()*60*1000); // timezone offset 	
+				    var formatted = date.toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1"); // change time format as HH:MM:SS
+				    $("#chart-title-%s").text("%s x = "+formatted);
+				}
+			    }	
+			var placeholder = $("#placeholder_%s");
+			placeholder.bind("plothover",  function (event, pos, item) {
+				latestPosition = pos;
+				if (!updateLegendTimeout)
+				    updateLegendTimeout = setTimeout(updateLegend_%s, 50);
+			    });
+			});
+
+</script>
+
 			<div>
 			<div class="chart-container">
-				<div class="chart-title">%s</div>
+				<div id="chart-title-%s" class="chart-title">%s x = 0.00 </div>
 				<div id="placeholder_%s" class="chart-placeholder" style="float:left"></div>
 			</div>
 			</div>
