@@ -473,11 +473,17 @@ class flot_bar_renderer:
                                 }
                         '''
 
-			tmp_data = re.split('[,\[\] ]', chart_data.items[0].data.__repr__())
-			tmp_dataList = [x for x in tmp_data if (x != "None" and x != "")]
-			time_gap = int(tmp_dataList[-2]) - int(tmp_dataList[0])
-			barWidth = time_gap / len(chart_data.items[0].data)
-			if barWidth < 1:
+			#set bar width
+
+			#push num1(time in millisecond) which matches '[num1, num2]'
+			tmp_data = re.findall('\d+(?=, \d+)', chart_data.items[0].data.__repr__())
+			if len(tmp_data) >= 2:
+				start_time = int(tmp_data[0])
+				end_time = int(tmp_data[-1])
+				time_gap = end_time - start_time
+				#unit of barWidth = unit of x axis(1 millisecond)
+				barWidth = time_gap / len(chart_data.items[0].data) * 0.8
+			else:
 				barWidth = 1
 
 			mode = 'xaxis: { mode: "time" }, yaxis: { tickFormatter: tickFunc, min: 0 }, bars: { fill: 0.8, show: true, lineWidth: 0, barWidth: %d, fillColors: false}, legend: { labelFormatter: %s }, ' %(barWidth, labelFormatter)
