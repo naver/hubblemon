@@ -275,7 +275,7 @@ class basic_loader:
 			tmp_list = self.make_chart(titles, tmap, items, ts_start, ts_step)
 		
 			if titles[0]=="#stack":
-				for t in range(len(tmp_list)):
+				for t in range(len(tmp_list))[1:]:
 					tmp_data = tmp_list[t][1]
 					stack_data=[]
 					for i in range(len(tmp_data)):  
@@ -284,6 +284,7 @@ class basic_loader:
 						else:
 							prev_data = tmp_list[t-1][1]
 							stack_data.append([tmp_data[i][0], (tmp_data[i][1] + prev_data[i][1])])
+					
 				new_chart.push_data('stack', stack_data)	
 			for tmp in tmp_list:
 				new_chart.push_data(tmp[0], tmp[1])
