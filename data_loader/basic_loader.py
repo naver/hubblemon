@@ -273,22 +273,29 @@ class basic_loader:
 			new_chart = chart_data()
 
 			tmp_list = self.make_chart(titles, tmap, items, ts_start, ts_step)
-
-			for t in range(len(tmp_list)):
-				tmp = tmp_list[t]
-				if(tmp[0] == 'user'):
-					tmp2=[]
-					for i in range(len(tmp[1])):   
-						if tmp[1][i] == None:
-							tmp2.append(tmp[1][i])
+		
+				
+			if titles[0]=='#stack':
+				stack_data=[]
+				for t in range(len(tmp_list)):
+					tmp_data = tmp_list[t][1]
+					for i in range(len(tmp_data)):   
+						if tmp_data[i] == None:
+							stack_data.append(None)
 						else:
-							tmp4 = tmp_list[t-1]
-							tmp2.append([tmp[1][i][0], (tmp[1][i][1] + tmp4[1][i][1])/2])
-					new_chart.push_data('stack', tmp2)
+							if (t==1):
+								stack_data.append([tmp_data[i][0], tmp_data[i][1]])
+							else:
+								prev_data = tmp_list[t-1][1]
+								stack_data.append([tmp_data[i][0], (tmp_data[i][1] + prev_data[i][1])])
+				new_chart.push_data('stack', stack_data)
+				
+			for tmp in tmp_list:
 				new_chart.push_data(tmp[0], tmp[1])
+			
 
 
-
+	
 
 			renderer_name = 'default'
 			if isinstance(titles, list) and titles[0].startswith('#'): # renderer
