@@ -271,8 +271,18 @@ class basic_loader:
 			new_chart = chart_data()
 
 			tmp_list = self.make_chart(titles, tmap, items, ts_start, ts_step)
-			for tmp in tmp_list:
-				new_chart.push_data(tmp[0], tmp[1])
+			for t in range(len(tmp_list)):
+				tmp = tmp_list[t]
+				if (tmp[0] == 'user'):
+                                        tmp2=[]
+                                        for i in range(len(tmp[1])):
+                                                if tmp[1][i] == None:
+                                                        tmp2.append(tmp[1][i])
+                                                else:
+                                                        tmp4 = tmp_list[t-1]
+                                                        tmp2.append([tmp[1][i][0], (tmp[1][i][1] + tmp4[1][i][1])])
+                                        new_chart.push_data('stack', tmp2)
+                                new_chart.push_data(tmp[0], tmp[1])
 
 			renderer_name = 'default'
 			if isinstance(titles, list) and titles[0].startswith('#'): # renderer
