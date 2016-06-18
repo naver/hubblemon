@@ -217,7 +217,7 @@ def _make_time_range(param, link):
 
 			$.ajax(
 			{
-			    url : %s + '&start_date=' + $('#start_date').val() + '&end_date=' + $('#end_date').val() + '&auto_update=true&ajax=true',
+			    url : %s + '&start_date=' + $('#start_date').val() + '&end_date=' + $('#end_date').val() + '&auto_update=%d&diff=%s&ajax=true',
 			    type : "GET",
 			    dataType : 'json',
 			    success : function(data) {
@@ -231,9 +231,9 @@ def _make_time_range(param, link):
 		    </script>
 		"""
 		if 'diff' in param:
-			auto_update = auto_update %(param['diff'], link, auto_update_time)
+			auto_update = auto_update %(param['diff'], link, auto_update_time // 1000, param['diff'], auto_update_time)
 		else:
-			auto_update = auto_update %('30', link, auto_update_time)
+			auto_update = auto_update %('30', link, auto_update_time // 1000, '30', auto_update_time)
 		js_chart_list += date_template % (start_date.strftime("%Y-%m-%d %H:%M"), link, end_date.strftime("%Y-%m-%d %H:%M"), link, range_radio.render(), auto_update) # set initial time
 	else:
 		js_chart_list += date_template % (start_date.strftime("%Y-%m-%d %H:%M"), link, end_date.strftime("%Y-%m-%d %H:%M"), link, range_radio.render(), '') # set initial time
@@ -413,6 +413,9 @@ def system_page(request):
 		for chart_data in chart_data_list:
 			js_chart_data += chart_data.render()
 		
+	if 'ajax' in request.GET:
+		return HttpResponse(json.dumps({'reponse': 'success', 'chart_data': js_chart_data}), content_type='application/json')
+
 	## make view
 	variables = RequestContext(request, { 'main_link':_make_main_link(), 'chart_list':js_chart_list, 'chart_data':js_chart_data } )
 	return render_to_response('system_page.html', variables)
@@ -487,6 +490,8 @@ def expr_page(request):
 			<input type="hidden" name="end_date" value="%s">''' % (start_date, end_date)
 	js_chart_list = _make_time_range(param, "'/expr?expr=%s'" % urllib.parse.quote(expr))
 
+	if 'ajax' in param:
+		return HttpResponse(json.dumps({'reponse': 'success', 'chart_data': js_chart_data}), content_type='application/json')
 	## make view
 	variables = RequestContext(request, { 'main_link':_make_main_link(), 'expr_form':expr_form, 'date_range':date_range, 'chart_list':js_chart_list, 'chart_data':js_chart_data} )
 	return render_to_response('expr_page.html', variables)
