@@ -38,11 +38,13 @@ class basic_loader:
 		flot_line = flot_line_renderer()
 		flot_pie = flot_pie_renderer()
 		flot_bar = flot_bar_renderer()
+		flot_stack = flot_line_renderer()
 		self.renderer['default'] = flot_line
 		self.renderer['line'] = flot_line
 		self.renderer['title'] = title_renderer()
 		self.renderer['pie'] = flot_pie
 		self.renderer['bar'] = flot_bar
+		self.renderer['stack'] = flot_stack
 
 	def count(self, name):
 		if self.handle is None:
@@ -271,8 +273,25 @@ class basic_loader:
 			new_chart = chart_data()
 
 			tmp_list = self.make_chart(titles, tmap, items, ts_start, ts_step)
+		
+			if titles[0]=="#stack":
+				for t in range(len(tmp_list))[1:]:
+					tmp_data = tmp_list[t][1]
+					stack_data=[]
+					for i in range(len(tmp_data)):  
+						if tmp_data[i] == None:
+							stack_data.append(tmp_data[i])
+						else:
+							prev_data = tmp_list[t-1][1]
+							stack_data.append([tmp_data[i][0], (tmp_data[i][1] + prev_data[i][1])])
+					
+				new_chart.push_data('stack', stack_data)	
 			for tmp in tmp_list:
 				new_chart.push_data(tmp[0], tmp[1])
+			
+
+
+	
 
 			renderer_name = 'default'
 			if isinstance(titles, list) and titles[0].startswith('#'): # renderer
