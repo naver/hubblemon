@@ -176,6 +176,7 @@ def _make_time_range(param, link):
 			%s
 			</div>
 			&nbsp
+			%s
 		</div>
 
 		
@@ -183,7 +184,59 @@ def _make_time_range(param, link):
 
 	end_date = datetime.datetime.now()
 	start_date = end_date - datetime.timedelta(0, 60*30)
-	js_chart_list += date_template % (start_date.strftime("%Y-%m-%d %H:%M"), link, end_date.strftime("%Y-%m-%d %H:%M"), link, range_radio.render()) # set initial time
+	if 'auto_update' in param:
+		try:
+			auto_update_time = int(param['auto_update']) * 1000
+		except:
+			auto_update_time = 5000
+		auto_update = """
+		    <script type="text/javascript">
+		    setInterval(function() {
+			console.log("update chart");
+			var ed = new Date();
+			var offset = ed.getTimezoneOffset() * 60;
+			ed.setSeconds(ed.getSeconds() - offset);
+			var end_ts = ed.getTime()/1000;
+
+			var start_ts = end_ts - %s*60;
+			var sd = new Date(start_ts*1000);
+
+			var sd_str = sd.toISOString();
+			var sd_date = sd_str.substring(0, 10);
+			var sd_time = sd_str.substring(11, 16);
+			sd_str = sd_date + " " + sd_time;
+
+			$('#start_date').val(sd_str);
+
+			var ed_str = ed.toISOString();
+			var ed_date = ed_str.substring(0, 10);
+			var ed_time = ed_str.substring(11, 16);
+			ed_str = ed_date + " " + ed_time;
+
+			$('#end_date').val(ed_str);
+
+			$.ajax(
+			{
+			    url : %s + '&start_date=' + $('#start_date').val() + '&end_date=' + $('#end_date').val() + '&auto_update=%d&diff=%s&ajax=true',
+			    type : "GET",
+			    dataType : 'json',
+			    success : function(data) {
+				console.log(data.reponse);
+				if(data.reponse == 'success') {
+				    $('.chart_area').html(data.chart_data);
+				}
+			    }
+			});
+		    }, %d);
+		    </script>
+		"""
+		if 'diff' in param:
+			auto_update = auto_update %(param['diff'], link, auto_update_time // 1000, param['diff'], auto_update_time)
+		else:
+			auto_update = auto_update %('30', link, auto_update_time // 1000, '30', auto_update_time)
+		js_chart_list += date_template % (start_date.strftime("%Y-%m-%d %H:%M"), link, end_date.strftime("%Y-%m-%d %H:%M"), link, range_radio.render(), auto_update) # set initial time
+	else:
+		js_chart_list += date_template % (start_date.strftime("%Y-%m-%d %H:%M"), link, end_date.strftime("%Y-%m-%d %H:%M"), link, range_radio.render(), '') # set initial time
 
 	return js_chart_list
 
@@ -360,6 +413,9 @@ def system_page(request):
 		for chart_data in chart_data_list:
 			js_chart_data += chart_data.render()
 		
+	if 'ajax' in request.GET:
+		return HttpResponse(json.dumps({'reponse': 'success', 'chart_data': js_chart_data}), content_type='application/json')
+
 	## make view
 	variables = RequestContext(request, { 'main_link':_make_main_link(), 'chart_list':js_chart_list, 'chart_data':js_chart_data } )
 	return render_to_response('system_page.html', variables)
@@ -434,6 +490,8 @@ def expr_page(request):
 			<input type="hidden" name="end_date" value="%s">''' % (start_date, end_date)
 	js_chart_list = _make_time_range(param, "'/expr?expr=%s'" % urllib.parse.quote(expr))
 
+	if 'ajax' in param:
+		return HttpResponse(json.dumps({'reponse': 'success', 'chart_data': js_chart_data}), content_type='application/json')
 	## make view
 	variables = RequestContext(request, { 'main_link':_make_main_link(), 'expr_form':expr_form, 'date_range':date_range, 'chart_list':js_chart_list, 'chart_data':js_chart_data} )
 	return render_to_response('expr_page.html', variables)
@@ -504,6 +562,8 @@ def chart_page(request):
 
 
 	## make view
+	if 'ajax' in param:
+		return HttpResponse(json.dumps({'reponse': 'success', 'chart_data': js_chart_data}), content_type='application/json')
 	variables = RequestContext(request, { 'main_link':_make_main_link(), 'chart_list':js_chart_list, 'chart_data':js_chart_data } )
 	return render_to_response('chart_page.html', variables)
 
