@@ -45,6 +45,7 @@ class CollectListener:
 		#print(socket.gethostname())
 		#print(self.port)
 		
+		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		self.sock.bind((socket.gethostname(), self.port))
 		self.sock.listen(5)
 
@@ -61,7 +62,7 @@ class CollectListener:
 			for sock in readable:
 				if sock == self.sock: # new client
 					conn, addr = self.sock.accept()
-					self.sock_node_map[conn] = CollectNode(conn, self.plugins, self.basedir)
+					self.sock_node_map[conn] = CollectNode(conn, addr, self.plugins, self.basedir)
 					print ('[%d]connect from %s(%s)' % (self.port, addr, conn.fileno()))
 					continue
 
@@ -99,7 +100,7 @@ class CollectListener:
 
 
 class CollectNode:
-	def __init__(self, socket, plugins, basedir):
+	def __init__(self, socket, addr, plugins, basedir):
 		self.sock = socket
 
 		self.plugins = {}
@@ -107,6 +108,7 @@ class CollectNode:
 			self.plugins[k] = v.clone()
 
 		self.basedir = basedir
+		self.addr = addr
 
 	def do_op(self):
 		packet = self.sock.recv(4096)
@@ -119,7 +121,11 @@ class CollectNode:
 			return False
 
 		header, body = packet.split(b'\n', 1)
-		header = header.decode('utf-8')
+		try:
+			header = header.decode('utf-8')
+		except UnicodeDecodeError as e:
+			print('>>>>>>> unicode decode error from %s, %s' % (self.addr, header))
+			return False
 
 		if header.count(' ') != 3:
 			print('>> protocol error (stat-header): %s' % header)
