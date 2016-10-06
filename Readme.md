@@ -13,6 +13,7 @@ And now it supports various client plugins.
 * Arcus
 * memcached
 * redis
+* nbase-arc
 * Cubrid
 * Mysql
 * jstat (GC time)
