@@ -45,6 +45,7 @@ class CollectListener:
 		#print(socket.gethostname())
 		#print(self.port)
 		
+		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		self.sock.bind((socket.gethostname(), self.port))
 		self.sock.listen(5)
 
@@ -109,6 +110,7 @@ class CollectNode:
 			self.plugins[k] = v.clone()
 
 		self.basedir = basedir
+		self.addr = addr
 
 	def do_op(self):
 		packet = self.sock.recv(128)
