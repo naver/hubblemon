@@ -65,6 +65,12 @@ def _conf_master_load(addr, cluster_map, cluster_list_map):
 
 	tn = telnetlib.Telnet(ip, port)
 	js = _read_json(tn, 'cluster_ls')
+	if js['state'] == 'redirect':
+		ip, port = js['data']['ip'], js['data']['port']
+		tn = telnetlib.Telnet(ip, port)
+		js = _read_json(tn, 'cluster_ls')
+		
+		
 	cluster_list = js['data']['list']
 	#print(cluster_list)
 
@@ -79,7 +85,7 @@ def _conf_master_load(addr, cluster_map, cluster_list_map):
 			js = _read_json(tn, 'pgs_info %s %s' % (cluster, pgs))
 			ip = js['data']['pm_IP']
 			try:
-				hostname = socket.gethostbyaddr(ip)[0]
+				hostname = socket.gethostbyaddr(ip)[1][0]
 			except Exception as e:
 				hostname = ip
 
@@ -155,6 +161,7 @@ def get_chart_data(param):
 				if node.startswith('['):
 					continue # skip
 
+				node = node.split('-')[1]
 				loader = common.core.loader(node, arc_preset, title=node)
 				loader_list.append(loader)
 
@@ -166,6 +173,7 @@ def get_chart_data(param):
 				if node.startswith('['):
 					continue # skip
 
+				node = node.split('-')[1]
 				loader = common.core.loader(node, arc_preset, title=node)
 				loader_list.append(loader)
 
