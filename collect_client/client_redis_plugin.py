@@ -30,6 +30,7 @@ class redis_stat:
 		self.name = 'redis'
 		self.type = 'rrd'
 		self.addr = []
+		self.prev_all_stats = None
 
 		self.collect_alias_key_init()
 		self.create_key_init()
@@ -97,7 +98,7 @@ class redis_stat:
 		return result
 
 
-	def collect_stat(self, all_stats, prev_all_stats):
+	def collect_stat(self, all_stats):
 		print('====== %s ======' % str(datetime.datetime.now()))
 		for addr in self.addr:
 			stat = {}
@@ -142,14 +143,18 @@ class redis_stat:
 					stat[alias_key] = value # real name in rrd file
 
 			#print(stat)
-			print('[%s] ' % addr[1], stat)
+			#print('[%s] ' % addr[1], stat)
+			print('.')
+
+			if 'cpu_user' not in stat:
+				print(lines)
 
 			for k, v in self.collect_key.items():
 				if v not in stat:
-					if prev_all_stats and v in prev_all_stats['redis_%s' % addr[1]]:
-						print('\n\n\n\n\n###############################################################')
-						print('###### modify %s' % v)
-						stat[v] = prev_all_stats['redis_%s' % addr[1]][v]
+					if self.prev_all_stats and v in self.prev_all_stats['redis_%s' % addr[1]]:
+						print('###############################################################')
+						stat[v] = self.prev_all_stats['redis_%s' % addr[1]][v]
+						print('###### modify %s as %f' % (v, stat[v]))
 					else:
 						stat[v] = 0
 
@@ -157,14 +162,13 @@ class redis_stat:
 
 	def collect(self):
 		all_stats = {}
-		prev_all_stats = None
 		
 		if self.flag_auto_register == True:
 				if self.auto_arc_register() == True:
 						return None # for create new file
 
-		self.collect_stat(all_stats, prev_all_stats)
-		prev_all_stats = copy.deepcopy(all_stats)
+		self.collect_stat(all_stats)
+		self.prev_all_stats = copy.deepcopy(all_stats)
 
 		return all_stats
 		
