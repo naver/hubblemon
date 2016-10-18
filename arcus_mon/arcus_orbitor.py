@@ -115,7 +115,6 @@ while True:
 				print('# orbitor health check')
 				last_health_check = ts
 				naver_sms.send('Orbitor Health check', 'Orbitor Health check')
-				os.system("ssh cregarcus01.news.nhnsystem.com 'bash ~/health_restart.sh  > /dev/null 2>&1 &'")
 
 	time.sleep(10)
 	sys.stdout.flush()

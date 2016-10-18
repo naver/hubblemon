@@ -429,9 +429,12 @@ class flot_line_renderer:
 		idx = flot_line_renderer.idx + id(chart_data) # to get unique idx
 		flot_line_renderer.idx += 1
 
+		plot_idx = idx
+		#plot_idx = 1
+
 		#print (raw_data)
 		js_template = self.get_js_template()
-		return  js_template % ('%s' %idx, raw_data,idx, idx, mode,idx,idx,idx,idx,idx, idx,idx,chart_data.title, idx,idx,idx, chart_data.title, idx)
+		return  js_template % (plot_idx, raw_data, plot_idx, idx, mode, idx, idx, plot_idx, plot_idx, plot_idx, plot_idx, idx, chart_data.title, idx, idx, idx, chart_data.title, idx)
 
 		
 	def get_js_template(self):
