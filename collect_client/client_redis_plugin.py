@@ -30,7 +30,7 @@ class redis_stat:
 		self.name = 'redis'
 		self.type = 'rrd'
 		self.addr = []
-		self.prev_all_stats = None
+		self.all_stats = {}
 
 		self.collect_alias_key_init()
 		self.create_key_init()
@@ -99,7 +99,7 @@ class redis_stat:
 
 
 	def collect_stat(self, all_stats):
-		print('====== %s ======' % str(datetime.datetime.now()))
+		print('collect', self.addr)
 		for addr in self.addr:
 			stat = {}
 
@@ -142,35 +142,23 @@ class redis_stat:
 
 					stat[alias_key] = value # real name in rrd file
 
-			#print(stat)
-			#print('[%s] ' % addr[1], stat)
-			print('.')
-
-			if 'cpu_user' not in stat:
-				print(lines)
-
+			ins_name = 'redis_%s' % addr[1]
 			for k, v in self.collect_key.items():
 				if v not in stat:
-					if self.prev_all_stats and v in self.prev_all_stats['redis_%s' % addr[1]]:
-						print('###############################################################')
-						stat[v] = self.prev_all_stats['redis_%s' % addr[1]][v]
-						print('###### modify %s as %f' % (v, stat[v]))
+					if ins_name in all_stats and v in all_stats[ins_name]:
+						stat[v] = self.all_stats[ins_name][v]
 					else:
 						stat[v] = 0
 
-			all_stats['redis_%s' % addr[1]] = stat
+			all_stats[ins_name] = stat
 
 	def collect(self):
-		all_stats = {}
-		
 		if self.flag_auto_register == True:
 				if self.auto_arc_register() == True:
 						return None # for create new file
 
-		self.collect_stat(all_stats)
-		self.prev_all_stats = copy.deepcopy(all_stats)
-
-		return all_stats
+		self.collect_stat(self.all_stats)
+		return self.all_stats
 		
 
 	def create(self):
