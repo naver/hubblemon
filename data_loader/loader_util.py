@@ -20,6 +20,30 @@
 from chart.chart_data import chart_data
 from data_loader.basic_loader import flot_line_renderer
 
+class serial_loader:
+	def __init__(self, loaders):
+		self.loaders = loaders
+		self.title = ''
+
+	def load(self, ts_start, ts_end):
+		chart_data_list = [] # merged result
+
+		if self.title != '':
+			title_chart = chart_data()
+			title_chart.title = self.title
+			chart_data_list.append(title_chart)
+
+		for loader in self.loaders:
+			chart_list = loader.load(ts_start, ts_end)
+			if len(chart_list) == 0:
+				continue
+
+			chart_data_list += chart_list
+
+		return chart_data_list
+
+	
+
 class merge_loader:
 	def __init__(self, loaders):
 		self.loaders = loaders
@@ -29,7 +53,12 @@ class merge_loader:
 		chart_list_list = []
 
 		chart_len = -1
+		if not isinstance(self.loaders, list):
+			print('# loaders (param of merge) should be list')
+			return []
+
 		for loader in self.loaders:
+			print(loader)
 			chart_list = loader.load(ts_start, ts_end)
 			if len(chart_list) == 0:
 				continue
@@ -42,7 +71,7 @@ class merge_loader:
 				print('# chart list length mismatch')
 				return []
 
-		
+
 		for x in range(0, chart_len):
 			new_chart = chart_data()
 
@@ -69,6 +98,10 @@ class sum_loader:
 		chart_list_list = []
 
 		chart_len = -1
+		if not isinstance(self.loaders, list):
+			print('# loaders (param of merge) should be list')
+			return []
+
 		for loader in self.loaders:
 			chart_list = loader.load(ts_start, ts_end)
 			if len(chart_list) == 0:

@@ -22,6 +22,7 @@ import os
 import common.rrd_data
 import common.remote_data_reader
 import common.sql_data
+from data_loader.loader_util import serial_loader
 from data_loader.loader_util import merge_loader
 from data_loader.loader_util import sum_loader
 from data_loader.loader_util import filter_loader
@@ -231,6 +232,10 @@ class remote_manager:
 
 		
 # utility
+def serial(loaders):
+	ret = serial_loader(loaders)
+	return ret
+
 def merge(loaders):
 	ret = merge_loader(loaders)
 	return ret
@@ -246,6 +251,7 @@ def filter(loaders, *filters):
 def draw(range, *datas):
 	ret = draw_loader(range, datas)
 	return ret
+
 
 # add functions to use at chart_page
 

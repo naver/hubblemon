@@ -291,20 +291,31 @@ def get_addon_page(param):
 import psutil_mon.psutil_view
 import arcus_mon.arcus_view
 import redis_mon.redis_view
+import fnmatch
 
 
-def system_view(client, item):
+def system_view(client, item = 'brief', type='serial'):
 	if isinstance(client, str):
-		clients = [ client ]
+		if '*' in client or '?' in client: # wild card
+			clients = []
+			all_clients = get_client_list()
+
+			for c in all_clients:
+				if fnmatch.fnmatch(c, client):
+					clients.append(c)
+		else:
+			clients = [ client ]
 	else: # list, tuple
 		clients = client
 
 	ret = []
 	for client in clients:
-		ret += psutil_mon.psutil_view.system_view(client, item)
+		ret.append(psutil_mon.psutil_view.system_view(client, item))
 
-	return ret
+	if type == 'merge':
+		return data_loader.loader_factory.merge_loader(ret)
 
+	return data_loader.loader_factory.serial_loader(ret)
 
 def arcus_view(instance): # client/arcus_port
 	if isinstance(instance, str):
@@ -316,7 +327,7 @@ def arcus_view(instance): # client/arcus_port
 	for instance in instances:
 		ret.append(arcus_mon.arcus_view.arcus_view(instance))
 
-	return ret
+	return data_loader.loader_factory.serial_loader(ret)
 
 
 def arcus_instance_list(name):

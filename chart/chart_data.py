@@ -46,6 +46,12 @@ class chart_data:
 	def render(self):
 		if self.renderer:
 			return self.renderer.render(self)
+		elif self.title != '':
+			return """
+			<div class="chart-seperator" style="clear:both">
+				<p>%s</p>
+			</div>
+			""" % self.title
 
 		return 'Renderer is None'
 

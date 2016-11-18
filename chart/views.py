@@ -400,14 +400,11 @@ def system_page(request):
 
 	# chart data
 	js_chart_data = ''
-	chart_data_list = []
 	start_ts, end_ts = _get_ts(request.GET)
 
 	if 'server' in request.GET and request.GET['server'] != '' and 'item' in request.GET and request.GET['item'] != '':
-		loader_list_path = common.core.system_view(request.GET['server'], request.GET['item'])
-		for loader in loader_list_path:
-			ts = int(time.time())
-			chart_data_list += loader.load(start_ts, end_ts)
+		loader = common.core.system_view(request.GET['server'], request.GET['item'])
+		chart_data_list = loader.load(start_ts, end_ts)
 
 		js_chart_data = ''
 		for chart_data in chart_data_list:
@@ -456,6 +453,7 @@ def expr_page(request):
 			loader = eval(expr)
 			#print(loader)
 
+			# allow list or tuple in expr_text
 			if isinstance(loader, list) or isinstance(loader, tuple):
 				loaders = loader
 			else:
@@ -464,7 +462,9 @@ def expr_page(request):
 			## chart rendering
 			start_ts, end_ts = _get_ts(param)
 
+			print(loaders)
 			for loader in loaders:
+				print(loader)
 				if hasattr(loader, 'load'):
 					chart_data_list = loader.load(start_ts, end_ts)
 					for chart_data in chart_data_list:
@@ -537,29 +537,20 @@ def chart_page(request):
 
 
 	# case 3. select all (make data)
-	ret = common.core.get_chart_data(param)
-	#print(ret)
+	loader = common.core.get_chart_data(param)
+	#print(loader)
 
-	if ret == None:
+	if loader == None:
 		variables = RequestContext(request, { 'main_link':_make_main_link(), 'chart_data':'Unknown chart id'} )
 		return render_to_response('chart_page.html', variables)
 
-	loaders = ret
-
 	## chart rendering
-	chart_data_list = []
 	start_ts, end_ts = _get_ts(request.GET)
-
-	if not isinstance(loaders, list):
-		loaders = [loaders]
-
-	for loader in loaders:
-		chart_data_list += loader.load(start_ts, end_ts)
+	chart_data_list = loader.load(start_ts, end_ts)
 
 	js_chart_data = ''
 	for chart_data in chart_data_list:
 		js_chart_data += chart_data.render()
-
 
 	## make view
 	if 'ajax' in param:
