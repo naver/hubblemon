@@ -22,12 +22,15 @@ import socket
 import telnetlib
 import subprocess
 import shlex
+import datetime
+import copy
 
 class redis_stat:
 	def __init__(self):
 		self.name = 'redis'
 		self.type = 'rrd'
 		self.addr = []
+		self.all_stats = {}
 
 		self.collect_alias_key_init()
 		self.create_key_init()
@@ -96,6 +99,7 @@ class redis_stat:
 
 
 	def collect_stat(self, all_stats):
+		print('collect', self.addr)
 		for addr in self.addr:
 			stat = {}
 
@@ -138,23 +142,23 @@ class redis_stat:
 
 					stat[alias_key] = value # real name in rrd file
 
-			#print(stat)
-
+			ins_name = 'redis_%s' % addr[1]
 			for k, v in self.collect_key.items():
 				if v not in stat:
-					stat[v] = 0
+					if ins_name in all_stats and v in all_stats[ins_name]:
+						stat[v] = self.all_stats[ins_name][v]
+					else:
+						stat[v] = 0
 
-			all_stats['redis_%s' % addr[1]] = stat
+			all_stats[ins_name] = stat
 
 	def collect(self):
-		all_stats = {}
-		
 		if self.flag_auto_register == True:
 				if self.auto_arc_register() == True:
 						return None # for create new file
 
-		self.collect_stat(all_stats)
-		return all_stats
+		self.collect_stat(self.all_stats)
+		return self.all_stats
 		
 
 	def create(self):
