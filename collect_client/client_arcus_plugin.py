@@ -142,28 +142,49 @@ class arcus_stat:
 			all_stats['arcus_%s' % addr[1]] = stat
 
 	def collect_prefix(self, all_stats):
+		flag_fail = False
 		for addr in self.addr:
-			result = self.do_arcus_command(addr[0], addr[1], 'stats detail dump', 1.0)
+			result = self.do_arcus_command(addr[0], addr[1], 'stats prefixes')
 			if 'END' not in result: # ignore this result. timeout or bad packet, or too many prefixes
 				continue
 
 			lines = result.split('\r\n')
-			stat = {}
-
-			if len(lines) > self.collect_prefix_limit: # ignore too many prefixes
-				continue 
+			prefixes_set = {}
 
 			for line in lines:
-				if line == 'END':
+				if line == 'END' or line.strip() == '':
 					continue
 
-				if line.strip() == '':
+				items = line.split()
+				prefixes_set[items[1]] = 1
+
+
+			result = self.do_arcus_command(addr[0], addr[1], 'stats detail dump')
+			if 'END' not in result: # ignore this result. timeout or bad packet, or too many prefixes
+				flag_fail = True
+
+			lines = result.split('\r\n')
+			stat = {}
+
+			flush_count = 0
+			for line in lines:
+				if line == 'END' or line.strip() == '':
 					continue
 
 				items = line.split()
 				prefix = items[1]
-				
 				items = items[2:] 
+
+				if len(lines) > len(prefixes_set) + 20 and prefix not in prefixes_set and prefix != "<null>": # keep 20 extra stats for margin
+					print('[%s:%s] flush_frefix %s' % (addr[0], addr[1], prefix))
+					self.do_arcus_command(addr[0], addr[1], 'flush_prefix %s' % prefix)
+					flush_count += 1
+					if flush_count > 32: # delete later
+						break
+
+				if flag_fail == True or len(lines) > self.collect_prefix_limit: # ignore too many prefixes
+					continue
+
 				tmp_stats = dict(zip(items[0::2], items[1::2]))
 				stats = {}
 
