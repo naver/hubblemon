@@ -203,6 +203,8 @@ def get_chart_data(param):
 				tmp_port, prefix_name = file.split('-', 1)
 				curr_prefix, dummy = prefix_name.split('.rrd')
 				results.append(common.core.loader(file_path, arcus_prefix_preset, curr_prefix)) # all lists
+
+			results = data_loader.loader_factory.serial(results)
 		else:
 			path = os.path.join(instance, '%s-%s' % (port, prefix))
 			results = common.core.loader(path, arcus_prefix_preset, title=prefix)

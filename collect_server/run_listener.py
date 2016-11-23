@@ -37,7 +37,7 @@ def listener(port, path):
 	lsn.put_plugin('rrd', server_rrd_plugin.server_rrd_plugin(path))
 	
 	#time.sleep(5)
-	lsn.listen(50000) # set repeat count, because some leak in rrdtool
+	lsn.listen(100000) # set repeat count, because some leak in rrdtool
 	#lsn.listen() # solve above with Process
 	print('>>> stop child listener %d (%d)' % (port, os.getpid()))
 
