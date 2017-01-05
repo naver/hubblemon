@@ -64,6 +64,11 @@ cub = cubrid_stat()
 cub.auto_register()
 c.plugins.append(cub)
 
+# redis stat example
+rds = redis_stat()
+rds.auto_arc_register()
+c.plugins.append(rds)
+
 # jstat stat example
 js = jstat_stat()
 js.auto_register(['java', 'apache', 'catalina'], trace=True)
