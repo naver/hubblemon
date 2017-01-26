@@ -176,8 +176,8 @@ class arcus_stat:
 				items = items[2:] 
 
 				if len(lines) > len(prefixes_set) + 20 and prefix not in prefixes_set and prefix != "<null>": # keep 20 extra stats for margin
-					print('[%s:%s] flush_frefix %s' % (addr[0], addr[1], prefix))
-					self.do_arcus_command(addr[0], addr[1], 'flush_prefix %s' % prefix)
+					#print('[%s:%s] flush_frefix %s' % (addr[0], addr[1], prefix))
+					#self.do_arcus_command(addr[0], addr[1], 'flush_prefix %s' % prefix)
 					flush_count += 1
 					if flush_count > 32: # delete later
 						break

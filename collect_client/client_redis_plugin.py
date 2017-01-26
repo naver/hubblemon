@@ -52,28 +52,27 @@ class redis_stat:
 
 		tmp_addr = []
 		for line in lines:
-				lst = line.split()
+			lst = line.split()
 
-				port = 0
-				for a in lst:
-						if a.endswith('.conf'):
-								try:
-										port = int(a.split('.')[0]) + 9
-								except ValueError:
-										port = 0
+			port = 0
+			for a in lst:
+				if a.endswith('.conf'):
+					try:
+						port = int(a.split('.')[0]) + 9
+					except ValueError:
+						port = 0
+					break
 
-								break
-
-				if port > 0:
-						tmp_addr.append( ('127.0.0.1', str(port)) )
+			if port > 0:
+				tmp_addr.append( ('127.0.0.1', str(port)) )
 
 
 		tmp_addr.sort()
 
 		if self.addr != tmp_addr:
-				print('## auto register arc port')
-				self.addr = tmp_addr
-				return True
+			print('## auto register arc port')
+			self.addr = tmp_addr
+			return True
 
 		return False
  
