@@ -56,6 +56,7 @@ def do_zookeeper_create(zk, path, value):
 def do_zookeeper_delete(zk, path):
 	print(path)
 	zk.delete(path)
+	#zk.delete(path, recursive=True)
 
 	try:
 		do_zookeeper_read(zk, path)
