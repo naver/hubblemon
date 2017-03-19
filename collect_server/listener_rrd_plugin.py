@@ -41,14 +41,14 @@ def rrd_update_data(file_path, timestamp, data):
 	
 	
 
-class server_rrd_plugin:
+class listener_rrd_plugin:
 	def __init__(self, path):
 		self.name = 'rrd'
 		self.handle = None
 		self.path = path
 		
 	def clone(self):
-		return server_rrd_plugin(self.path)
+		return listener_rrd_plugin(self.path)
 
 	
 

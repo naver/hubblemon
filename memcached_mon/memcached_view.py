@@ -87,9 +87,9 @@ def get_chart_list(param):
 	ts = time.time()
 	if ts - last_ts >= 300:
 		memcached_cloud_map_tmp = {}
-		client_list = common.core.get_client_list()
-		for client in client_list:
-			instance_list = common.core.get_data_list_of_client(client, 'memcached_')
+		entity_list = common.core.get_entity_list()
+		for entity in entity_list:
+			instance_list = common.core.get_data_list_of_entity(entity, 'memcached_')
 			if len(instance_list) > 0:
 
 				new_list = []
@@ -97,7 +97,7 @@ def get_chart_list(param):
 					if not instance.startswith('memcached_prefix_'): # skip prefix
 						new_list.append(instance)
 
-					memcached_cloud_map_tmp[client] = new_list
+					memcached_cloud_map_tmp[entity] = new_list
 
 		memcached_cloud_map = memcached_cloud_map_tmp
 

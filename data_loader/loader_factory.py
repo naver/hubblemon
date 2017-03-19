@@ -30,10 +30,11 @@ from data_loader.loader_util import filter_loader
 from data_loader.loader_util import draw_loader
 
 # tsdb storage
+# partition_info not used
 class tsdb_storage_manager:
 	def __init__(self, conn_info):
 			self.conn_info = conn_info
-			self.tsdb_manager=common.tsdb_handle.tsdb_handle(conn_info)
+			self.handle=common.tsdb_handle.tsdb_handle(conn_info)
 
 
 	def get_handle(self, partition_info, entity_table):
@@ -44,139 +45,90 @@ class tsdb_storage_manager:
 					return None
 
 
-	def get_client_list(self, param):
-			client_list = []
-			query = 'list *' # TODO
-			table_list =self.sql_manager.select(query);
-			for table in table_list:
-				client_name = table[0].split("_")[1]
-				if client_name not in client_list:
-					client_list.append(client_name)
-
-			#print ("client_list:", client_list)
-			return client_list
+	def get_entity_list(self, param):
+			entity_list = []
+			return entity_list
 	
-	def get_data_of_client(self, param, client, name):
-			query = "SELECT name FROM sqlite_master WHERE type='table'"
-			table_list =self.sql_manager.select(query);
-			target_name ="D_"+client+"_"+name
-			for table in table_list:
-				table=table[0]
-				if (table==target_name):
-					break
-			#print ("data_client: ", table)
-			return table 
-			
 
-	def get_data_list_of_client(self, param, client, prefix):
-			data_list = []
-			# select name from sqlite_master where type = 'table' and name like 'D_%s_%s%%' % (client, prefix)
-			query = "SELECT name FROM sqlite_master WHERE type='table'"
-			table_list =self.sql_manager.select(query);
-			target_name ="D_"+client+"_"+prefix
-			for table in table_list:
-				table=table[0]
-				if table.startswith(target_name):
-					data_list.append(table)
-			#print ("data_list_of_client_list:", data_list)
-			return data_list
+	def get_table_list_of_entity(self, partition_info, entity, prefix):
+			table_list = []
+			return table_list
 
-	def get_all_data_list(self, param, prefix):
-			data_list = []
-			# select name from sqlite_master where type = 'table' and name like 'D_%%_%s%%' % (prefix)
-			query = "SELECT name FROM sqlite_master WHERE type='table'"
-			table_list =self.sql_manager.select(query);
-			for table in table_list:
-				table=table[0]
-				client_name = table.split("_")[1]
-				target_name = "D_"+client_name+"_"+prefix
-				if table.startswith(target_name):
-					data_list.append(table)
-			#print ("all_data_list:", data_list)
-			return data_list
+	def get_all_table_list(self, partition_info, prefix):
+		table_list = []
+		return table_list
 
 
 
 # rrd
-
+# use patition_info as basedir (to use different physical drive)
 class rrd_storage_manager:
 	def __init__(self, hubblemon_path):
 		self.hubblemon_path = hubblemon_path
 
-	def get_handle(self, base, path):
+	def get_handle(self, partition_info, path):
 		if not path.endswith('.rrd'):
 			path += '.rrd'
 
 		try:
-			fd = self.get_local_data_handle(base, path)
+			fd = self.get_local_file_handle(partition_info, path)
 			return common.rrd_handle.rrd_handle(fd.path)
 		except:
 			return None
 
-	def get_local_data_handle(self, base, path):
-		if base[0] != '/':
-			base = os.path.join(self.hubblemon_path, base)
+	def get_local_file_handle(self, partition_info, path):
+		if partition_info[0] != '/':
+			partition_info = os.path.join(self.hubblemon_path, partition_info)
 		
-		path = os.path.join(base, path)
+		path = os.path.join(partition_info, path)
 
 		fd = open(path)
 		fd.path = path
 		return fd
 
 
-	def get_client_list(self, base):
-		client_list = []
+	def get_entity_list(self, partition_info):
+		entity_list = []
 
-		if base[0] != '/':
-			base = os.path.join(self.hubblemon_path, base)
+		if partition_info[0] != '/':
+			partition_info = os.path.join(self.hubblemon_path, partition_info)
 
-		for dir in os.listdir(base):
-			dir_path = os.path.join(base, dir)
+		for dir in os.listdir(partition_info):
+			dir_path = os.path.join(partition_info, dir)
 
 			if os.path.isdir(dir_path):
-				client_list.append(dir)
+				entity_list.append(dir)
 
-		return client_list
-
-	def get_data_of_client(self, base, client, name):
-		if base[0] != '/':
-			base = os.path.join(self.hubblemon_path, base)
-
-		path = os.path.join(base, client)
-
-		for file in os.listdir(path):
-			if file == name:
-				break
-		return file
+		return entity_list
 
 
-	def get_data_list_of_client(self, base, client, prefix):
-		data_list = []
+	def get_table_list_of_entity(self, partition_info, entity, prefix):
+		table_list = []
 
-		if base[0] != '/':
-			base = os.path.join(self.hubblemon_path, base)
+		if partion_info[0] != '/':
+			partition_info = os.path.join(self.hubblemon_path, partition_info)
 
-		path = os.path.join(base, client)
+		path = os.path.join(partition_info, entity)
 
 		for file in os.listdir(path):
 			if file.startswith(prefix):
-				data_list.append(file)
+				table_list.append(file)
 
-		return data_list
+		return table_list
 
 
 
-	def get_all_data_list(self, base, prefix):
-		data_list = []
-		for dir in os.listdir(base):
-			dir_path = os.path.join(base, dir)
+	def get_all_table_list(self, partition_info, prefix):
+		table_list = []
+		for dir in os.listdir(partition_info):
+			dir_path = os.path.join(partition_info, dir)
 
 			if os.path.isdir(dir_path):
 				for file in os.listdir(dir_path):
 					if file.startswith(prefix):
-						data_list.append(dir + '/' + file)						
+						table_list.append(dir + '/' + file)						
 
-		return data_list
+		return table_list
 
 
 # test for tsdb storage
@@ -209,12 +161,12 @@ class tsdb_test_storage_manager(rrd_storage_manager):
 		self.hubblemon_path = hubblemon_path
 		rrd_storage_manager.__init__(self, hubblemon_path)
 
-	def get_handle(self, base, path):
+	def get_handle(self, partition_info, path):
 		if not path.endswith('.rrd'):
 			path += '.rrd'
 
 		try:
-			fd = self.get_local_data_handle(base, path)
+			fd = self.get_local_file_handle(partition_info, path)
 			rrd_handle =  common.rrd_handle.rrd_handle(fd.path)
 			return tsdb_test_handle(rrd_handle)
 
@@ -222,13 +174,14 @@ class tsdb_test_storage_manager(rrd_storage_manager):
 			return None
 
 
+# partition_info not used
 class sql_storage_manager:
 	def __init__(self, db_path):
 			self.db_path = db_path
-			self.sql_manager=common.sql_handle.sql_handle(db_path)
+			self.handle=common.sql_handle.sql_handle(db_path)
 
 
-	def get_handle(self, base, path):
+	def get_handle(self, partition_info, path):
 			try:
 					return common.sql_handle.sql_handle(path)
 
@@ -236,56 +189,45 @@ class sql_storage_manager:
 					return None
 
 
-	def get_client_list(self, param):
-			client_list = []
+	def get_entity_list(self, param):
+			entity_list = []
 			query = "SELECT name FROM sqlite_master WHERE type='table'"
-			table_list =self.sql_manager.select(query);
-			for table in table_list:
-				client_name = table[0].split("_")[1]
-				if client_name not in client_list:
-					client_list.append(client_name)
+			dbtable_list =self.handle.select(query);
+			for table in dbtable_list:
+				entity_name = table[0].split("_")[1]
+				if entity_name not in entity_list:
+					entity_list.append(entity_name)
 
-			#print ("client_list:", client_list)
-			return client_list
+			#print ("entity_list:", entity_list)
+			return entity_list
 	
-	def get_data_of_client(self, param, client, name):
-			query = "SELECT name FROM sqlite_master WHERE type='table'"
-			table_list =self.sql_manager.select(query);
-			target_name ="D_"+client+"_"+name
-			for table in table_list:
-				table=table[0]
-				if (table==target_name):
-					break
-			#print ("data_client: ", table)
-			return table 
-			
 
-	def get_data_list_of_client(self, param, client, prefix):
-			data_list = []
-			# select name from sqlite_master where type = 'table' and name like 'D_%s_%s%%' % (client, prefix)
+	def get_table_list_of_entity(self, partition_info, entity, prefix):
+			table_list = []
+			# select name from sqlite_master where type = 'table' and name like 'D_%s_%s%%' % (entity, prefix)
 			query = "SELECT name FROM sqlite_master WHERE type='table'"
-			table_list =self.sql_manager.select(query);
-			target_name ="D_"+client+"_"+prefix
-			for table in table_list:
+			dbtable_list =self.handle.select(query);
+			target_name ="D_"+entity+"_"+prefix
+			for table in dbtable_list:
 				table=table[0]
 				if table.startswith(target_name):
-					data_list.append(table)
-			#print ("data_list_of_client_list:", data_list)
-			return data_list
+					table_list.append(table)
+			#print ("table_list_of_entity:", table_list)
+			return table_list
 
-	def get_all_data_list(self, param, prefix):
-			data_list = []
+	def get_all_table_list(self, partition_info, prefix):
+			table_list = []
 			# select name from sqlite_master where type = 'table' and name like 'D_%%_%s%%' % (prefix)
 			query = "SELECT name FROM sqlite_master WHERE type='table'"
-			table_list =self.sql_manager.select(query);
-			for table in table_list:
+			dbtable_list =self.handle.select(query);
+			for table in dbtable_list:
 				table=table[0]
-				client_name = table.split("_")[1]
-				target_name = "D_"+client_name+"_"+prefix
+				entity_name = table.split("_")[1]
+				target_name = "D_"+entity_name+"_"+prefix
 				if table.startswith(target_name):
-					data_list.append(table)
-			#print ("all_data_list:", data_list)
-			return data_list
+					table_list.append(table)
+			#print ("all_table_list:", table_list)
+			return table_list
 
 
 

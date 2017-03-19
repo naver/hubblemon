@@ -7,7 +7,7 @@ from common.tsdb_handle import tsdb_handle
 
 
 
-class server_tsdb_plugin:
+class listener_tsdb_plugin:
 	def __init__(self, path):
 		self.name = 'tsdb'
 
@@ -18,7 +18,7 @@ class server_tsdb_plugin:
 		self.gauge_list={}
 
 	def clone(self):
-		return server_tsdb_plugin(self.path)
+		return listener_tsdb_plugin(self.path)
 
 	def create_data(self, basedir, name_data_map):
 		for name, data in name_data_map.items():                                          

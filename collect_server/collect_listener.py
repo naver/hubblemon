@@ -175,37 +175,37 @@ class CollectNode:
 			ret = handle.read(start_ts, end_ts)
 			return ret
 
-		elif cmd == 'CLIENT_LIST':
-			client_list = []
+		elif cmd == 'ENTITY_LIST':
+			entity_list = []
 			for dir in os.listdir(self.basedir):
 				dir_path = os.path.join(self.basedir, dir)
 				if os.path.isdir(dir_path):
-					client_list.append(dir)
+					entity_list.append(dir)
 			
-			return client_list
+			return entity_list
 		
-		elif cmd == 'DATA_LIST_OF_CLIENT':
-			data_list = []
+		elif cmd == 'TABLE_LIST_OF_ENTITY':
+			table_list = []
 			client, prefix = info.split('/')
 			path = os.path.join(self.basedir, client)
 
 			for file in os.listdir(path):
 				if file.startswith(prefix):
-					data_list.append(file)
+					table_list.append(file)
 
-			return data_list
+			return table_list
 
-		elif cmd == 'ALL_DATA_LIST':
-			data_list = []
+		elif cmd == 'ALL_TABLE_LIST':
+			table_list = []
 			for dir in os.listdir(self.basedir):
 				dir_path = os.path.join(self.basedir, dir)
 
 				if os.path.isdir(dir_path):
 					for file in os.listdir(dir_path):
 						if file.startswith(prefix):
-							data_list.append(dir + '/' + file)
+							table_list.append(dir + '/' + file)
 
-			return data_list
+			return table_list
 
 		else:
 			print('protocol error (cmd): %s' % cmd)

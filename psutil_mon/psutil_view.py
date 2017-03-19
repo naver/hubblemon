@@ -32,28 +32,28 @@ net_filter = [['bytes_recv', 'bytes_sent'], ['packets_recv', 'packets_sent'], ['
 resource_filter = [['tcp_open', 'fd', 'handle'], ['process', 'thread'], 'retransmit', 'ctx_switch']
 
 
-def system_view_brief(client, title = ''):
+def system_view_brief(entity, title = ''):
 	if title == '':
-		title = client
+		title = entity
 
 	loader_list = []
 
-	file_path = os.path.join(client, 'psutil_cpu')
+	file_path = os.path.join(entity, 'psutil_cpu')
 	loader_list.append(common.core.loader(file_path, cpu_filter, 'cpu'))
 	
-	file_path = os.path.join(client, 'psutil_memory')
+	file_path = os.path.join(entity, 'psutil_memory')
 	loader_list.append(common.core.loader(file_path, mem_filter, 'memory'))
 
-	file_path = os.path.join(client, 'psutil_swap')
+	file_path = os.path.join(entity, 'psutil_swap')
 	loader_list.append(common.core.loader(file_path, swap_filter, 'swap'))
 
-	file_path = os.path.join(client, 'psutil_disk')
+	file_path = os.path.join(entity, 'psutil_disk')
 	loader_list.append(common.core.loader(file_path, disk_filter, 'disk'))
 	
-	file_path = os.path.join(client, 'psutil_net')
+	file_path = os.path.join(entity, 'psutil_net')
 	loader_list.append(common.core.loader(file_path, net_filter, 'net'))
 
-	file_path = os.path.join(client, 'psutil_resource')
+	file_path = os.path.join(entity, 'psutil_resource')
 	loader_list.append(common.core.loader(file_path, resource_filter, 'resource'))
 
 	loader = data_loader.loader_factory.serial(loader_list)
@@ -61,17 +61,17 @@ def system_view_brief(client, title = ''):
 	return loader
 
 
-def system_view(client, item = 'brief', title = ''):
+def system_view(entity, item = 'brief', title = ''):
 	if title == '':
-		title = client
+		title = entity
 
 	if item == 'brief':
-		return system_view_brief(client, title)
+		return system_view_brief(entity, title)
 
 	loader_file_list = []
 	loader_list = []
 
-	loader_file_list = common.core.get_data_list_of_client(client, 'psutil_' + item)
+	loader_file_list = common.core.get_data_list_of_entity(entity, 'psutil_' + item)
 
 	filter = None
 	if item == 'cpu':
@@ -89,7 +89,7 @@ def system_view(client, item = 'brief', title = ''):
 		
 	for loader_file in loader_file_list:
 		print(loader_file)
-		loader_list.append(common.core.loader(os.path.join(client, loader_file), filter, loader_file.split('.')[0]))
+		loader_list.append(common.core.loader(os.path.join(entity, loader_file), filter, loader_file.split('.')[0]))
 
 	loader = data_loader.loader_factory.serial(loader_list)
 	loader.title = title

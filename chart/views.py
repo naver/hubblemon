@@ -390,13 +390,14 @@ def system_page(request):
 	print(request.GET)
 
 	levels = [ 'server', 'item' ]
-	system_list = []
+	entity_list = []
 	item_list = [ 'brief', 'cpu', 'memory', 'swap', 'disk', 'net', 'resource' ]
 
-	system_list = common.core.get_client_list()
+	entity_list = common.core.get_entity_list()
+	#print(entity_list)
 	
-	system_list.sort()
-	js_chart_list = _make_static_chart_list(request.GET, 'system', levels, [ system_list, item_list ])
+	entity_list.sort()
+	js_chart_list = _make_static_chart_list(request.GET, 'system', levels, [ entity_list, item_list ])
 
 	# chart data
 	js_chart_data = ''

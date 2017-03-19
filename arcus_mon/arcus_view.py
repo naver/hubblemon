@@ -194,8 +194,8 @@ def get_chart_data(param):
 
 		if prefix == '[ALL]':
 			results = []
-			client, port = instance_name.split('/')
-			file_list = common.core.get_data_list_of_client(client, port + '-')
+			entity, port = instance_name.split('/')
+			file_list = common.core.get_data_list_of_entity(entity, port + '-')
 
 			for file in file_list:
 				file_path = os.path.join(instance, file)
@@ -250,9 +250,9 @@ def get_chart_list(param):
 		if cloud == '' or instance == '':
 			return (['cloud', 'instance', 'prefix'], arcus_cloud_map)
 
-		client, port = instance.split('/')
+		entity, port = instance.split('/')
 
-		file_list = common.core.get_data_list_of_client(client, port + '-')
+		file_list = common.core.get_data_list_of_entity(entity, port + '-')
 
 		prefix_list = ['[ALL]']
 

@@ -7,7 +7,7 @@ from common.sql_handle import sql_handle
 
 
 
-class server_sql_plugin:
+class listener_sql_plugin:
 	def __init__(self, path):                                                             
 		self.name = 'sql'                                                                 
 		self.path = path
@@ -16,7 +16,7 @@ class server_sql_plugin:
 		self.gauge_list={}
 
 	def clone(self):
-		return server_sql_plugin(self.path)
+		return listener_sql_plugin(self.path)
 	def create_data(self, basedir, name_data_map):
 		for name, data in name_data_map.items():                                          
 			if name =='RRA':                                                              

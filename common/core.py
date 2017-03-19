@@ -34,30 +34,30 @@ mod_query_cache = {}
 #
 # default loader settings
 #
-#local_storage_manager = data_loader.loader_factory.rrd_storage_manager(hubblemon_path)
+local_storage_manager = data_loader.loader_factory.rrd_storage_manager(hubblemon_path)
 #local_storage_manager = data_loader.loader_factory.sql_storage_manager(hubblemon_path)
 #local_storage_manager = data_loader.loader_factory.tsdb_test_storage_manager(hubblemon_path)
 
-local_storage_manager = data_loader.loader_factory.tsdb_storage_manager(hubblemon_path)
+#local_storage_manager = data_loader.loader_factory.tsdb_storage_manager(hubblemon_path)
 
 remote_storage_manager = data_loader.loader_factory.remote_manager()
 
-def loader(path, filter = None, title = ''):
+def loader(entity_table, filter = None, title = ''):
 	results = []
 
-	info = _get_listener_info(path)
+	info = _get_listener_info(entity_table)
 	
 	if info[2] == 'local':
 		try:
-			param = info[1]
-			handle = local_storage_manager.get_handle(param, path)
+			local_param = info[1] # local_param is path if rrd or ignored
+			handle = local_storage_manager.get_handle(local_param, entity_table)
 			return data_loader.basic_loader.basic_loader(handle, filter, title)
 		except:
 			return data_loader.basic_loader.basic_loader(None, [])
 	else: # remote
 		try:
 			host, port = info[0].split(':')
-			handle = remote_storage_manager.get_handle(host, int(port), path)
+			handle = remote_storage_manager.get_handle(host, int(port), entity_table)
 			return data_loader.basic_loader.basic_loader(handle, filter, title)
 		except:
 			return data_loader.basic_loader.basic_loader(None, [])
@@ -71,12 +71,12 @@ def loader(path, filter = None, title = ''):
 #
 
 
-def _get_listener_info(file):
-	#print(file)
-	name = file.split('/')[0]
-	#ip = socket.gethostbyname(name)
+def _get_listener_info(entity_table):
+	#print(entity_table)
+	entity = entity_table.split('/')[0]
+	#ip = socket.gethostbyname(entity)
 
-	ret = binascii.crc32(bytes(name, 'utf-8'))
+	ret = binascii.crc32(bytes(entity, 'utf-8'))
 	n = len(common.settings.listener_list)
 	idx = ret % n
 
@@ -86,78 +86,60 @@ def _get_listener_info(file):
 
 
 # local or remote
-def get_client_list():
-	client_list = []
+def get_entity_list():
+	entity_list = []
 
 	for item in common.settings.listener_list:
 		if item[2] == 'local':
-			param = item[1]
-			client_list += local_storage_manager.get_client_list(param)
+			local_param = item[1]
+			entity_list += local_storage_manager.get_entity_list(local_param)
 
 		else: # remote
 			address = item[0]
 			host, port = address.split(':')
 			port = int(port)
 			handle = get_default_remote_handle(host, port)
-			client_list += handle.get_client_list()
+			entity_list += handle.get_entity_list()
 
-	return client_list
-
-def get_data_of_client(client, prefix):
-	info = _get_listener_info(client)
-	data=""
-
-	if info[2] == 'local':
-		param = info[1]
-		data= local_storage_manager.get_data_of_client(param, client, prefix)
-
-	else: # remote
-		address = info[0]
-		host, port = address.split(':')
-		port = int(port)
-		handle = get_default_remote_handle(host, port)
-		data= handle.get_data_of_client(client, prefix)
-
-	return data
-
+	return entity_list
 
 
 # local or remote
-def get_data_list_of_client(client, prefix):
-	info = _get_listener_info(client)
+def get_data_list_of_entity(entity, prefix):
+	info = _get_listener_info(entity)
 	data_list = []
 
 	if info[2] == 'local':
-		param = info[1]
-		data_list += local_storage_manager.get_data_list_of_client(param, client, prefix)
+		partition_info = info[1]
+		data_list += local_storage_manager.get_data_list_of_entity(partition_info, entity, prefix)
 
 	else: # remote
 		address = info[0]
 		host, port = address.split(':')
 		port = int(port)
 		handle = get_default_remote_handle(host, port)
-		data_list += handle.get_data_list_of_client(client, prefix)
+		data_list += handle.get_data_list_of_entity(entity, prefix)
 
 	return data_list
 	
 
 # local or remote
-def get_all_data_list(prefix):
-	data_list = []
+def get_all_table_list(prefix):
+	table_list = []
 
 	for item in common.settings.listener_list:
 		if item[2] == 'local':
-			base = item[1]
-			data_list += local_storage_manager.get_all_data_list(base, prefix)
+			partition_info = item[1]
+			table_list += local_storage_manager.get_all_table_list(partition_info, prefix)
 		else:
 			address = item[0]
 			host, port = address.split(':')
 			port = int(port)
 			handle = get_default_remote_handle(host, port)
-			data_list += handle.get_all_data_list(prefix)
+			table_list += handle.get_all_table_list(prefix)
 
 
-	return data_list
+	return table_list
 
 
 #
@@ -296,30 +278,30 @@ import redis_mon.redis_view
 import fnmatch
 
 
-def system_view(client, item = 'brief', type='serial'):
-	if isinstance(client, str):
-		if '*' in client or '?' in client: # wild card
-			clients = []
-			all_clients = get_client_list()
+def system_view(entity, item = 'brief', type='serial'):
+	if isinstance(entity, str):
+		if '*' in entity or '?' in entity: # wild card
+			entity_list = []
+			all_entities = get_entity_list()
 
-			for c in all_clients:
-				if fnmatch.fnmatch(c, client):
-					clients.append(c)
+			for c in all_entities:
+				if fnmatch.fnmatch(c, entity):
+					entity_list.append(c)
 		else:
-			clients = [ client ]
+			entity_list = [ entity ]
 	else: # list, tuple
-		clients = client
+		entity_list = entity
 
 	ret = []
-	for client in clients:
-		ret.append(psutil_mon.psutil_view.system_view(client, item))
+	for entity in entity_list:
+		ret.append(psutil_mon.psutil_view.system_view(entity, item))
 
 	if type == 'merge':
 		return data_loader.loader_factory.merge_loader(ret)
 
 	return data_loader.loader_factory.serial_loader(ret)
 
-def arcus_view(instance): # client/arcus_port
+def arcus_view(instance): # entity/arcus_port
 	if isinstance(instance, str):
 		instances = [ instance ]
 	else: # list, tuple
