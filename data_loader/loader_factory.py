@@ -22,11 +22,79 @@ import os
 import common.rrd_data
 import common.remote_data_reader
 import common.sql_data
+import common.tsdb_data
 from data_loader.loader_util import serial_loader
 from data_loader.loader_util import merge_loader
 from data_loader.loader_util import sum_loader
 from data_loader.loader_util import filter_loader
 from data_loader.loader_util import draw_loader
+
+# tsdb storage
+class tsdb_storage_manager:
+	def __init__(self, conn_info):
+			self.conn_info = conn_info
+			self.tsdb_manager=common.tsdb_data.tsdb_gw(conn_info)
+
+
+	def get_handle(self, partition_info, entity_table):
+			try:
+					return common.tsdb_data.tsdb_gw(entity_table)
+
+			except:
+					return None
+
+
+	def get_client_list(self, param):
+			client_list = []
+			query = 'list *' # TODO
+			table_list =self.sql_manager.select(query);
+			for table in table_list:
+				client_name = table[0].split("_")[1]
+				if client_name not in client_list:
+					client_list.append(client_name)
+
+			#print ("client_list:", client_list)
+			return client_list
+	
+	def get_data_of_client(self, param, client, name):
+			query = "SELECT name FROM sqlite_master WHERE type='table'"
+			table_list =self.sql_manager.select(query);
+			target_name ="D_"+client+"_"+name
+			for table in table_list:
+				table=table[0]
+				if (table==target_name):
+					break
+			#print ("data_client: ", table)
+			return table 
+			
+
+	def get_data_list_of_client(self, param, client, prefix):
+			data_list = []
+			# select name from sqlite_master where type = 'table' and name like 'D_%s_%s%%' % (client, prefix)
+			query = "SELECT name FROM sqlite_master WHERE type='table'"
+			table_list =self.sql_manager.select(query);
+			target_name ="D_"+client+"_"+prefix
+			for table in table_list:
+				table=table[0]
+				if table.startswith(target_name):
+					data_list.append(table)
+			#print ("data_list_of_client_list:", data_list)
+			return data_list
+
+	def get_all_data_list(self, param, prefix):
+			data_list = []
+			# select name from sqlite_master where type = 'table' and name like 'D_%%_%s%%' % (prefix)
+			query = "SELECT name FROM sqlite_master WHERE type='table'"
+			table_list =self.sql_manager.select(query);
+			for table in table_list:
+				table=table[0]
+				client_name = table.split("_")[1]
+				target_name = "D_"+client_name+"_"+prefix
+				if table.startswith(target_name):
+					data_list.append(table)
+			#print ("all_data_list:", data_list)
+			return data_list
+
 
 
 # rrd
