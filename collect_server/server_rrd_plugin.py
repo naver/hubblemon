@@ -23,14 +23,14 @@ from multiprocessing import Process
 common_path = os.path.abspath('..')
 sys.path.append(common_path)
 
-from common.rrd_data import rrd_data
+from common.rrd_handle import rrd_handle
 
 
 def rrd_update_data(file_path, timestamp, data):
 	try:
 		if os.path.exists(file_path):
-			rrd_file = rrd_data(file_path)
-			rrd_file.update(timestamp, data)
+			handle = rrd_handle(file_path)
+			handle.update(timestamp, data)
 		else:
 			print('## rrd file not found: %s' % file_path)
 
@@ -44,7 +44,7 @@ def rrd_update_data(file_path, timestamp, data):
 class server_rrd_plugin:
 	def __init__(self, path):
 		self.name = 'rrd'
-		self.rrd_file = None
+		self.handle = None
 		self.path = path
 		
 	def clone(self):
@@ -74,8 +74,8 @@ class server_rrd_plugin:
 			try:
 				filename = name + '.rrd'
 				filename = filename.replace('/', '_')
-				rrd_file = self.open_data(hostname, filename)
-				rrd_file.update(timestamp, data)
+				handle = self.open_data(hostname, filename)
+				handle.update(timestamp, data)
 			except Exception as e:
 				print(e)
 				print('on update file %s, %s (item: %d)' % (hostname, name + '.rrd', len(data)))
@@ -84,12 +84,12 @@ class server_rrd_plugin:
 	def open_data(self, basedir, filename):
 		path = os.path.join(self.path, basedir)
 		path = os.path.join(path, filename)
-		rrd_file = None
+		handle = None
 
 		if os.path.exists(path):
-			rrd_file = rrd_data(path)
+			handle = rrd_handle(path)
 
-		return rrd_file
+		return handle
 		
 
 	def create_data(self, basedir, name_data_map):
@@ -112,15 +112,15 @@ class server_rrd_plugin:
 			path = os.path.join(dir_path, filename)
 
 			if not os.path.exists(path):
-				rrd_file = rrd_data(path)
+				handle = rrd_handle(path)
 
 				assert (isinstance(data, list))
 				for item in data:
-					rrd_file.put_ds(*item)
+					handle.put_ds(*item)
 
 				for rra in rra_list:
-					rrd_file.put_rra(*rra)
+					handle.put_rra(*rra)
 
-				rrd_file.create()
+				handle.create()
 
 

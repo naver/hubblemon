@@ -3,7 +3,7 @@ import common.settings
 
 
 
-class tsdb_gw:
+class tsdb_handle:
 	def __init__(self, path):
 		#self.type = common.settings.tsdb_type
 		#self.handle = common.settings.conn

@@ -25,7 +25,7 @@ import pickle
 
 
 
-class remote_data_reader:
+class remote_handle:
 	def __init__(self, host, port, file = None):
 		self.host = host
 		self.port = port

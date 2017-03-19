@@ -19,10 +19,10 @@
 
 import os
 
-import common.rrd_data
-import common.remote_data_reader
-import common.sql_data
-import common.tsdb_data
+import common.rrd_handle
+import common.remote_handle
+import common.sql_handle
+import common.tsdb_handle
 from data_loader.loader_util import serial_loader
 from data_loader.loader_util import merge_loader
 from data_loader.loader_util import sum_loader
@@ -33,12 +33,12 @@ from data_loader.loader_util import draw_loader
 class tsdb_storage_manager:
 	def __init__(self, conn_info):
 			self.conn_info = conn_info
-			self.tsdb_manager=common.tsdb_data.tsdb_gw(conn_info)
+			self.tsdb_manager=common.tsdb_handle.tsdb_handle(conn_info)
 
 
 	def get_handle(self, partition_info, entity_table):
 			try:
-					return common.tsdb_data.tsdb_gw(entity_table)
+					return common.tsdb_handle.tsdb_handle(entity_table)
 
 			except:
 					return None
@@ -109,7 +109,7 @@ class rrd_storage_manager:
 
 		try:
 			fd = self.get_local_data_handle(base, path)
-			return common.rrd_data.rrd_data(fd.path)
+			return common.rrd_handle.rrd_handle(fd.path)
 		except:
 			return None
 
@@ -215,7 +215,7 @@ class tsdb_test_storage_manager(rrd_storage_manager):
 
 		try:
 			fd = self.get_local_data_handle(base, path)
-			rrd_handle =  common.rrd_data.rrd_data(fd.path)
+			rrd_handle =  common.rrd_handle.rrd_handle(fd.path)
 			return tsdb_test_handle(rrd_handle)
 
 		except:
@@ -225,12 +225,12 @@ class tsdb_test_storage_manager(rrd_storage_manager):
 class sql_storage_manager:
 	def __init__(self, db_path):
 			self.db_path = db_path
-			self.sql_manager=common.sql_data.sql_gw(db_path)
+			self.sql_manager=common.sql_handle.sql_handle(db_path)
 
 
 	def get_handle(self, base, path):
 			try:
-					return common.sql_data.sql_gw(path)
+					return common.sql_handle.sql_handle(path)
 
 			except:
 					return None
@@ -295,7 +295,7 @@ class remote_manager:
 		pass
 
 	def get_handle(host, port, file = None):
-		handle = common.remote_data_reader.remote_data_reader(host, port, file)
+		handle = common.remote_handle.remote_handle(host, port, file)
 		return handle
 
 		

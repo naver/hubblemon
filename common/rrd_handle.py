@@ -23,7 +23,7 @@ import rrdtool
 
 
 
-class rrd_data:
+class rrd_handle:
 	def __getattr__(self, name):
 		return getattr(rrdtool, name)
 

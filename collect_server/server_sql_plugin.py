@@ -1,7 +1,7 @@
 import os, sys, copy
 from multiprocessing import Process
 
-from common.sql_data import sql_gw
+from common.sql_handle import sql_handle
 
 
 
@@ -11,7 +11,7 @@ class server_sql_plugin:
 	def __init__(self, path):                                                             
 		self.name = 'sql'                                                                 
 		self.path = path
-		self.sql_manager=sql_gw(path)
+		self.handle=sql_handle(path)
 		self.prev_data={}
 		self.gauge_list={}
 
@@ -24,7 +24,7 @@ class server_sql_plugin:
 			
 			table_name = '"D_'+basedir+"_"+name+'"'
 			check_table ="SELECT count(*) FROM sqlite_master WHERE type='table' AND name=" + table_name
-			is_exist=self.sql_manager.select(check_table)[0][0]
+			is_exist=self.handle.select(check_table)[0][0]
 			query = "CREATE TABLE " + table_name
 			attr_query= "(timestamp BIGINT PRIMARY KEY"                                   
 			for attr in data:
@@ -35,7 +35,7 @@ class server_sql_plugin:
 
 			query = query+attr_query+")"
 			if is_exist==0:
-				self.sql_manager.create(query)
+				self.handle.create(query)
 
 
 	def update_data(self, hostname, timestamp, name_data_map):
@@ -72,4 +72,4 @@ class server_sql_plugin:
 			val_query += ")"
 
 			query = query+ attr_query + val_query
-			self.sql_manager.insert(table_name, query)
+			self.handle.insert(table_name, query)

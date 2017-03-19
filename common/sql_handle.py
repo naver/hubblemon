@@ -3,7 +3,7 @@ import common.settings
 
 
 
-class sql_gw:
+class sql_handle:
 	def __init__(self, filename):
 		self.type = common.settings.sql_type
 		self.handle = common.settings.conn

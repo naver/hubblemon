@@ -1,7 +1,7 @@
 import os, sys, copy
 from multiprocessing import Process
 
-from common.tsdb_data import tsdb_gw
+from common.tsdb_handle import tsdb_handle
 
 
 
@@ -13,7 +13,7 @@ class server_tsdb_plugin:
 
 		print('>>>>>>>> path: ', path)
 		self.path = path
-		self.tsdb_manager=tsdb_gw(path)
+		self.handle=tsdb_handle(path)
 		self.prev_data={}
 		self.gauge_list={}
 
@@ -32,7 +32,7 @@ class server_tsdb_plugin:
 					self.gauge_list['%s_%s_%s' % (basedir, name, attr[0])] = True
 
 			print(query)
-			self.tsdb_manager.create(query)
+			self.handle.create(query)
 
 
 	def update_data(self, hostname, timestamp, name_data_map):
@@ -69,5 +69,5 @@ class server_tsdb_plugin:
 
 			query += attr_query + val_query
 			print(query)
-			self.tsdb_manager.put(query)
+			self.handle.put(query)
 
