@@ -59,6 +59,8 @@ target/
 
 # sqlite file
 *.sqlite3
+*.swp
+*.swo
 
 
 nohup.out

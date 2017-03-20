@@ -27,50 +27,32 @@ import data_loader.basic_loader
 import data_loader.loader_factory
 
 
-hubblemon_path = os.path.join(os.path.dirname(__file__), '..')
 mod_cache = {}
 mod_query_cache = {}
 
 #
 # default loader settings
 #
-local_storage_manager = data_loader.loader_factory.rrd_storage_manager(hubblemon_path)
-#local_storage_manager = data_loader.loader_factory.sql_storage_manager(hubblemon_path)
-#local_storage_manager = data_loader.loader_factory.tsdb_test_storage_manager(hubblemon_path)
-
-#local_storage_manager = data_loader.loader_factory.tsdb_storage_manager(hubblemon_path)
-
-remote_storage_manager = data_loader.loader_factory.remote_manager()
 
 def loader(entity_table, filter = None, title = ''):
 	results = []
 
 	info = _get_listener_info(entity_table)
+
+	lisnter = info[0]
+	storage_manager = info[1]
+
+	handle = storage_manager.get_handle(entity_table)
+
+	try:
+		return data_loader.basic_loader.basic_loader(handle, filter, title)
+	except:
+		return data_loader.basic_loader.basic_loader(None, [])
+
 	
-	if info[2] == 'local':
-		try:
-			local_param = info[1] # local_param is path if rrd or ignored
-			handle = local_storage_manager.get_handle(local_param, entity_table)
-			return data_loader.basic_loader.basic_loader(handle, filter, title)
-		except:
-			return data_loader.basic_loader.basic_loader(None, [])
-	else: # remote
-		try:
-			host, port = info[0].split(':')
-			handle = remote_storage_manager.get_handle(host, int(port), entity_table)
-			return data_loader.basic_loader.basic_loader(handle, filter, title)
-		except:
-			return data_loader.basic_loader.basic_loader(None, [])
-	
-
-		
-
-
 #
 # data, system handling
 #
-
-
 def _get_listener_info(entity_table):
 	#print(entity_table)
 	entity = entity_table.split('/')[0]
@@ -90,35 +72,19 @@ def get_entity_list():
 	entity_list = []
 
 	for item in common.settings.listener_list:
-		if item[2] == 'local':
-			local_param = item[1]
-			entity_list += local_storage_manager.get_entity_list(local_param)
-
-		else: # remote
-			address = item[0]
-			host, port = address.split(':')
-			port = int(port)
-			handle = get_default_remote_handle(host, port)
-			entity_list += handle.get_entity_list()
+		storage_manager = item[1]
+		entity_list += storage_manager.get_entity_list()
 
 	return entity_list
 
 
 # local or remote
-def get_data_list_of_entity(entity, prefix):
+def get_table_list_of_entity(entity, prefix):
 	info = _get_listener_info(entity)
 	data_list = []
 
-	if info[2] == 'local':
-		partition_info = info[1]
-		data_list += local_storage_manager.get_data_list_of_entity(partition_info, entity, prefix)
-
-	else: # remote
-		address = info[0]
-		host, port = address.split(':')
-		port = int(port)
-		handle = get_default_remote_handle(host, port)
-		data_list += handle.get_data_list_of_entity(entity, prefix)
+	storage_manager = info[1]
+	data_list += storage_manager.get_table_list_of_entity(entity, prefix)
 
 	return data_list
 	
@@ -128,16 +94,8 @@ def get_all_table_list(prefix):
 	table_list = []
 
 	for item in common.settings.listener_list:
-		if item[2] == 'local':
-			partition_info = item[1]
-			table_list += local_storage_manager.get_all_table_list(partition_info, prefix)
-		else:
-			address = item[0]
-			host, port = address.split(':')
-			port = int(port)
-			handle = get_default_remote_handle(host, port)
-			table_list += handle.get_all_table_list(prefix)
-
+		storage_manager = item[1]
+		table_list += storage_manager.get_all_table_list(prefix)
 
 	return table_list
 

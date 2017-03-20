@@ -29,13 +29,12 @@ sys.path.append(hubblemon_path)
 import common.core
 
 class CollectListener:
-	def __init__(self, port, basedir):
+	def __init__(self, port):
 		self.port = port;
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		self.sock_node_map = {}
 		self.plugins = {}
-		self.basedir = basedir
 
 	def put_plugin(self, name, plug):
 		self.plugins[name] = plug
@@ -62,7 +61,7 @@ class CollectListener:
 			for sock in readable:
 				if sock == self.sock: # new client
 					conn, addr = self.sock.accept()
-					self.sock_node_map[conn] = CollectNode(conn, addr, self.plugins, self.basedir)
+					self.sock_node_map[conn] = CollectNode(conn, addr, self.plugins)
 					print ('[%d]connect from %s(%s)' % (self.port, addr, conn.fileno()))
 					continue
 
@@ -101,15 +100,14 @@ class CollectListener:
 
 
 class CollectNode:
-	def __init__(self, socket, addr, plugins, basedir):
+	def __init__(self, socket, addr, plugins):
 		self.sock = socket
 		self.addr = addr
 
-		self.plugins = {}
-		for k, v in plugins.items():
-			self.plugins[k] = v.clone()
+		self.plugins = plugins
+		#for k, v in plugins.items():
+		#	self.plugins[k] = v.clone()
 
-		self.basedir = basedir
 		self.addr = addr
 
 	def do_op(self):
@@ -174,7 +172,12 @@ class CollectNode:
 			handle = common.core.get_default_local_handle(path)
 			ret = handle.read(start_ts, end_ts)
 			return ret
+		else:
+			print('protocol error (cmd): %s' % cmd)
+			return None
 
+
+		'''
 		elif cmd == 'ENTITY_LIST':
 			entity_list = []
 			for dir in os.listdir(self.basedir):
@@ -206,10 +209,8 @@ class CollectNode:
 							table_list.append(dir + '/' + file)
 
 			return table_list
+		'''
 
-		else:
-			print('protocol error (cmd): %s' % cmd)
-			return None
 
 	def do_stat(self, version, data):
 		result = pickle.loads(data)

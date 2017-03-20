@@ -89,7 +89,7 @@ def get_chart_list(param):
 		redis_cloud_map_tmp = {}
 		entity_list = common.core.get_entity_list()
 		for entity in entity_list:
-			instance_list = common.core.get_data_list_of_entity(entity, 'redis_')
+			instance_list = common.core.get_table_list_of_entity(entity, 'redis_')
 			if len(instance_list) > 0:
 				redis_cloud_map_tmp[entity] = instance_list	
 		redis_cloud_map = redis_cloud_map_tmp

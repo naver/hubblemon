@@ -21,32 +21,34 @@
 # data path
 #
 
+
+
 import os, sys, socket
+from data_loader.rrd_storage import rrd_storage_manager
+from data_loader.sql_storage import sql_storage_manager
+from data_loader.tsdb_storage import tsdb_storage_manager
+from data_loader.remote_storage import remote_storage_manager
 
-'''
-sql_type ="sqlite3"
-if(sql_type=="sqlite3"):
-	import sqlite3
-	hubblemon_path = os.path.join(os.path.dirname(__file__), '..')
-	db_path = os.path.join(hubblemon_path, 'hubblemon.db')
-	conn=sqlite3.connect(db_path, check_same_thread=False, isolation_level=None)
-'''
 
-collect_server_port = 30000
+collect_server_port = 40000
+
+hostname = socket.gethostname()
 
 # should be sorted by addr
 #  add listener if you want
 
-hostname = socket.gethostname()
-
-listener_list =[('%s:30001' % hostname, 'collect_server/listener_30001', 'local')]
+#listener_list =[('%s:40001' % hostname, rrd_storage_manager('collect_server/listener_40001'))]
+#listener_list =[('%s:40001' % hostname, sql_storage_manager('hubblemon.db'))]
+listener_list =[('%s:40001' % hostname, tsdb_storage_manager('127.0.0.1:8000'))]
 
 '''
+# examples
 # you can spread listeners to remote servers
-listener_list =[('%s:30001' % hostname, '/collect_server/listener_30001/', 'local'),
-		('%s:30002' % hostname, '/collect_server/listener_30002/', 'local'),
-		('remoteserver1.com:30001', '/data2/collect_listener/', 'remote'),
-		('remoteserver2.com:30002', '/data3/collect_listener/', 'remote')]
+listener_list =[('%s:30001' % hostname, rrd_storage_manager('/collect_server/listener_30001/'),
+		('%s:30002' % hostname, rrd_storage_manager('/collect_server/listener_30002/'),
+		('remoteserver1.com:30001', remote_storage_manager('remoteserver1.com:30001'),
+		('remoteserver2.com:30001', remote_storage_manager('remoteserver2.com:30001'),
+		('%s:30003, % hostname, sql_storage_manager('hubblemon.db')]
 '''
 
 
@@ -63,27 +65,10 @@ chart_resolution = 400
 # remove or add links you want
 #
 main_link = [	('system', '/system'),
-		('expr', '/expr'),
-		('arcus_graph', '/graph?type=arcus_graph'),
-		('arcus_stat', '/chart?type=arcus_stat'),
-		('arcus_prefix', '/chart?type=arcus_prefix'),
-		('arcus_list', '/addon?type=arcus_list'),
-		('redis_stat', '/chart?type=redis_stat'),
-		('memcached_stat', '/chart?type=memcached_stat'),
-		('cubrid_stat', '/chart?type=cubrid_stat'),
-		('mysql_stat', '/chart?type=mysql_stat'),
-		('jstat_stat', '/chart?type=jstat_stat'),
-		('redis_query', '/query?type=redis_query'),
-		('memcached_query', '/query?type=memcached_query'),
-		#('cubrid_query', '/query?type=cubrid_query'), # CUBRIDdb is not supporeted by pip , checkin test issue
-		('arcus_query', '/query?type=arcus_query'),
-		('mysql_query', '/query?type=mysql_query') ]
+		('expr', '/expr'),]
 
 
 # for arcus_mon
-arcus_zk_addrs = []
-if 'ARCUS_ZK_ADDRESSES' in os.environ:
-    arcus_zk_addrs = os.environ['ARCUS_ZK_ADDRESSES'].split(',')
 
 '''
 # example

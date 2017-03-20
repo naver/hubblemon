@@ -195,7 +195,7 @@ def get_chart_data(param):
 		if prefix == '[ALL]':
 			results = []
 			entity, port = instance_name.split('/')
-			file_list = common.core.get_data_list_of_entity(entity, port + '-')
+			file_list = common.core.get_table_list_of_entity(entity, port + '-')
 
 			for file in file_list:
 				file_path = os.path.join(instance, file)
@@ -252,7 +252,7 @@ def get_chart_list(param):
 
 		entity, port = instance.split('/')
 
-		file_list = common.core.get_data_list_of_entity(entity, port + '-')
+		file_list = common.core.get_table_list_of_entity(entity, port + '-')
 
 		prefix_list = ['[ALL]']
 

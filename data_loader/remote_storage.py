@@ -1,4 +1,3 @@
-
 #
 # Hubblemon - Yet another general purpose system monitor
 #
@@ -26,10 +25,10 @@ import pickle
 
 
 class remote_handle:
-	def __init__(self, host, port, file = None):
+	def __init__(self, entity_table, host, port):
 		self.host = host
 		self.port = port
-		self.file = file
+		self.entity_table = entity_table
 
 		self.sock = None
 		self.version = 0.1
@@ -73,10 +72,11 @@ class remote_handle:
 
 	def read(self, ts_from, ts_to, filter = 'None'):
 
-		body = '%s:%d:%d:%s' % (self.file, ts_from, ts_to, filter)
+		body = '%s:%d:%d:%s' % (self.entity_table, ts_from, ts_to, filter)
 		cmd = 'GET %s %s %d\n' % (self.version, 'DATA', len(body))
 
 		return self.command(cmd, body)
+
 
 	def get_entity_list(self):
 		if self.sock is None:
@@ -107,6 +107,28 @@ class remote_handle:
 		return self.command(cmd, body)
 
 
-		
+
+class remote_storage_manager:
+	def __init__(self, addr):
+		self.addr = addr
+		toks = addr.split(':')
+		self.host = toks[0]
+		self.port = int(toks[1])
+
+		self.handle = remote_handle(None, self.host, self.port)
+
+	def get_handle(entity_table):
+		handle = remote_handle(entity_table, self.host, self.port)
+		return handle
+
+	def get_entity_list(self):
+		return self.handle.get_entity_list()
+
+	def get_table_list_of_entity(self, entity, prefix):
+		return self.handle.get_table_list_of_entity(entity, prefix)
+
+	def get_all_table_list(self, prefix):
+		return self.handle.get_all_table_list(prefix)
+
 
 

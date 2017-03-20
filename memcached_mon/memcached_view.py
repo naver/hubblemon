@@ -89,7 +89,7 @@ def get_chart_list(param):
 		memcached_cloud_map_tmp = {}
 		entity_list = common.core.get_entity_list()
 		for entity in entity_list:
-			instance_list = common.core.get_data_list_of_entity(entity, 'memcached_')
+			instance_list = common.core.get_table_list_of_entity(entity, 'memcached_')
 			if len(instance_list) > 0:
 
 				new_list = []

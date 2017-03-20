@@ -71,7 +71,7 @@ def system_view(entity, item = 'brief', title = ''):
 	loader_file_list = []
 	loader_list = []
 
-	loader_file_list = common.core.get_data_list_of_entity(entity, 'psutil_' + item)
+	loader_file_list = common.core.get_table_list_of_entity(entity, 'psutil_' + item)
 
 	filter = None
 	if item == 'cpu':

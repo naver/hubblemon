@@ -33,7 +33,7 @@ hostname = socket.gethostname()
 
 
 #server_address = ['1.1.1.1:40000', '2.2.2.2:40000'] # your collect server address
-server_address = ['%s:30000' % hostname] # your collect server address
+server_address = ['%s:40000' % hostname] # your collect server address
 
 
 if True:

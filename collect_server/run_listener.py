@@ -21,9 +21,6 @@
 import os, sys, time
 
 import collect_listener
-import listener_rrd_plugin
-import listener_tsdb_plugin
-#import listener_sql_plugin
 
 hubblemon_path = os.path.join(os.path.dirname(__file__), '..')
 sys.path.append(hubblemon_path)
@@ -31,27 +28,24 @@ sys.path.append(hubblemon_path)
 import common.settings
 
 
-def listener(port, path):
+def listener(port, storage_manager):
 	print('>>> start child listener %d (%d)' % (port, os.getpid()))
-	lsn = collect_listener.CollectListener(port, path)
-	#lsn.put_plugin('default', listener_sql_plugin.listener_sql_plugin(path))
-	lsn.put_plugin('rrd', listener_rrd_plugin.listener_rrd_plugin(path))
-	#lsn.put_plugin('default', listener_tsdb_plugin.listener_tsdb_plugin(path))
+	lsn = collect_listener.CollectListener(port)
+	lsn.put_plugin('default', storage_manager)
 	
 	#time.sleep(5)
 	lsn.listen(100000) # set repeat count, because some leak in rrdtool
 	#lsn.listen() # solve above with Process
 	print('>>> stop child listener %d (%d)' % (port, os.getpid()))
-
 	sys.exit()
 
-def restart_listener(port, path):
+def restart_listener(port, storage_manager):
 	while True:
 		print('>>> listener %d(%d) fork' % (port, os.getpid()))
 		pid = os.fork()
 
 		if pid == 0: # child
-			listener(port, path)
+			listener(port, storage_manager)
 		else: # parent
 			print('>>> listener %d (%d) wait' % (port, pid))
 			os.wait()
@@ -63,19 +57,15 @@ def restart_listener(port, path):
 	
 for item in common.settings.listener_list:
 	addr = item[0]
-	path = item[1]
+	storage_manager = item[1]
 
-	if path[0] != '/': # abs
-		path = os.path.join(hubblemon_path, path)
-	
 	ip, port = addr.split(':')
 	port = int(port)
-
 
 	pid = os.fork()
 
 	if pid == 0: # child
-		restart_listener(port, path)
+		restart_listener(port, storage_manager)
 
 
 os.wait()
