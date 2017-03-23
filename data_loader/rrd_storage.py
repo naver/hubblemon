@@ -76,7 +76,7 @@ class rrd_handle:
 
 		result = result[0:-1]
 		
-		print ('## rrd update %s (%d): %s' % (self.filename, count, result))
+		#print ('## rrd update %s (%d): %s' % (self.filename, count, result))
 		ret = rrdtool.update(self.filename, result)
 
 
@@ -156,6 +156,7 @@ class rrd_storage_manager:
 		for table, data in name_data_map.items(): # for each section
 			try:
 				table += '.rrd'
+				table = table.replace('/', '_') # some stat name include /
 				entity_table = os.path.join(entity, table)
 				handle = self.get_handle(entity_table)
 				handle.update(timestamp, data)
@@ -180,6 +181,7 @@ class rrd_storage_manager:
 				continue
 
 			table += '.rrd'
+			table = table.replace('/', '_') # some stat name include /
 			entity_table = os.path.join(entity_path, table)
 
 			if not os.path.exists(entity_table):

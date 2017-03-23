@@ -15,7 +15,6 @@ class LinkTest(TestCase):
 	
 		self.assertTrue(resp.find(b'system') > 0)
 		self.assertTrue(resp.find(b'expr') > 0)
-		self.assertTrue(resp.find(b'arcus_graph') > 0)
 
 
 	def test_list(self):
