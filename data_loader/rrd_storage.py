@@ -17,18 +17,89 @@
 #
 
 import os, sys, time
-import rrdtool
+import imp, rrdtool
+
+
+
+class rrd_worker:
+	def __init__(self, fifo_path):
+		self.fifo_path = fifo_path
+
+	def do_something(self):
+		print('### do something invoked')
+		count = 0
+		fifo = open(self.fifo_path, 'r')
+		buffer = ''
+
+		while True:
+			before = time.time()
+			tmp = fifo.read(4096)
+			after = time.time()
+
+			#print('>>> read: ', tmp)
+			length = len(tmp)
+			buffer += tmp
+
+			while True:
+				idx = buffer.find('\n')
+				if idx < 0:
+					break
+
+				line = buffer[:idx]
+				#print('>>> line: ', line)
+				buffer = buffer[idx+1:]
+				toks = line.split(' ', 2)
+
+				if toks[0] == 'update':
+					#print('update %s %s' % (toks[1], toks[2]))
+					try:
+						rrdtool.update(toks[1], toks[2])
+					except rrdtool.OperationalError as e:
+						#print(e)
+						continue
+					except Exception as e:
+						print(e)
+						continue
+				else:
+					pass
+
+			if (after - before) > 0.1:
+				time.sleep(1)
+
+			count += 1
+			if count > 50000:
+				print('quit by evercouning')
+				break
+
+	def do_fork(self):
+		print('# rrd_worker do fork')
+		pid = os.fork()
+		if pid == 0: # child
+			while True:
+				pid = os.fork()
+
+				if pid == 0: # child
+					self.do_something()
+				else:
+					os.wait()
+		else:
+			return # return to caller process
+
+
 
 class rrd_handle:
 	def __getattr__(self, name):
 		return getattr(rrdtool, name)
 
-	def __init__(self, filename, start=int(time.time()) - 10, step=5):
+	def __init__(self, filename, fifo, start=int(time.time()) - 10, step=5):
 		self.filename = filename
+		self.fifo = fifo
 		self.start = start
 		self.step = step
 		self.DS = {}
 		self.RRA = []
+		self.update_count = 0
+
 
 	def put_ds(self, name, type, health, min, max):
 		self.DS[name] = 'DS:%s:%s:%s:%s:%s' % (name, type, str(health), str(min), str(max))
@@ -50,7 +121,11 @@ class rrd_handle:
 		args += self.RRA
 		print('## rrd create - %s(%d items), start: %d, step: %d' % (self.filename, len(self.DS), self.start, self.step))
 		print(args)
-		rrdtool.create(self.filename, '--start', '%d' % self.start, '--step', '%d' % self.step, *args)
+		try:
+			rrdtool.create(self.filename, '--start', '%d' % self.start, '--step', '%d' % self.step, *args)
+		except rrdtool.OperationalError as e:
+			print(e)
+
 
 	def update(self, *params):
 		result = ''
@@ -77,8 +152,13 @@ class rrd_handle:
 		result = result[0:-1]
 		
 		#print ('## rrd update %s (%d): %s' % (self.filename, count, result))
-		ret = rrdtool.update(self.filename, result)
 
+		#ret = rrdtool.update(self.filename, result)
+		try:
+			self.fifo.write('update %s %s\n' % (self.filename, result))
+		except Exception as e:
+			print('## pipe write excpetion')
+			print(e)
 
 	def read(self, ts_from, ts_to, filter = None):
 		ret = rrdtool.fetch(self.filename, 'MAX', '-s', str(ts_from), '-e', str(ts_to))
@@ -95,6 +175,21 @@ class rrd_storage_manager:
 			storage_path = os.path.join(hubblemon_path, storage_path)
 
 		self.storage_path = storage_path
+		self.fifo_path = os.path.join(storage_path, 'rrd_fifo')
+
+		try:
+			os.mkfifo(self.fifo_path)
+		except FileExistsError as e:
+			pass
+
+		self.fifo = None
+
+	def optional_init(self):
+		worker = rrd_worker(self.fifo_path)
+		worker.do_fork()
+
+		time.sleep(0.2)
+		self.fifo = open(self.fifo_path, 'w')
 
 	def get_handle(self, entity_table):
 		if not entity_table.endswith('.rrd'):
@@ -102,7 +197,7 @@ class rrd_storage_manager:
 
 		try:
 			fd = self.get_local_file_handle(entity_table)
-			return rrd_handle(fd.path)
+			return rrd_handle(fd.path, self.fifo)
 		except:
 			return None
 
@@ -147,7 +242,7 @@ class rrd_storage_manager:
 			if os.path.isdir(entity_path):
 				for table in os.listdir(entity_path):
 					if table.startswith(prefix):
-						table_list.append(dir + '/' + table)						
+						table_list.append(entity + '/' + table)						
 
 		return table_list
 
@@ -185,7 +280,7 @@ class rrd_storage_manager:
 			entity_table = os.path.join(entity_path, table)
 
 			if not os.path.exists(entity_table):
-				handle = rrd_handle(entity_table)
+				handle = rrd_handle(entity_table, None)
 
 				assert (isinstance(data, list))
 				for item in data:

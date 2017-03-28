@@ -48,10 +48,7 @@ class CollectListener:
 		self.sock.bind((socket.gethostname(), self.port))
 		self.sock.listen(5)
 
-		idx = 0
-		while count < 0 or idx < count:
-			idx += 1
-
+		while True:
 			inputs = [self.sock]
 			for sock in self.sock_node_map:
 				inputs.append(sock)
@@ -95,6 +92,7 @@ class CollectListener:
 				print ('disconnected: %d' % sock.fileno())
 				node.disconnect()
 				del self.sock_node_map[sock]
+
 
 
 
