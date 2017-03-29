@@ -67,7 +67,7 @@ class rrd_worker:
 				time.sleep(1)
 
 			count += 1
-			if count > 50000:
+			if count > 5000:
 				print('quit by evercouning')
 				break
 

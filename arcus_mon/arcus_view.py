@@ -31,7 +31,18 @@ import common.core
 import kazoo
 
 
-arcus_preset = [['bytes', 'total_malloced', 'engine_maxbytes'], 'curr_items', (lambda x: x['get_hits'] / x['cmd_get'] * 100, 'hit_ratio'), ['cmd_get', 'cmd_set'], 'cmd_get', 'cmd_set', 'evictions', 'reclaimed', ['bytes_read', 'bytes_written'], ['rusage_user', 'rusage_system'], 'curr_connections', ['cmd_lop_create', 'cmd_lop_insert', 'cmd_lop_get', 'cmd_lop_delete'], ['cmd_sop_create', 'cmd_sop_delete'], ['cmd_sop_insert', 'cmd_sop_get', 'cmd_sop_exist'], ['cmd_bop_create', 'cmd_bop_delete'], ['cmd_bop_insert', 'cmd_bop_update', 'cmd_bop_incr', 'cmd_bop_decr'], ['cmd_bop_get', 'bop_get_ehits', 'bop_get_nhits'], ['cmd_bop_count', 'cmd_bop_mget', 'cmd_bop_smget'], ['getattr_hits', 'setattr_hits'], ['cmd_flush', 'cmd_flush_prefix'], ['hb_count', 'hb_latency'], ['sticky_bytes', 'sticky_limit'], ['incr_hits', 'decr_hits']]
+arcus_preset = [['bytes', 'total_malloced', 'engine_maxbytes'], 'curr_items', \
+		(lambda x: x['get_hits'] / x['cmd_get'] * 100, 'hit_ratio'), \
+		['cmd_get', 'cmd_set'], 'cmd_get', 'cmd_set', 'evictions', 'reclaimed', ['bytes_read', 'bytes_written'],\
+		['rusage_user', 'rusage_system'], 'curr_connections', ['cmd_bop_get', 'bop_get_ehits', 'bop_get_nhits'],\
+		[(lambda x: (x['bop_get_ehits'] + x['bop_get_nhits']) / x['cmd_bop_get'] * 100, 'bop_hit_ratio'),\
+		 (lambda x: x['bop_get_ehits'] / (x['bop_get_ehits'] + x['bop_get_nhits']) * 100, 'bop_elem_hit_ratio')], \
+		['cmd_lop_create', 'cmd_lop_insert', 'cmd_lop_get', 'cmd_lop_delete'],\
+		['cmd_sop_create', 'cmd_sop_delete', 'cmd_sop_insert', 'cmd_sop_get', 'cmd_sop_exist'],\
+		['cmd_bop_create', 'cmd_bop_delete', 'cmd_bop_insert', 'cmd_bop_update', 'cmd_bop_incr', 'cmd_bop_decr'],\
+		['cmd_bop_count', 'cmd_bop_mget', 'cmd_bop_smget'],\
+		['incr_hits', 'decr_hits', 'getattr_hits', 'setattr_hits'],\
+		['cmd_flush', 'cmd_flush_prefix', 'hb_count', 'hb_latency'], ]
 
 
 def arcus_view(path, title = ''):
