@@ -27,6 +27,7 @@ class rrd_worker:
 
 	def do_something(self):
 		print('### do something invoked')
+		start_timestamp = time.time()
 		count = 0
 		fifo = open(self.fifo_path, 'r')
 		buffer = ''
@@ -67,9 +68,9 @@ class rrd_worker:
 				time.sleep(1)
 
 			count += 1
-			if count > 5000:
-				print('quit by evercouning')
-				break
+			if count > 50000:
+				print('quit by overcounting, running sec: %d' % (time.time() - start_timestamp))
+				sys.exit()
 
 	def do_fork(self):
 		print('# rrd_worker do fork')
