@@ -38,23 +38,23 @@ def system_view_brief(entity, title = ''):
 
 	loader_list = []
 
-	file_path = os.path.join(entity, 'psutil_cpu')
-	loader_list.append(common.core.loader(file_path, cpu_filter, 'cpu'))
+	entity_table = os.path.join(entity, 'psutil_cpu')
+	loader_list.append(common.core.loader(entity_table, cpu_filter, 'cpu'))
 	
-	file_path = os.path.join(entity, 'psutil_memory')
-	loader_list.append(common.core.loader(file_path, mem_filter, 'memory'))
+	entity_table = os.path.join(entity, 'psutil_memory')
+	loader_list.append(common.core.loader(entity_table, mem_filter, 'memory'))
 
-	file_path = os.path.join(entity, 'psutil_swap')
-	loader_list.append(common.core.loader(file_path, swap_filter, 'swap'))
+	entity_table = os.path.join(entity, 'psutil_swap')
+	loader_list.append(common.core.loader(entity_table, swap_filter, 'swap'))
 
-	file_path = os.path.join(entity, 'psutil_disk')
-	loader_list.append(common.core.loader(file_path, disk_filter, 'disk'))
+	entity_table = os.path.join(entity, 'psutil_disk')
+	loader_list.append(common.core.loader(entity_table, disk_filter, 'disk'))
 	
-	file_path = os.path.join(entity, 'psutil_net')
-	loader_list.append(common.core.loader(file_path, net_filter, 'net'))
+	entity_table = os.path.join(entity, 'psutil_net')
+	loader_list.append(common.core.loader(entity_table, net_filter, 'net'))
 
-	file_path = os.path.join(entity, 'psutil_resource')
-	loader_list.append(common.core.loader(file_path, resource_filter, 'resource'))
+	entity_table = os.path.join(entity, 'psutil_resource')
+	loader_list.append(common.core.loader(entity_table, resource_filter, 'resource'))
 
 	loader = data_loader.loader_factory.serial(loader_list)
 	loader.title = title
@@ -68,10 +68,10 @@ def system_view(entity, item = 'brief', title = ''):
 	if item == 'brief':
 		return system_view_brief(entity, title)
 
-	loader_file_list = []
+	table_list = []
 	loader_list = []
 
-	loader_file_list = common.core.get_table_list_of_entity(entity, 'psutil_' + item)
+	table_list = common.core.get_table_list_of_entity(entity, 'psutil_' + item)
 
 	filter = None
 	if item == 'cpu':
@@ -87,9 +87,9 @@ def system_view(entity, item = 'brief', title = ''):
 	elif item == 'resource':
 		filter = resource_filter
 		
-	for loader_file in loader_file_list:
-		print(loader_file)
-		loader_list.append(common.core.loader(os.path.join(entity, loader_file), filter, loader_file.split('.')[0]))
+	for table in table_list:
+		print(table)
+		loader_list.append(common.core.loader(os.path.join(entity, table), filter, table.split('.')[0]))
 
 	loader = data_loader.loader_factory.serial(loader_list)
 	loader.title = title
