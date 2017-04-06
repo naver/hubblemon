@@ -28,7 +28,8 @@ class tsdb_handle:
 		self.entity_table = entity_table
 		self.conn_info = conn_info
 
-		self.cl = tsClient()
+		self.cl = tsClient(False)
+		#self.cl = tsClient()
 		self.connect()
 
 	def connect(self):
@@ -38,14 +39,22 @@ class tsdb_handle:
 		print(query)
 
 		cur = self.cl.request(query)
-		ret = cur.next()
+		ret = False
+
+		if cur != None:
+			ret = cur.next()
+
 		return ret
 
 	def put(self, query):
 		print(query)
 
 		cur = self.cl.request(query)
-		return cur.next()
+		ret = False
+		if cur != None:
+			ret = cur.next()
+
+		return ret
 
 	def get(self, query):
 		print(query)
@@ -80,6 +89,9 @@ class tsdb_handle:
 			if ret == None:
 				break
 
+			if ret.ts == 0: # error
+				break
+
 			items.append([ret.ts] + ret.value)
 			
 		ret = ('#timestamp', cur.names[1:], items)
@@ -90,12 +102,13 @@ class tsdb_handle:
 
 
 class tsdb_storage_manager:
-	def __init__(self, conn_info):
+	def __init__(self, conn_info, cycle_size = 10000):
 		self.conn_info = conn_info
 		self.name = 'tsdb'
 		self.handle=tsdb_handle(None, conn_info)
 		self.prev_data={}
 		self.gauge_list={}
+		self.cycle_size = cycle_size
 
 
 	def get_handle(self, entity_table):
@@ -159,7 +172,7 @@ class tsdb_storage_manager:
 			if table =='RRA':
 				continue
 
-			query = "create %s %s" % (entity, table)
+			query = "create %s %s %d" % (entity, table, self.cycle_size)
 			for attr in data:
 				query += " " + attr[0]
 				if attr[1] == 'GAUGE':
