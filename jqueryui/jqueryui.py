@@ -147,26 +147,26 @@ class jquery_selectable(jqueryui):
 
 		js_template = self.get_js_template()
 		id = self.id
-		return  js_template % (id, id, id, id, id, select_list)
+		return  js_template % (id, id, id, id, id, id, select_list)
 
 	def get_js_template(self):
 		js_template = '''
 			<style>
-			#%s .ui-selecting { background: #FECA40; }
-			#%s .ui-selected { background: #F39814; color: white; }
-			#%s { list-style-type: none; margin:0; padding:0; }
-			.ui-widget-content { display:inline; margin: 0 0 0 0; padding: 0 0 0 0; border: 1; }
-			</style>
+                        #%s .ui-selecting { background: #FECA40; }
+                        #%s .ui-selected { background: #F39814; color: white; }
+                        #%s { list-style-type: none; margin: 0; padding: 0; width: 60%%; }
+                        #%s li { margin: 3px; padding: 0.4em; font-size: 1.4em; height: 18px; }
+                        </style>
 
-			<script type="text/javascript">
-			    $(function() {
-				$('#%s').selectable();
-			    });
-			</script>
+                        <script type="text/javascript">
+                            $(function() {
+                                $('#%s').selectable();
+			    })
+                        </script>
 
-			<ul id='%s'>
-				%s
-			</ul>
+                        <ol id='%s'>
+                                %s
+                        </ol>
 		'''
 
 		return js_template
