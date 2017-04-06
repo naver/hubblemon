@@ -59,6 +59,24 @@ def _make_time_range(param, link):
 		js_chart_list += script.render()
 
 
+	realtime = jquery_radio('realtime')
+	realtime.push_item('on')
+	realtime.push_item('off')
+	action = """
+		var s = $(this).attr('id');
+		var diff = 0;
+		if (s == 'on') {
+			window.location.href=%s + '&auto_update=5&diff=5';
+		}
+		else if (s == 'off') {
+			window.location.href=%s;
+		}
+
+	""" % (link, link)
+
+	realtime.set_action(action)
+
+
 	# radio button
 	range_radio = jquery_radio('range_radio')
 	range_radio.push_item('5m')
@@ -137,6 +155,9 @@ def _make_time_range(param, link):
 
 	range_radio.set_action(action)
 
+
+	
+
 	# input & rendering
 	date_template = """
 		<div class="date_range">
@@ -153,8 +174,9 @@ def _make_time_range(param, link):
 					}
 			})
 			</script>
-
 			</div>
+
+
 			&nbsp~&nbsp
 			<div id="date_end" style="display:inline">
 			<input type="text" id="end_date" value="%s">
@@ -168,14 +190,20 @@ def _make_time_range(param, link):
 					}
 			})
 			</script>
-
 			</div>
+
+
 			&nbsp &nbsp &nbsp
 			set start before
 			<div id="start_radio" style="display:inline">
 			%s
 			</div>
-			&nbsp
+
+			&nbsp &nbsp &nbsp
+			realtime
+			<div id="start_radio" style="display:inline">
+			%s
+			</div>
 			%s
 		</div>
 
@@ -189,6 +217,9 @@ def _make_time_range(param, link):
 			auto_update_time = int(param['auto_update']) * 1000
 		except:
 			auto_update_time = 5000
+
+		end_date += datetime.timedelta(0, 60)
+
 		auto_update = """
 		    <script type="text/javascript">
 		    setInterval(function() {
@@ -234,9 +265,9 @@ def _make_time_range(param, link):
 			auto_update = auto_update %(param['diff'], link, auto_update_time // 1000, param['diff'], auto_update_time)
 		else:
 			auto_update = auto_update %('30', link, auto_update_time // 1000, '30', auto_update_time)
-		js_chart_list += date_template % (start_date.strftime("%Y-%m-%d %H:%M"), link, end_date.strftime("%Y-%m-%d %H:%M"), link, range_radio.render(), auto_update) # set initial time
+		js_chart_list += date_template % (start_date.strftime("%Y-%m-%d %H:%M"), link, end_date.strftime("%Y-%m-%d %H:%M"), link, range_radio.render(), realtime.render(), auto_update) # set initial time
 	else:
-		js_chart_list += date_template % (start_date.strftime("%Y-%m-%d %H:%M"), link, end_date.strftime("%Y-%m-%d %H:%M"), link, range_radio.render(), '') # set initial time
+		js_chart_list += date_template % (start_date.strftime("%Y-%m-%d %H:%M"), link, end_date.strftime("%Y-%m-%d %H:%M"), link, range_radio.render(), realtime.render(), '') # set initial time
 
 	return js_chart_list
 
