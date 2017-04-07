@@ -17,6 +17,7 @@
 #
 
 import os, sys, time
+from datetime import datetime
 
 
 class composite_handle:
@@ -24,25 +25,16 @@ class composite_handle:
 		self.handles = handles
 
 	def read(self, ts_from, ts_to, filter = None):
+		now_ts = datetime.now().timestamp()
+		range = now_ts - ts_from
+
 		for handle in self.handles:
-			ret = handle.read(ts_from, ts_to, filter)
-			if isinstance(ret[0], str):
-				if ret[0] == '#timestamp':
-					# ('#timestamp', (metrics), [(ts, ...)...]
-					if len(ret[2]) == 0:
-						print('fetch next manager')
-						continue
-				else:
-					# ('#rrd', (ts_start, ts_end, step), (metrics), [()...]
-					if len(ret[3]) == 0:
-						print('fetch next manager')
-						continue
-			else:
-				# ((ts_start, ts_end, step), (metrics), [()...]
-				if len(ret[2]) == 0:
-					print('fetch next manager')
+			if hasattr(handle, 'time_range'):
+				if handle.time_range < range:
+					print('time range skip')
 					continue
 
+			ret = handle.read(ts_from, ts_to, filter)
 			return ret
 
 
@@ -79,11 +71,20 @@ class composite_storage_manager:
 	# update data use member functions, it makes leak because compositeupdate has it
 	def update_data(self, entity, timestamp, name_data_map):
 		for mgr in self.mgrs:
-			mgr.update_data(entity, timestamp, name_data_map)
+			ret = mgr.update_data(entity, timestamp, name_data_map)
+			if ret == False:
+				return False
+
+		return True
 
 
 	def create_data(self, entity, name_data_map):
 		for mgr in self.mgrs:
-			mgr.create_data(entity, name_data_map)
+			ret = mgr.create_data(entity, name_data_map)
+			if ret == False:
+				return False
+
+		return True
+
 
 

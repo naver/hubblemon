@@ -224,7 +224,8 @@ def _make_time_range(param, link):
 		    <script type="text/javascript">
 		    setInterval(function() {
 			console.log("update chart");
-			var ed = new Date();
+			var nd = new Date();
+			var ed = new Date(nd.getTime() + 60 * 1000);
 			var offset = ed.getTimezoneOffset() * 60;
 			ed.setSeconds(ed.getSeconds() - offset);
 			var end_ts = ed.getTime()/1000;

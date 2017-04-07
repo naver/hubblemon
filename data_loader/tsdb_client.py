@@ -5,7 +5,8 @@ import select
 import threading
 import queue
 
-class tsException:
+
+class tsException(Exception):
 	def __init__(self, msg):
 		self.msg = msg
 
@@ -14,7 +15,6 @@ class tsConnection:
 	def __init__(self):
 		self.socket = None
 		self.buffer = ''
-		self.lock = threading.Lock()
 
 	def connect(self, addr):
 		if self.socket:
@@ -51,17 +51,8 @@ class tsConnection:
 		return self.socket == None
 
 	def send_request(self, request):
-		if self.socket == None:
-			ret = self.connect(self.addr)
-			if ret == None:
-				print('cannot connect')
-				return False
-			
-
 		#print('send_request: ', request + '\r\n')
 		self.socket.sendall(bytes(request + '\r\n', 'utf-8'))
-		return True
-		
 
 	def hasline(self):
 		index = self.buffer.find(b'\r\n')
@@ -188,6 +179,7 @@ class tsClient(threading.Thread):
 		self.requests = queue.Queue()
 		self.quit = False
 		self.async = async
+		self.lock = threading.Lock()
 
 		if self.async == True:
 			threading.Thread.__init__(self)
@@ -203,6 +195,7 @@ class tsClient(threading.Thread):
 
 	def connect(self, addr):
 		self.handle.connect(addr)
+		self.requests.queue.clear()
 
 		if self.async == True:
 			self.start()
@@ -330,6 +323,34 @@ class tsClient(threading.Thread):
 
 		return True
 
+	def process_sync_response(self, cur):
+		line = self.handle.readline(0).decode('utf-8')
+
+		if line == None:
+			return False
+
+		if line.startswith("ERROR"):
+			cur.set_error(line)
+		elif line.startswith("OK"):
+			if cur.query.startswith("list"):
+				self.process_list(cur)
+			elif cur.query.startswith("get") or cur.query.startswith("sget"):
+				self.process_get(cur)
+			else:
+				self.process_execute(cur)
+		elif line.startswith("cursor"): # stream response of another request
+			toks = line.split(" ")
+			stream_id = int(toks[1])
+			if stream_id not in self.cursor_map:
+				print("ERROR CURSOR ID %d" % stream_id)
+				return False 
+
+			self.process_get(cur)
+		else:
+			cur.set_error("ERROR PROTOCOL:" + line)
+
+		return True
+
 
 	def request(self, query, callback = None):
 		cur = tsCursor()
@@ -342,17 +363,17 @@ class tsClient(threading.Thread):
 
 		cur.callback = callback
 
-		self.requests.put(cur)
-		ret = self.handle.send_request(query)
 
-		if self.async == False:
-			if ret == True:
-				self.process_response()
-			else:
-				return None
+		if self.async == True:
+			self.lock.acquire()
+			self.requests.put(cur)
+			self.handle.send_request(query)
+			self.lock.release()
+		else:
+			self.handle.send_request(query)
+			self.process_sync_response(cur)
 
 		return cur
-
 
 
 

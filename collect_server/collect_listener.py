@@ -146,7 +146,9 @@ class CollectNode:
 		# STAT VERSION HOST LENGTH
 		if type == 'STAT':
 			#print('recv: %d' % len(body))
-			self.do_stat(version, body)
+			ret = self.do_stat(version, body)
+			if ret == False:
+				return False
 
 		# GET VERSION CMD INFO
 		elif type == 'GET':
@@ -229,7 +231,10 @@ class CollectNode:
 					continue
 
 				p = self.plugins[k]
-				p.create_data(hostname, v)
+				ret = p.create_data(hostname, v)
+				if ret == False:
+					return False
+
 				self.sock.send(b'OK')
 		else:
 			if '__stack__' in result:
@@ -253,7 +258,9 @@ class CollectNode:
 						continue
 
 					p = self.plugins[k]
-					p.update_data(hostname, result['datetime'].timestamp(), v)
+					ret = p.update_data(hostname, result['datetime'].timestamp(), v)
+					if ret == False:
+						return False
 
 					# tmp: add client, ts
 					v['client'] = result['client']

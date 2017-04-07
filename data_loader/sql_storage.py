@@ -170,6 +170,8 @@ class sql_storage_manager:
 			if is_exist==0:
 				self.handle.create(query)
 
+		return True
+
 
 	def update_data(self, entity, timestamp, name_data_map):
 		for table, data in name_data_map.items():
@@ -206,6 +208,8 @@ class sql_storage_manager:
 
 			query = query+ attr_query + val_query
 			self.handle.insert(query)
+
+		return True
 
 
 
