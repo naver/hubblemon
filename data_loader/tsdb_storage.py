@@ -223,16 +223,15 @@ class tsdb_storage_manager:
 				if full_attr in self.gauge_list:
 					continue
 				else:
-					if table_name in self.prev_data:
+					if table_name in self.prev_data and '#timestamp' in self.prev_data:
 						prev_data = self.prev_data[table_name]
-						old = data[attr]
-						data[attr] = (val - prev_data[attr])/5
-
+						prev_timestamp = self.prev_data['#timestamp']
+						data[attr] = (val - prev_data[attr]) / (timestamp - prev_timestamp) # 1sec average
 					else:
-						self.prev_data[table_name] = tmp_map
 						data[attr] = 0
 
 			self.prev_data[table_name] = tmp_map
+			self.prev_data['#timestamp'] = timestamp
 
 			query = "put %s %s" % (entity, table)
 
