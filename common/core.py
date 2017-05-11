@@ -69,13 +69,15 @@ def _get_listener_info(entity_table):
 
 # local or remote
 def get_entity_list():
-	entity_list = []
+	entity_map = {}
 
 	for item in common.settings.listener_list:
 		storage_manager = item[1]
-		entity_list += storage_manager.get_entity_list()
+		entities = storage_manager.get_entity_list()
+		for entity in entities:
+			entity_map[entity] = 1
 
-	return entity_list
+	return list(entity_map.keys())
 
 
 # local or remote

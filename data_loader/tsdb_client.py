@@ -5,7 +5,8 @@ import select
 import threading
 import queue
 
-class tsException:
+
+class tsException(Exception):
 	def __init__(self, msg):
 		self.msg = msg
 
@@ -14,26 +15,28 @@ class tsConnection:
 	def __init__(self):
 		self.socket = None
 		self.buffer = ''
-		self.lock = threading.Lock()
 
 	def connect(self, addr):
 		if self.socket:
 			self.disconnect()
 
+		self.addr = addr
 		ip, port = addr.split(':')
-		self.ip = ip
-		self.port = int(port)
-		self.address = ( self.ip, self.port )
+		address = ( ip, int(port) )
 
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		try:
-			self.socket.connect(self.address)
+			self.socket.connect(address)
 		except socket.timeout as msg:
 			self.disconnect()
+			self.socket = None
+			return None
 		except socket.error as msg:
 			self.disconnect()
+			self.socket = None
+			return None
 
-		print(self.address)
+		print(address)
 		self.buffer = b''
 		self.socket.setblocking(0)
 
@@ -48,11 +51,11 @@ class tsConnection:
 		return self.socket == None
 
 	def send_request(self, request):
-		print('send_request: ', request + '\r\n')
+		#print('send_request: ', request + '\r\n')
 		self.socket.sendall(bytes(request + '\r\n', 'utf-8'))
 
 	def hasline(self):
-		index = self.buffer.find('\r\n')
+		index = self.buffer.find(b'\r\n')
 		return index >= 0
 
 	def readline(self, timeout = 0):
@@ -62,7 +65,7 @@ class tsConnection:
 			index = buf.find(b'\r\n')
 			if index >= 0:
 				break
-	
+
 			if timeout > 0:
 				ret = select.select([self.socket], [], [], timeout)
 			else:
@@ -170,53 +173,32 @@ class tsCursor:
 
 
 class tsClient(threading.Thread):
-
-	def __init__(self):
+	def __init__(self, async = True):
 		self.handle = tsConnection()
 		self.cursor_map = {}
-
 		self.requests = queue.Queue()
 		self.quit = False
+		self.async = async
+		self.lock = threading.Lock()
 
-		threading.Thread.__init__(self)
+		if self.async == True:
+			threading.Thread.__init__(self)
 
 	def run(self):
 		while True:
-			line = self.handle.readline(0.1)
-			if line == None:
+			ret = self.process_response(0.1)
+			if ret == False:
 				if self.quit == True:
 					return
 				else:
 					continue
 
-			if line.startswith(b"ERROR"):
-				cur = self.requests.get()
-				cur.set_error(line)
-			elif line.startswith(b"OK"):
-				cur = self.requests.get()
-
-				if cur.query.startswith("list"):
-					self.process_list(cur)
-				elif cur.query.startswith("get") or cur.query.startswith("sget"):
-					self.process_get(cur)
-				else:
-					self.process_execute(cur)
-			elif line.startswith(b"cursor"): # stream response of another request
-				toks = line.split(" ")
-				stream_id = int(toks[1])
-				if stream_id not in self.cursor_map:
-					continue 
-
-				cur = self.cursor_map[stream_id]
-				self.process_get(cur)
-			else:
-				cur = self.requests.get()
-				cur.set_error("ERROR PROTOCOL:" + line)
-
-
 	def connect(self, addr):
 		self.handle.connect(addr)
-		self.start()
+		self.requests.queue.clear()
+
+		if self.async == True:
+			self.start()
 
 	def disconnect(self):
 		self.handle.disconnect()
@@ -227,8 +209,8 @@ class tsClient(threading.Thread):
 		items = []
 
 		while True:
-			line = self.handle.readline().strip()
-			if line.startswith(b"end"):
+			line = self.handle.readline().strip().decode('utf-8')
+			if line.startswith("end"):
 				break
 			else:
 				v = tsValue(i, line)
@@ -309,6 +291,67 @@ class tsClient(threading.Thread):
 		cur.queue_put([v])
 
 
+	def process_response(self, timeout = 0):
+		line = self.handle.readline(timeout).decode('utf-8')
+		if line == None:
+			return False
+
+		if line.startswith("ERROR"):
+			cur = self.requests.get()
+			cur.set_error(line)
+		elif line.startswith("OK"):
+			cur = self.requests.get()
+
+			if cur.query.startswith("list"):
+				self.process_list(cur)
+			elif cur.query.startswith("get") or cur.query.startswith("sget"):
+				self.process_get(cur)
+			else:
+				self.process_execute(cur)
+		elif line.startswith("cursor"): # stream response of another request
+			toks = line.split(" ")
+			stream_id = int(toks[1])
+			if stream_id not in self.cursor_map:
+				print("ERROR CURSOR ID %d" % stream_id)
+				return False 
+
+			cur = self.cursor_map[stream_id]
+			self.process_get(cur)
+		else:
+			cur = self.requests.get()
+			cur.set_error("ERROR PROTOCOL:" + line)
+
+		return True
+
+	def process_sync_response(self, cur):
+		line = self.handle.readline(0).decode('utf-8')
+
+		if line == None:
+			return False
+
+		if line.startswith("ERROR"):
+			cur.set_error(line)
+		elif line.startswith("OK"):
+			if cur.query.startswith("list"):
+				self.process_list(cur)
+			elif cur.query.startswith("get") or cur.query.startswith("sget"):
+				self.process_get(cur)
+			else:
+				self.process_execute(cur)
+		elif line.startswith("cursor"): # stream response of another request
+			toks = line.split(" ")
+			stream_id = int(toks[1])
+			if stream_id not in self.cursor_map:
+				print("ERROR CURSOR ID %d" % stream_id)
+				return False 
+
+			self.process_get(cur)
+		else:
+			cur.set_error("ERROR PROTOCOL:" + line)
+
+		return True
+
+
 	def request(self, query, callback = None):
 		cur = tsCursor()
 		cur.query = query
@@ -320,12 +363,17 @@ class tsClient(threading.Thread):
 
 		cur.callback = callback
 
-		self.requests.put(cur)
-		self.handle.send_request(query)
+
+		if self.async == True:
+			self.lock.acquire()
+			self.requests.put(cur)
+			self.handle.send_request(query)
+			self.lock.release()
+		else:
+			self.handle.send_request(query)
+			self.process_sync_response(cur)
 
 		return cur
 
 
-
-	
 

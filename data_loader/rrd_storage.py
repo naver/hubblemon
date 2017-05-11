@@ -261,6 +261,8 @@ class rrd_storage_manager:
 				print('on update table %s, %s (item: %d)' % (entity, table + '.rrd', len(data)))
 				print(data)
 
+		return True
+
 
 	def create_data(self, entity, name_data_map):
 		entity_path = os.path.join(self.storage_path, entity)
@@ -292,5 +294,5 @@ class rrd_storage_manager:
 
 				handle.create()
 
-
+		return True
 

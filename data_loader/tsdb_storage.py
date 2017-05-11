@@ -20,41 +20,76 @@
 
 import os, sys, time, copy
 from data_loader.tsdb_client import tsClient
+from data_loader.tsdb_client import tsException
 
 
 
 class tsdb_handle:
-	def __init__(self, entity_table, conn_info):
+	def __init__(self, entity_table, conn_info, time_range):
 		self.entity_table = entity_table
 		self.conn_info = conn_info
+		self.time_range = time_range
 
-		self.cl = tsClient()
+		self.cl = tsClient(False)
+		#self.cl = tsClient()
 		self.connect()
 
 	def connect(self):
 		self.cl.connect(self.conn_info)
 
-	def create(self, query):
-		print(query)
+	def disconnect(self):
+		self.cl.disconnect()
 
-		cur = self.cl.request(query)
-		ret = cur.next()
+	def create(self, query):
+		#print(query)
+
+		try:
+			cur = self.cl.request(query)
+			ret = False
+
+			if cur != None:
+				ret = cur.next()
+
+		except Exception as e:
+			print(e)
+			self.disconnect()
+			self.connect()
+			return False
+
 		return ret
 
 	def put(self, query):
-		print(query)
+		#print(query)
 
-		cur = self.cl.request(query)
-		return cur.next()
+		try:
+			cur = self.cl.request(query)
+			ret = False
+			if cur != None:
+				ret = cur.next()
+
+		except Exception as e:
+			print(e)
+			self.disconnect()
+			self.connect()
+			return False
+
+		return ret
 
 	def get(self, query):
-		print(query)
+		#print(query)
 
-		cur = self.cl.request(query)
+		try:
+			cur = self.cl.request(query)
+		except Exception as e:
+			print(e)
+			self.disconnect()
+			self.connect()
+			return None
+
 		return cur
 
 	def request(self, query):
-		print(query)
+		#print(query)
 
 		cur = self.cl.request(query)
 		return cur
@@ -71,13 +106,16 @@ class tsdb_handle:
 
 		query += ' %d %d' % (ts_from, ts_to)
 
-		print(query)
+		#print(query)
 		cur = self.get(query)
 
 		items = []
 		while True:
 			ret = cur.next()
 			if ret == None:
+				break
+
+			if ret.ts == 0: # error
 				break
 
 			items.append([ret.ts] + ret.value)
@@ -90,17 +128,19 @@ class tsdb_handle:
 
 
 class tsdb_storage_manager:
-	def __init__(self, conn_info):
+	def __init__(self, conn_info, time_range = 3600):
 		self.conn_info = conn_info
 		self.name = 'tsdb'
-		self.handle=tsdb_handle(None, conn_info)
 		self.prev_data={}
 		self.gauge_list={}
+		self.time_range = time_range
+		self.cycle_size = time_range / 5
+		self.handle=tsdb_handle(None, conn_info, time_range)
 
 
 	def get_handle(self, entity_table):
 		try:
-			return tsdb_handle(entity_table, self.conn_info)
+			return tsdb_handle(entity_table, self.conn_info, self.time_range)
 
 		except:
 			return None
@@ -159,16 +199,17 @@ class tsdb_storage_manager:
 			if table =='RRA':
 				continue
 
-			query = "create %s %s" % (entity, table)
+			query = "create %s %s %d" % (entity, table, self.cycle_size)
 			for attr in data:
 				query += " " + attr[0]
 				if attr[1] == 'GAUGE':
 					self.gauge_list['%s_%s_%s' % (entity, table, attr[0])] = True
 
-			print(query)
 			ret = self.handle.create(query)
-			print(ret)
+			if ret == False:
+				return False
 
+		return True
 
 	def update_data(self, entity, timestamp, name_data_map):
 		for table, data in name_data_map.items():
@@ -182,16 +223,15 @@ class tsdb_storage_manager:
 				if full_attr in self.gauge_list:
 					continue
 				else:
-					if table_name in self.prev_data:
+					if table_name in self.prev_data and '#timestamp' in self.prev_data:
 						prev_data = self.prev_data[table_name]
-						old = data[attr]
-						data[attr] = val - prev_data[attr]
-
+						prev_timestamp = self.prev_data['#timestamp']
+						data[attr] = (val - prev_data[attr]) / (timestamp - prev_timestamp) # 1sec average
 					else:
-						self.prev_data[table_name] = tmp_map
 						data[attr] = 0
 
 			self.prev_data[table_name] = tmp_map
+			self.prev_data['#timestamp'] = timestamp
 
 			query = "put %s %s" % (entity, table)
 
@@ -200,11 +240,15 @@ class tsdb_storage_manager:
 
 			for attr, val in data.items():
 				attr_query += " " + attr
-				val_query += " " + str(val)
+				val_query += " %d" % val
 
 			query += attr_query + val_query
-			print(query)
-			self.handle.put(query)
+			ret = self.handle.put(query)
+			#print(ret)
+			if ret == False:
+				return False
+
+		return True
 
 
 
