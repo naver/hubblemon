@@ -139,55 +139,23 @@ class collectd:
 
 			listener.connect()
 
-	def collect_by_thread(self, p, stat):
-		lock = stat['__lock__']
-
-		result = p.collect()
-
-		lock.acquire()
-
-		if p.type not in stat:
-			stat[p.type] = {}
-
-		if result == None: # recreate signal from plugin
-			stat['__close__'] = True
-		elif '__lock__' not in stat: # terminated (cause this thread was not joined at time)
-			pass # do nothing
-		else:
-			for k, v in result.items():
-				stat[p.type][k] = v
-
-		lock.release()
-
-
 			
 	def collect(self):
 		stat = {}
-		stat['__lock__'] = threading.Lock()
 		threads = []
 
 		for p in self.plugins:
-			th = threading.Thread(target=self.collect_by_thread, args=(p, stat))
-			threads.append(th)
-			th.start()
+			result = p.collect()
+			if result == None: # recreate signal from plugin
+				self.close()
+				return None
 
-		time.sleep(self.sleep)
+			if p.type not in stat:
+				stat[p.type] = {}
 
-		for p in self.plugins:
-			if th.is_alive():
-				print('# collect thread not joined')
-			else:
-				th.join()
+			for k, v in result.items():
+				stat[p.type][k] = v
 			
-		lock = stat['__lock__']
-		lock.acquire()
-		del stat['__lock__']
-		lock.release()
-
-		if '__close__' in stat and stat['__close__'] == True:
-			self.close()
-			return None
-
 		return stat
 				
 
@@ -242,6 +210,7 @@ class collectd:
 
 				print(result)
 				self.send_stat_all(result)
+				time.sleep(self.sleep)
 
 			except Exception as e:
 				print(e)
