@@ -226,12 +226,16 @@ class tsdb_storage_manager:
 					if table_name in self.prev_data and '#timestamp' in self.prev_data:
 						prev_data = self.prev_data[table_name]
 						prev_timestamp = self.prev_data['#timestamp']
-						data[attr] = (val - prev_data[attr]) / (timestamp - prev_timestamp) # 1sec average
+						if timestamp - prev_timestamp == 0:
+							print('# abnormal timestamp %d of %s' % (timestamp, entity))
+							data[attr] = 0
+
+						#data[attr] = (val - prev_data[attr]) / (timestamp - prev_timestamp) # 1sec average
+						data[attr] = (val - prev_data[attr]) / 5
 					else:
 						data[attr] = 0
 
 			self.prev_data[table_name] = tmp_map
-			self.prev_data['#timestamp'] = timestamp
 
 			query = "put %s %s" % (entity, table)
 
@@ -246,8 +250,10 @@ class tsdb_storage_manager:
 			ret = self.handle.put(query)
 			#print(ret)
 			if ret == False:
+				self.prev_data['#timestamp'] = timestamp
 				return False
 
+		self.prev_data['#timestamp'] = timestamp
 		return True
 
 

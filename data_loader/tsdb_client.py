@@ -36,7 +36,7 @@ class tsConnection:
 			self.socket = None
 			return None
 
-		print(address)
+		#print(address)
 		self.buffer = b''
 		self.socket.setblocking(0)
 
