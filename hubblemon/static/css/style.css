@@ -1,0 +1,58 @@
+
+#id_expr {
+	width: 80%;
+}
+
+#id_query {
+	width: 80%;
+}
+
+#id_eval {
+	width: 80%;
+}
+
+.resize {
+	overflow: visible;
+}
+
+.title {
+	margin-top: 15px;
+	font: normal 32px "omnes-pro", Helvetica, Arial, sans-serif;
+	margin-bottom: 15px;
+}
+
+.main_link {
+	background-color: #e6e6fa;
+	font-size: 100%;
+}
+
+.chart_list {
+	background-color: #e6fae6;
+	font-family: "Trebuchet MS", "Helvetica", "Arial",  "Verdana", "sans-serif";
+	font-size: 62.5%;
+}
+
+.query_list {
+	background-color: #e6fae6;
+	font-family: "Trebuchet MS", "Helvetica", "Arial",  "Verdana", "sans-serif";
+	font-size: 62.5%;
+}
+
+.query_form {
+	background-color: #fae6e6;
+	font-family: "Trebuchet MS", "Helvetica", "Arial",  "Verdana", "sans-serif";
+	font-size: 62.5%;
+}
+
+.chart_select {
+}
+
+.date_range {
+}
+
+
+.chart_area {
+}
+
+	
+
