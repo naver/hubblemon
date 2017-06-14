@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 
 {% block external %}
-<link href="../site_media/flot.css" rel="stylesheet" type="text/css">
+{% load staticfiles %}
+<link href="{% static 'css/flot.css' %}" rel="stylesheet" type="text/css">
+<!--<link href="../site_media/flot.css" rel="stylesheet" type="text/css">-->
 {% endblock %}
 
 {% block title %}query view{% endblock %}
