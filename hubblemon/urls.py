@@ -24,10 +24,6 @@ from django.contrib import admin
 #from graph.views import *
 from chart.views import *
 
-import os.path
-
-site_media = os.path.join(os.path.dirname(__file__), 'site_media')
-
 urlpatterns = [
     # Examples:
     # url(r'^$', 'hubblemon.views.home', name='home'),
@@ -41,6 +37,5 @@ urlpatterns = [
     url(r'^query/', query_page),
     url(r'^system/', system_page),
     url(r'^addon/', addon_page),
-    #include(r'^site_media/(?P<path>.*)$', 'django.views.static.serve'), #{ 'document_root': site_media }),
 ]
 
