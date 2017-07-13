@@ -4,12 +4,15 @@
         <head>
 		<meta chartset="UTF-8">
                 <title>hubblemon {% block title %}{% endblock %}</title>
-                <link rel="stylesheet" href="/site_media/style.css" type="text/css" />
-                <link rel="stylesheet" href="/site_media/jquery-ui-timepicker-addon.css" type="text/css" />
+                
+                {% load staticfiles %}
+                <link href="{% static 'css/flot.css' %}" rel="stylesheet" type="text/css">
+				<link rel="stylesheet" href="{% static 'css/style.css' %}" type="text/css" />
+                <link rel="stylesheet" href="{% static 'css/jquery-ui-timepicker-addon.css' %}" type="text/css" />
 		<link media="all" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.2/themes/smoothness/jquery-ui.css" rel="stylesheet"/>
                 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
                 <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.2/jquery-ui.min.js"></script>
-                <script src="/static/jquery-ui-timepicker-addon.js"></script>
+                <script src="{% static 'js/jquery-ui-timepicker-addon.js' %}"></script>
 
                 {% block external %}{% endblock %}
         </head>

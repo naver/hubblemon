@@ -19,7 +19,6 @@
 
 
 from django.shortcuts import render
-from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.http import HttpResponse
 from django import forms
@@ -447,9 +446,13 @@ def system_page(request):
 		return HttpResponse(json.dumps({'reponse': 'success', 'chart_data': js_chart_data}), content_type='application/json')
 
 	## make view
-	variables = RequestContext(request, { 'main_link':_make_main_link(), 'chart_list':js_chart_list, 'chart_data':js_chart_data } )
-	return render_to_response('system_page.html', variables)
-
+	variables = {
+		'main_link': _make_main_link(),
+		'chart_list': js_chart_list,
+		'chart_data': js_chart_data
+	}
+	
+	return render(request, 'system_page.html', variables)
 
 
 def expr_page(request):
@@ -526,8 +529,15 @@ def expr_page(request):
 	if 'ajax' in param:
 		return HttpResponse(json.dumps({'reponse': 'success', 'chart_data': js_chart_data}), content_type='application/json')
 	## make view
-	variables = RequestContext(request, { 'main_link':_make_main_link(), 'expr_form':expr_form, 'date_range':date_range, 'chart_list':js_chart_list, 'chart_data':js_chart_data} )
-	return render_to_response('expr_page.html', variables)
+	variables = {
+		'main_link': _make_main_link(),
+		'expr_form': expr_form,
+		'date_range': date_range,
+		'chart_list': js_chart_list,
+		'chart_data': js_chart_data
+	}
+	
+	return render(request, 'expr_page.html', variables)
 
 
 def chart_page(request):
@@ -539,8 +549,13 @@ def chart_page(request):
 	## list rendering
 	levels, chart_map = common.core.get_chart_list(param)
 	if (len(levels) == 0):
-		variables = RequestContext(request, { 'main_link':_make_main_link(), 'chart_list':'', 'chart_data':'' } )
-		return render_to_response('chart_page.html', variables)
+		variables = {
+			'main_link': _make_main_link(),
+			'chart_list': '',
+			'chart_data': ''
+		}
+
+		return render(request, 'chart_page.html', variables)
 	
 	js_chart_list = _make_dynamic_chart_list(param, 'chart', levels, chart_map)
 	print(levels)
@@ -549,8 +564,12 @@ def chart_page(request):
 	# case 1. not selected anyone
 	if levels[0] not in param:
 		#print('## return chart map')
-		variables = RequestContext(request, { 'main_link':_make_main_link(), 'chart_list':js_chart_list } )
-		return render_to_response('chart_page.html', variables)
+		variables = {
+			'main_link': _make_main_link(),
+			'chart_list': js_chart_list
+		}
+
+		return render(request, 'chart_page.html', variables)
 
 	# case 2. partialy selected
 	if levels[-1] not in param:
@@ -574,8 +593,11 @@ def chart_page(request):
 	#print(loader)
 
 	if loader == None:
-		variables = RequestContext(request, { 'main_link':_make_main_link(), 'chart_data':'Unknown chart id'} )
-		return render_to_response('chart_page.html', variables)
+		variables = {
+			'main_link': _make_main_link(),
+			'chart_data': 'Unknown chart id'
+		}
+		return render(request, 'chart_page.html', variables)
 
 	## chart rendering
 	start_ts, end_ts = _get_ts(request.GET)
@@ -588,8 +610,14 @@ def chart_page(request):
 	## make view
 	if 'ajax' in param:
 		return HttpResponse(json.dumps({'reponse': 'success', 'chart_data': js_chart_data}), content_type='application/json')
-	variables = RequestContext(request, { 'main_link':_make_main_link(), 'chart_list':js_chart_list, 'chart_data':js_chart_data } )
-	return render_to_response('chart_page.html', variables)
+	
+	variables = {
+		'main_link': _make_main_link(),
+		'chart_list': js_chart_list,
+		'chart_data': js_chart_data
+	}
+	
+	return render(request, 'chart_page.html', variables)
 
 
 def query_page(request):
@@ -626,8 +654,15 @@ def query_page(request):
 	## list rendering
 	levels, query_map = common.core.get_chart_list(param)
 	if (len(levels) == 0):
-		variables = RequestContext(request, { 'main_link':_make_main_link(), 'auth_fields':auth_fields, 'query_form':form, 'query_list':'', 'query_data':'' } )
-		return render_to_response('query_page.html', variables)
+		variables = {
+			'main_link': _make_main_link(),
+			'auth_fields': auth_fields,
+			'query_form': form,
+			'query_list': '',
+			'query_data': ''
+		}
+
+		return render(request, 'query_page.html', variables)
 	
 	js_query_list = _make_dynamic_chart_list(param, 'query', levels, query_map)
 	#print(levels)
@@ -664,9 +699,16 @@ def query_page(request):
 			ip = request.META.get('REMOTE_ADDR')
 
 		query_data = common.core.query(param, ip)
+	
+	variables = {
+		'main_link': _main_main_link(),
+		'auth_fields': auth_fields,
+		'query_form': form,
+		'query_list': js_query_list,
+		'query_data': query_data
+	}
 
-	variables = RequestContext(request, { 'main_link':_make_main_link(), 'auth_fields':auth_fields, 'query_form':form, 'query_list':js_query_list, 'query_data':query_data} )
-	return render_to_response('query_page.html', variables)
+	return render(request, 'query_page.html', variables)
 
 
 
@@ -684,8 +726,13 @@ def graph_page(request):
 	## list rendering
 	levels, graph_map = common.core.get_graph_list(param)
 	if (len(levels) == 0):
-		variables = RequestContext(request, { 'main_link':_make_main_link(), 'graph_list':'', 'graph_data':'' } )
-		return render_to_response('graph_page.html', variables)
+		variables = {
+			'main_link': _make_main_link(),
+			'graph_list': '',
+			'graph_data': ''
+		}
+
+		return render(request, 'graph_page.html', variables)
 
 	js_graph_list = _make_dynamic_chart_list(param, 'graph', levels, graph_map)
 	#print(levels)
@@ -693,8 +740,12 @@ def graph_page(request):
 	# return cloud & server list (not selected anyone)
 	if levels[0] not in param:
 		#print('## return graph map')
-		variables = RequestContext(request, { 'main_link':_make_main_link(), 'graph_list':js_graph_list } )
-		return render_to_response('graph_page.html', variables)
+		variables = {
+			'main_link': _make_main_link(),
+			'graph_list': js_graph_list
+		}
+
+		return render(request, 'graph_page.html', variables)
 
 	# return server list by json (select cloud only)
 	if levels[-1] not in param:
@@ -717,12 +768,22 @@ def graph_page(request):
 	#print(ret)
 
 	if ret == None or len(ret) == 0:
-		variables = RequestContext(request, { 'main_link':_make_main_link(), 'graph_data':'Unknown graph id'} )
-		return render_to_response('graph_page.html', variables)
+		variables = {
+			'main_link': _make_main_link(),
+			'graph_data': 'Unknown graph id'
+		}
+
+		return render(request, 'graph_page.html', variables)
 
 	## make view
-	variables = RequestContext(request, { 'main_link':_make_main_link(), 'graph_list':js_graph_list, 'graph_data':ret } )
-	return render_to_response('graph_page.html', variables)
+	variables = {
+		'main_link': _main_main_link(),
+		'graph_list': js_graph_list,
+		'graph_data': ret
+	}
+
+	return render(request, 'graph_page.html', variables)
+
 
 def addon_page(request):
 	print('####### addon_page request ########')
@@ -735,8 +796,11 @@ def addon_page(request):
 	print(param)
 	addon_page_data = common.core.get_addon_page(param)
 
-	variables = RequestContext(request, { 'main_link':_make_main_link(), 'addon_page_data':addon_page_data} )
-	return render_to_response('addon_page.html', variables)
+	variables = {
+		'main_link': _make_main_link(),
+		'addon_page_data': addon_page_data
+	}
+	return render(request, 'addon_page.html', variables)
 
 
 
