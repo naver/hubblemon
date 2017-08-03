@@ -363,7 +363,7 @@ class arcus_stat:
 					('cmd_bop_count', 'DERIVE', 60, '0', 'U'),
 					('bop_count_hits', 'DERIVE', 60, '0', 'U'),
 					('cmd_getattr', 'DERIVE', 60, '0', 'U'),
-					('getattr_hits', 'DERIVE', 60, '0', 'U'),
+					('cmd_setattr', 'DERIVE', 60, '0', 'U'),
 					('prefix_derive_01', 'DERIVE', 60, '0', 'U'),
 					('prefix_derive_02', 'DERIVE', 60, '0', 'U'),
 					('prefix_derive_03', 'DERIVE', 60, '0', 'U'),
