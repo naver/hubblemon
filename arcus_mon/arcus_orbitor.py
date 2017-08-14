@@ -54,10 +54,10 @@ class arcus_orbitor:
 
 		for addr in self.zk_addrs:
 			zk = arcus_util.zookeeper(addr)
-			zk.load_all()
 			print('###################################################')
 			print('### zk: %s ' % addr)
 			print('###################################################')
+			zk.load_all()
 			print(zk)
 			print('\n\n\n\n')
 			zk.watch(self.watch_callback)
