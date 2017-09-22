@@ -85,7 +85,7 @@ class tsConnection:
 
 		self.buffer = buf[index+2:]
 
-		#print 'readline: ', buf[:index]
+		#print('readline: ', buf[:index])
 		return buf[:index]
 
 	def recv(self, rlen):
@@ -102,7 +102,7 @@ class tsConnection:
 				raise tsException('Read %d bytes, expecting %d, read returned 0 length bytes' % ( len(buf), rlen ))
 
 		self.buffer = buf[rlen:]
-		#print 'recv: ', buf[:rlen]
+		#print('recv: ', buf[:rlen])
 		return buf[:rlen]
 
 
@@ -370,8 +370,10 @@ class tsClient(threading.Thread):
 			self.handle.send_request(query)
 			self.lock.release()
 		else:
+			self.lock.acquire()
 			self.handle.send_request(query)
 			self.process_sync_response(cur)
+			self.lock.release()
 
 		return cur
 

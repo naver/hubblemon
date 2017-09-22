@@ -51,7 +51,7 @@ class tsdb_handle:
 				ret = cur.next()
 
 		except Exception as e:
-			print(e)
+			print('tsdb_handle, create: ', e)
 			self.disconnect()
 			self.connect()
 			return False
@@ -68,7 +68,7 @@ class tsdb_handle:
 				ret = cur.next()
 
 		except Exception as e:
-			print(e)
+			print('tsdb_handle, put: ', e)
 			self.disconnect()
 			self.connect()
 			return False
@@ -81,7 +81,7 @@ class tsdb_handle:
 		try:
 			cur = self.cl.request(query)
 		except Exception as e:
-			print(e)
+			print('tsdb_handle, get: ', e)
 			self.disconnect()
 			self.connect()
 			return None
@@ -106,7 +106,15 @@ class tsdb_handle:
 
 		query += ' %d %d' % (ts_from, ts_to)
 
-		#print(query)
+		group_by = 0
+		count = (ts_to - ts_from)/5
+		if count > 400:
+			group_by = (ts_to-ts_from) / 400
+
+		if group_by > 0:
+			query += ' where\r\ngroup_by_time = %d\r\ngroup_by_method = max\r\nend' % group_by
+
+		print(query)
 		cur = self.get(query)
 
 		items = []
@@ -122,6 +130,7 @@ class tsdb_handle:
 			
 		ret = ('#timestamp', cur.names[1:], items)
 		#print(ret)
+		print(len(items))
 		return ret
 		
 
@@ -143,6 +152,7 @@ class tsdb_storage_manager:
 			return tsdb_handle(entity_table, self.conn_info, self.time_range)
 
 		except:
+			print('get_handle: ', e)
 			return None
 
 
@@ -248,7 +258,9 @@ class tsdb_storage_manager:
 
 			query += attr_query + val_query
 			ret = self.handle.put(query)
+
 			#print(ret)
+
 			if ret == False:
 				self.prev_data['#timestamp'] = timestamp
 				return False
