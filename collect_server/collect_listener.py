@@ -66,6 +66,7 @@ class CollectNode:
 		#	self.plugins[k] = v.clone()
 
 		self.addr = addr
+		self.lock = threading.Lock()
 
 	def do_op(self):
 		while True:
@@ -156,40 +157,6 @@ class CollectNode:
 			return None
 
 
-		'''
-		elif cmd == 'ENTITY_LIST':
-			entity_list = []
-			for dir in os.listdir(self.basedir):
-				dir_path = os.path.join(self.basedir, dir)
-				if os.path.isdir(dir_path):
-					entity_list.append(dir)
-			
-			return entity_list
-		
-		elif cmd == 'TABLE_LIST_OF_ENTITY':
-			table_list = []
-			client, prefix = info.split('/')
-			path = os.path.join(self.basedir, client)
-
-			for file in os.listdir(path):
-				if file.startswith(prefix):
-					table_list.append(file)
-
-			return table_list
-
-		elif cmd == 'ALL_TABLE_LIST':
-			table_list = []
-			for dir in os.listdir(self.basedir):
-				dir_path = os.path.join(self.basedir, dir)
-
-				if os.path.isdir(dir_path):
-					for file in os.listdir(dir_path):
-						if file.startswith(prefix):
-							table_list.append(dir + '/' + file)
-
-			return table_list
-		'''
-
 
 	def do_stat(self, version, data):
 		result = pickle.loads(data)
@@ -210,7 +177,11 @@ class CollectNode:
 					continue
 
 				p = self.plugins[k]
+			
+				self.lock.acquire()
 				ret = p.create_data(hostname, v)
+				self.lock.release()
+
 				if ret == False:
 					return False
 
@@ -237,7 +208,11 @@ class CollectNode:
 						continue
 
 					p = self.plugins[k]
+
+					self.lock.acquire()
 					ret = p.update_data(hostname, result['datetime'].timestamp(), v)
+					self.lock.release()
+
 					if ret == False:
 						return False
 
