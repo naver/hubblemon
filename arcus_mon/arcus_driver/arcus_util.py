@@ -271,10 +271,10 @@ class zookeeper:
 
 
 	def get_arcus_meta_all(self):
-		if self.zk.exists('/arcus/meta') == None:
-			self.zk.create('/arcus/meta', b'arcus meta info')
+		if self.zk_exists('/arcus/meta') == False:
+			self.zk_create('/arcus/meta', 'arcus meta info')
 
-		children = self.zk.get_children('/arcus/meta')
+		children = self.zk_children('/arcus/meta')
 		print('# children')
 		print(children)
 
@@ -361,7 +361,7 @@ class zookeeper:
 			
 
 	def _callback(self, event):
-		child_list = self.zk.get_children(event.path)
+		child_list = self.zk_children(event.path)
 		cloud = os.path.basename(event.path)
 		cache = self.arcus_cache_map[cloud]
 
@@ -403,7 +403,7 @@ class zookeeper:
 		print(cache.active_node)
 
 		self.callback(event, event_list)
-		children = self.zk.get_children(event.path, watch = self._callback)
+		children = self.zk_children(event.path, watch = self._callback)
 		
 
 	def watch(self, callback):

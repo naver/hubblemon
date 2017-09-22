@@ -255,7 +255,9 @@ class rrd_storage_manager:
 				table = table.replace('/', '_') # some stat name include /
 				entity_table = os.path.join(entity, table)
 				handle = self.get_handle(entity_table)
-				handle.update(timestamp, data)
+				if handle:
+					handle.update(timestamp, data)
+
 			except Exception as e:
 				print(e)
 				print('on update table %s, %s (item: %d)' % (entity, table + '.rrd', len(data)))

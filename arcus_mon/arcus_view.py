@@ -272,6 +272,7 @@ def get_chart_list(param):
 			prefix, dummy = prefix_name.split('.rrd')
 			prefix_list.append(prefix)
 		
+		prefix_list.sort()
 		prefix_map = {}
 		prefix_map[cloud] = { instance:prefix_list }
 
