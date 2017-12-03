@@ -29,7 +29,7 @@ urlpatterns = [
     # url(r'^$', 'hubblemon.views.home', name='home'),
     # url(r'^blog/', include('blog.urls')),
 
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', admin.site.urls),
     url(r'^$', chart_page),
     url(r'^graph/', graph_page),
     url(r'^expr/', expr_page),
