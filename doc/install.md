@@ -9,7 +9,7 @@ Hubblemon is made up with below components.
 
 Collect clients is made by python scripts and it send client system, application stats to collect server.
 
-Collect server receives clients stats and save it to disk then alarms if needed.
+Collect server receives clients stats and saves it to disk then alarms if needed.
 
 After clone Hubblemon on your system, you should modify settings.py like below.
 
