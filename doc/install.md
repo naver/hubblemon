@@ -230,9 +230,9 @@ If you want to collect arcus stat. uncomment that block which is like below.
 Now, collectd daemon includes arcus_stat plugin.
 
 arcus_stat, memcached_stat, cubrid_stat supports auto_register()
-That interface check system processes and collect application stat by itself automatically. so you don't have to add any other information. (You can also add infomation manually)
+That interface check system processes and collect application stat by itself automatically. so you don't have to add any other information. (You can also add information manually)
 
-mysql_plugin needs datebase name, mysql socket, id and password to collect mysql stats corectly.
+mysql_plugin needs database name, mysql socket, id and password to collect mysql stats correctly.
 
 jstat_plugin needs filter words to find correct java process.
 In default run_client.py, It shows ['java', 'apache', 'catalina'] as that parameter. And jstat_stat collect process which contains 'java', 'apache', 'catalina' in it's run time parameters. (That means.. tomcat)
