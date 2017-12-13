@@ -58,7 +58,7 @@ eval 모드에서는 conn, cursor 변수가 스크립트를 위해 미리 설정
 
 해당 memcached 에 0 부터 99까지를 기록하고 그 값을 다시 읽어와서 리스트에 기록한다.
 그리고 return_as_string(ret, p) 를 통해 웹화면에 출력한다.
-p 는 파마미터관리를 위한 내부 변수로서, 허블몬은 실제로 p['result'] 의 값을 출력하며 이 예제에서 이는 return_as_string 안에서 기록된다.
+p 는 파라미터관리를 위한 내부 변수로서, 허블몬은 실제로 p['result'] 의 값을 출력하며 이 예제에서 이는 return_as_string 안에서 기록된다.
 
 ![eval memcached](doc/img/rm_eval_memcached.png)
 
