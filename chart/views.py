@@ -777,7 +777,7 @@ def graph_page(request):
 
 	## make view
 	variables = {
-		'main_link': _main_main_link(),
+		'main_link': _make_main_link(),
 		'graph_list': js_graph_list,
 		'graph_data': ret
 	}
