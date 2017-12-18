@@ -95,7 +95,7 @@ Default value is '12:00'.
 
 #### mail_server, mail_sender, mail_receivers
 
-If you want to use mail as alarm method, You should set these values correctly.
+If you want to use mail as alarm method, you should set these values correctly.
 mail_server is smtp server address,
 mail_sender and mail_receivers are used at smtp protocols.
 
@@ -215,12 +215,12 @@ Default run_client.py template is like below.
 With this default template file.
 
 First, change server_address to your collect_server addresses. 
-server_address is list type because there is many collect_server address (For High availibility)
+server_address is list type because there is many collect_server address (For High availability)
 
 Then add plugins which you want to collect on your clients.
 In default template file, only a psutil_stat plugin is added to collectd daemon and other plugins are commented.
 
-If you want to collect arcus stat. uncomment that block which is like below. 
+If you want to collect arcus stat, uncomment that block which is like below. 
 
     # arcus stat example
     arcus = arcus_stat()
