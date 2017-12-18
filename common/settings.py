@@ -72,6 +72,7 @@ main_link = [	('system', '/system'),
 
 '''
 # example
+arcus_zk_addrs=[]
 arcus_zk_addrs.append('arcuscloud.yourcompany.com:17288')
 '''
 
