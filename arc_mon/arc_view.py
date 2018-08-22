@@ -161,7 +161,7 @@ def get_chart_data(param):
 				if node.startswith('['):
 					continue # skip
 
-				node = node.split('-')[1]
+				node = node.split('-', 1)[1]
 				loader = common.core.loader(node, arc_preset, title=node)
 				loader_list.append(loader)
 
@@ -173,7 +173,7 @@ def get_chart_data(param):
 				if node.startswith('['):
 					continue # skip
 
-				node = node.split('-')[1]
+				node = node.split('-', 1)[1]
 				loader = common.core.loader(node, arc_preset, title=node)
 				loader_list.append(loader)
 
@@ -182,7 +182,7 @@ def get_chart_data(param):
 		else:
 			for node in arc_cluster_map[cluster_name]:
 				if node.startswith(instance_name):
-					node = node.split('-')[1]
+					node = node.split('-', 1)[1]
 					results = common.core.loader(node, arc_preset, title=node)
 					break
 
