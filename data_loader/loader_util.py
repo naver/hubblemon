@@ -45,6 +45,15 @@ def parallel_load(ts_start, ts_end, loaders):
 	return chart_list_list
 
 
+class title_loader:
+	def __init__(self, title):
+		self.title = title
+
+	def load(self, ts_start, ts_end):
+		title_chart = chart_data()
+		title_chart.title = self.title
+		return [title_chart]
+
 
 class serial_loader:
 	def __init__(self, loaders):
@@ -68,12 +77,13 @@ class serial_loader:
 		for chart_list in chart_list_list:
 			chart_data_list += chart_list
 
-		return chart_data_list
+		return sorted(chart_data_list, key=lambda chart: chart.title)
 
 
 class merge_loader:
 	def __init__(self, loaders):
 		self.loaders = loaders
+		self.title_prefix = ''
 
 	def load(self, ts_start, ts_end):
 		chart_data_list = [] # merged result
@@ -98,10 +108,13 @@ class merge_loader:
 			for y in range(0, len(chart_list_list)):
 				chart = chart_list_list[y][x]
 				self.modify(new_chart, chart)
+
+			if self.title_prefix != '':
+				new_chart.title = '%s%s' % (self.title_prefix, new_chart.title)
 			
 			chart_data_list.append(new_chart)
 
-		return chart_data_list
+		return sorted(chart_data_list, key=lambda chart: chart.title)
 
 	def modify(self, main, new):
 		main.merge(new)

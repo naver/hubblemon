@@ -29,6 +29,7 @@ class basic_loader:
 		self.handle = handle
 
 		self.title = title
+		self.title_prefix = ''
 		self.data = {}
 
 		self.ts_start = None
@@ -152,6 +153,10 @@ class basic_loader:
 
 				data.append([ts, item[idx]])
 
+
+			if self.title_prefix != '':
+				titles  = '%s%s' % (self.title_prefix, titles)
+
 			return [(titles, data)]
 
 		elif isinstance(titles, tuple):
@@ -201,7 +206,7 @@ class basic_loader:
 			for title in titles:
 				if isinstance(title, str) and title.startswith('#'):
 					continue
-
+				
 				ret += self.make_chart(title, tmap, items, ts_start, ts_step)
 		
 			return ret

@@ -38,6 +38,8 @@ from common.settings import * # for expr
 from common.core import * # for expr
 from data_loader.loader_factory import * # for expr
 
+from arc_mon.arc_expr import *
+
 def _make_main_link():
 	ret = ''
 	for link in common.settings.main_link:
@@ -477,7 +479,7 @@ def expr_page(request):
 
 	## eval expression
 	js_chart_data = ''
-	if request.method == 'POST' and expr != '':
+	if expr != '':
 		try:
 			x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
 			if x_forwarded_for:
