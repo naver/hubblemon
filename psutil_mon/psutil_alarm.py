@@ -46,7 +46,10 @@ class psutil_alarm:
 		for k, v in map.items():
 			# overwrite if match like net-*
 			if fnmatch.fnmatch(key, k):
-				return map[k]
+				if 'IGNORE' in v:
+					if fnmatch.fnmatch(key, v['IGNORE']): # skip IGNORE case
+						continue
+				return v
 
 		return {}
 
