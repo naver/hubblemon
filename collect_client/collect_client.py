@@ -208,7 +208,7 @@ class collectd:
 				result['datetime'] = datetime.now()
 				result['client'] = self.name
 
-				print(result)
+				#print(result)
 				self.send_stat_all(result)
 				time.sleep(self.sleep)
 
