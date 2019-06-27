@@ -396,7 +396,7 @@ def _make_dynamic_chart_list(param, url, levels, chart_map):
 			js_chart_list += script.render()
 
 	js_chart_list =  '<div class="chart_select">%s</div>' % js_chart_list
-	if url != 'graph' and url != 'query':
+	if url != 'query':
 		js_chart_list += _make_time_range(param, link)
 
 	return js_chart_list
@@ -713,78 +713,6 @@ def query_page(request):
 	return render(request, 'query_page.html', variables)
 
 
-
-def graph_page(request):
-	print('####### graph page request ########')
-
-	if request.method == 'POST':
-		param = request.POST
-	else:
-		param = request.GET
-	print(param)
-
-	common.core.get_chart_list(param) # for init (dummy)
-
-	## list rendering
-	levels, graph_map = common.core.get_graph_list(param)
-	if (len(levels) == 0):
-		variables = {
-			'main_link': _make_main_link(),
-			'graph_list': '',
-			'graph_data': ''
-		}
-
-		return render(request, 'graph_page.html', variables)
-
-	js_graph_list = _make_dynamic_chart_list(param, 'graph', levels, graph_map)
-	#print(levels)
-
-	# return cloud & server list (not selected anyone)
-	if levels[0] not in param:
-		#print('## return graph map')
-		variables = {
-			'main_link': _make_main_link(),
-			'graph_list': js_graph_list
-		}
-
-		return render(request, 'graph_page.html', variables)
-
-	# return server list by json (select cloud only)
-	if levels[-1] not in param:
-		ret = graph_map
-		for level in levels:
-			if level in param:
-				if isinstance(ret, dict) and param[level] in ret:
-					ret = ret[param[level]]
-				else:
-					ret = []
-					break
-			else:
-				break
-
-		#print('## return json: ' + json.dumps(ret))
-		return HttpResponse(json.dumps(ret))
-
-	# select could & server
-	ret = common.core.get_graph_data(param)
-	#print(ret)
-
-	if ret == None or len(ret) == 0:
-		variables = {
-			'main_link': _make_main_link(),
-			'graph_data': 'Unknown graph id'
-		}
-
-		return render(request, 'graph_page.html', variables)
-
-	## make view
-	variables = {
-		'main_link': _make_main_link(),
-		'graph_list': js_graph_list,
-		'graph_data': ret
-	}
-
-	return render(request, 'graph_page.html', variables)
 
 
 def addon_page(request):

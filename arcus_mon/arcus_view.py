@@ -41,7 +41,7 @@ arcus_preset = [['bytes', 'total_malloced', 'engine_maxbytes'], 'curr_items', \
 		['cmd_sop_create', 'cmd_sop_delete', 'cmd_sop_insert', 'cmd_sop_get', 'cmd_sop_exist'],\
 		['cmd_bop_create', 'cmd_bop_delete', 'cmd_bop_insert', 'cmd_bop_update', 'cmd_bop_incr', 'cmd_bop_decr'],\
 		['cmd_bop_count', 'cmd_bop_mget', 'cmd_bop_smget'],\
-		['incr_hits', 'decr_hits', 'getattr_hits', 'setattr_hits'],\
+		['delete_hits', 'incr_hits', 'decr_hits', 'getattr_hits', 'setattr_hits'],\
 		['cmd_flush', 'cmd_flush_prefix', 'hb_count', 'hb_latency'], ]
 
 
@@ -105,7 +105,7 @@ def _zk_load(addr, cloud_map, cloud_list_map, zk_map):
 			node_str_list.append(node_str)
 
 		node_str_list.sort()
-		cloud_list_map[code] = [addr, node_str_list[:], zoo.arcus_cache_map[code].meta]
+		cloud_list_map[code] = [addr, node_str_list[:]]
 
 		cloud_map[code] = node_str_list
 		cloud_map[code].sort()
@@ -281,151 +281,8 @@ def get_chart_list(param):
 	return (['cloud', 'instance'], arcus_cloud_map)
 
 
-def get_graph_list(param):
-	#print(param)
-	ret = {}
-	for zk in common.settings.arcus_zk_addrs:
-		ret[zk] = True
-
-	return (['zk'], ret)
-
-	
-def get_graph_data(param):
-	#print(param)
-	zk = param['zk']
-	zoo = common.core.get_arcus_zk_load_all(zk)
-
-	# TODO: enable multi graph modify
-	# modify description if needed
-	for k, v in param.items():
-		#print(k, v)
-		if k.startswith('desc_'):
-			cloud = k.split('_', 1)[1]
-			
-			path = '/arcus/meta/%s' % cloud
-			print('**** %s, %s, %s' % (k, cloud, path))
-
-			if zoo.zk_exists(path):
-				zoo.zk_update(path, v)
-			else:
-				zoo.zk_create(path, v)
-
-			if cloud in zoo.arcus_cache_map:
-				zoo.arcus_cache_map[cloud].meta[0] = v
-			if cloud == 'zookeeper':
-				zoo.meta[0] = v
-
-	# make graph data
-	results = []
-	graph_data = render_arcus_graph(zoo, param)
-	return graph_data
 
 
-
-
-import time, socket
-from graph.node import graph_pool
-
-def set_description(zoo, param):
-	result = ''
-
-	if 'admin' in param:
-		#%s:<br><input type="text" name="desc_%s" value="%s">
-		template = """
-			<form class='desc_input' action='.'>
-				%s:<br><textarea rows="4" cols="40" textalign="left"
-					 name="desc_%s">%s</textarea>
-				<input type="submit" value="submit">
-				<input type="hidden" name="zk" value="%s">
-				<input type="hidden" name="admin" value="">
-				<input type="hidden" name="type" value="arcus_graph">
-			</form>
-			<br>
-		"""
-
-		result = template % ('zookeeper', 'zookeeper', zoo.meta[0], zoo.address)
-
-		for code, cache in sorted(zoo.arcus_cache_map.items()):
-			result += template % (code, code, cache.meta[0], zoo.address)
-
-	else:
-		template = """
-			<div class='desc_title'>
-			%s:
-			</div>
-			<div class='desc_value'>
-			<textarea rows="4" cols="40" textalign="left">%s</textarea>
-			</div>
-			<br>
-		"""
-
-		result = template % ('zookeeper', zoo.meta[0])
-
-		for code, cache in sorted(zoo.arcus_cache_map.items()):
-			result += template % (code, cache.meta[0])
-
-	return result
-
-def render_arcus_graph(zoo, param):
-	ts_start = time.time()
-
-	position = 20 # yaxis
-	pool = graph_pool(position)
-
-	node_zk = pool.get_node(zoo.address)
-	node_zk.weight = 300
-	node_zk.color = '0000FF'
-
-	for code, cache in zoo.arcus_cache_map.items():
-		node_cache = pool.get_node(code)
-		node_cache.weight = 200
-		node_cache.color = '00FF00'
-		node_cache.link(node_zk)
-		
-	for code, cache in zoo.arcus_cache_map.items():
-		node_cache = pool.get_node(code)
-
-		for node in cache.active_node:
-			try:
-				hostname, aliaslist, ipaddr = socket.gethostbyaddr(node.ip)
-				ret = hostname.split('.')
-				if len(ret) > 2:
-					hostname = '%s.%s' % (ret[0], ret[1])
-					
-			except socket.herror:
-				hostname = node.ip
-
-			node_node = pool.get_node(hostname)
-			node_node.weight = 100
-			node_node.color = '00FFFF'
-
-			if node.noport:
-				node_node.link(node_cache, node.port, 'FF0000')
-			else:
-				node_node.link(node_cache, node.port, '00FF00')
-
-		for node in cache.dead_node:
-			try:
-				hostname, aliaslist, ipaddr = socket.gethostbyaddr(node.ip)
-				ret = hostname.split('.')
-				if len(ret) > 2:
-					hostname = '%s.%s' % (ret[0], ret[1])
-			except socket.herror:
-				hostname = node.ip
-
-			node_node = pool.get_node(hostname)
-			node_node.weight = 100
-			node_node.color = '303030'
-
-			node_node.link(node_cache, node.port, 'EEEEEE')
-
-	# set meta info
-	pool.description = set_description(zoo, param)
-	result = pool.render()
-
-	ts_end = time.time()
-	print('## %s elapsed: %f' % (zoo.address, ts_end - ts_start))
-	return result
 
 
 def get_addon_page(param):
@@ -448,27 +305,6 @@ def get_arcus_cloud_page(param):
 		zk = param['zk']
 		zoo = common.core.get_arcus_zk_load_all(zk)
 
-		for k, v in param.items():
-			#print(k, v)
-			if k.startswith('desc_'):
-				cloud = k.split('_', 1)[1]
-
-				path = '/arcus/meta/%s' % cloud
-				#print('**** %s, %s, %s' % (k, cloud, path))
-
-				if zoo.zk_exists(path):
-					zoo.zk_update(path, v)
-				else:
-					zoo.zk_create(path, v)
-
-				if cloud in zoo.arcus_cache_map:
-					zoo.arcus_cache_map[cloud].meta = [v, None]
-					arcus_mon.arcus_view.arcus_cloud_list_map[cloud][2] = [v, None] # [zk, instance list, meta]
-				if cloud == 'zookeeper':
-					zoo.meta = [v, None]
-
-
-
 	cloud_list = ''
 	color = '#EEEEFF'
 
@@ -476,7 +312,6 @@ def get_arcus_cloud_page(param):
 	for cloud_name, v in sorted(arcus_mon.arcus_view.arcus_cloud_list_map.items()):
 		zookeeper = v[0]
 		node_str_list = v[1]
-		meta = v[2]
 		
 		if color == '#EEEEFF':
 			color = '#EEFFEE'
@@ -485,8 +320,7 @@ def get_arcus_cloud_page(param):
 
 		tmp ="""<div style="float:left; width:3%%;">%d</div>
 			<div style="float:left; width:12%%;"><a href="/chart?type=arcus_stat&cloud=%s&instance=[EACH]">%s</a></div>
-			<div style="float:left; width:25%%;"><a href="/graph?type=arcus_graph&zk=%s">%s</a></div>
-			""" % (idx, cloud_name, cloud_name, zookeeper, zookeeper)
+			""" % (idx, cloud_name, cloud_name)
 		idx += 1
 
 		tmp_instance = ''
@@ -498,32 +332,6 @@ def get_arcus_cloud_page(param):
 		
 
 		tmp += '<div style="float:left; width:20%%;">%s</div>' % (tmp_instance)
-
-		mtime = ''
-		if isinstance(meta, list) and hasattr(meta[1], 'mtime'):
-			mtime = str(datetime.datetime.fromtimestamp(int(meta[1].mtime)/1000))
-
-		if 'admin' in param:
-			tmp += '''<div style="float:left; width:40%%;">
-				<form class='desc_input' action='.'>
-					<textarea rows="%d" textalign="left" style="width:100%%;" name="desc_%s">%s</textarea>
-					<input type="submit" value="submit">
-					<input type="hidden" name="zk" value="%s">
-					<input type="hidden" name="admin" value="">
-					<input type="hidden" name="type" value="arcus_list">
-				</form>
-				<div>
-				%s
-				</div>
-				</div>''' % (len(node_str_list) + 3, cloud_name, str(meta[0]), zookeeper, mtime)
-		else:
-			tmp += '''<div style="float:left; width:40%%;">
-				<textarea rows="%d" textalign="left" style="width:100%%;">%s</textarea>
-				<div>
-				%s
-				</div>
-				</div>''' % (len(node_str_list) + 3, str(meta[0]), mtime)
-
 
 		cloud_list += '<div style="width:100%%; background:%s;">%s</div><div style="clear:both;"></div><div>&nbsp</div>' % (color, tmp)
 		
@@ -583,7 +391,7 @@ def get_arcus_util_page(param):
 	util_page = '''
 		<div>
 		<form action='.'>
-			zookeeper (ex: gasan.arcuscloud.nhncorp.com:17288)
+			zookeeper (ex: krx-01.arcuscloud.navercorp.com:17288)
 			<br>
 			<input id="id_zk" name="zk" type="text" value="%s"/>
 			<br>

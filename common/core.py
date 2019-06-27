@@ -137,36 +137,6 @@ def get_chart_data(param):
 	return mod_cache[type].get_chart_data(param)
 
 
-def get_graph_list(param):
-	if 'type' not in param:
-		return ([], {})
-
-	type = param['type']
-	type = type.split('_')[0]
-
-	if type not in mod_cache:
-		pkg = __import__('%s_mon.%s_view' % (type, type))
-		mod = getattr(pkg, '%s_view' % type)
-		mod.init_plugin()
-		mod_cache[type] = mod
-
-	return mod_cache[type].get_graph_list(param)
-
-
-def get_graph_data(param):
-	if 'type' not in param:
-		return None
-
-	type = param['type']
-	type = type.split('_')[0]
-
-	if type not in mod_cache:
-		pkg = __import__('%s_mon.%s_view' % (type, type))
-		mod = getattr(pkg, '%s_view' % type)
-		mod.init_plugin()
-		mod_cache[type] = mod
-
-	return mod_cache[type].get_graph_data(param)
 
 def auth_fields(param):
 	if 'type' not in param:

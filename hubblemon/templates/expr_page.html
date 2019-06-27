@@ -2,14 +2,10 @@
 
 {% block external %}
 
-<script src="http://www.flotcharts.org/flot/jquery.flot.js"></script>
-<script src="http://www.flotcharts.org/flot/jquery.flot.pie.js"></script>
-<script src="http://www.flotcharts.org/flot/jquery.flot.time.js"></script>
-<!--
-<script src="http://cdn.jsdelivr.net/jquery.flot/0.8.3/jquery.flot.js"></script>
-<script src="http://cdn.jsdelivr.net/jquery.flot/0.8.3/jquery.flot.pie.js"></script>
-<script src="http://cdn.jsdelivr.net/jquery.flot/0.8.3/jquery.flot.time.js"></script>
--->
+{% load staticfiles %}
+<script src="{% static 'js/flot/jquery.flot.js' %}"></script>
+<script src="{% static 'js/flot/jquery.flot.pie.js' %}"></script>
+<script src="{% static 'js/flot/jquery.flot.time.js' %}"></script>
 
 <script src="http://cipix2000.github.io/flot-cursors-plugin/jquery.flot.cursors.js"></script>
 {% endblock %}

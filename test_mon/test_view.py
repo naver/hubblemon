@@ -29,7 +29,6 @@ sys.path.append(hubblemon_path)
 import test_mon
 import common.settings
 import common.core
-from graph.node import graph_pool
 
 
 def init_plugin():
@@ -47,32 +46,6 @@ def get_chart_list(param):
 	print(param)
 	return (['cloud', 'instance'], {'cloud_a':['inst_a0', 'inst_a1', 'inst_a2'], 'cloud_b':['inst_b0', 'inst_b1']})
 
-
-def get_graph_list(param):
-	print(param)
-	ret = {}
-	return (['graph_name'], {'graph1':True, 'graph2':True})
-
-	
-def get_graph_data(param):
-	print(param)
-	name = param['graph_name']
-
-	position = 20 # yaxis
-	pool = graph_pool(position)
-
-	root = pool.get_node('root')
-
-	for i in range(0, 10):
-		nleaf = pool.get_node('nleaf %d' % i)
-		nleaf.link(root)
-
-		for j in range(0, 5):
-			leaf = pool.get_node('leaf %d/%d' % (j, i))
-			leaf.link(nleaf)
-
-	graph_data  = pool.render()
-	return graph_data
 
 
 

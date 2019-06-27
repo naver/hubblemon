@@ -64,4 +64,7 @@ target/
 
 
 nohup.out
+hubblemon.db
+nohup_*
+
 

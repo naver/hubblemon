@@ -21,7 +21,6 @@
 from django.conf.urls import include, url
 from django.contrib import admin
 
-#from graph.views import *
 from chart.views import *
 
 urlpatterns = [
@@ -31,7 +30,6 @@ urlpatterns = [
 
     url(r'^admin/', admin.site.urls),
     url(r'^$', chart_page),
-    url(r'^graph/', graph_page),
     url(r'^expr/', expr_page),
     url(r'^chart/', chart_page),
     url(r'^query/', query_page),

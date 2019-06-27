@@ -34,7 +34,6 @@ class arcus_cache:
 		self.node = []
 		self.active_node = []
 		self.dead_node = []
-		self.meta = ['', None]
 
 	def __repr__(self):
 		repr = '[Service Code: %s] (zk:%s)\n (node) %s\n (active) %s\n (dead) %s' % (self.code, self.zk_addr, self.node, self.active_node, self.dead_node)
@@ -96,11 +95,9 @@ class zookeeper:
 		self.arcus_node_map = {}
 
 		self.force = False
-		self.meta = ('', None)
-		self.meta_mtime = None
 
 	def __repr__(self):
-		repr = '[ZooKeeper: %s] %s, %s' % (self.address, self.meta[0], str(self.meta[1]))
+		repr = '[ZooKeeper: %s]' % (self.address)
 
 		for code, cache in self.arcus_cache_map.items():
 			repr = '%s\n\n%s' % (repr, cache)
@@ -265,35 +262,9 @@ class zookeeper:
 
 		return ret
 
-	def _get_arcus_meta(self, child, results):
-		data, stat, children = self.zk_read('/arcus/meta/' + child)
-		results[child] = [data.decode('utf-8'), stat]
 
 
-	def get_arcus_meta_all(self):
-		if self.zk_exists('/arcus/meta') == False:
-			self.zk_create('/arcus/meta', 'arcus meta info')
-
-		children = self.zk_children('/arcus/meta')
-		print('# children')
-		print(children)
-
-		threads = []
-		ret = {}
-
-		#print(children)
-		for child in children:
-			th = threading.Thread(target = self._get_arcus_meta, args = (child, ret))
-			th.start()
-			threads.append(th)
-
-		for th in threads:
-			th.join()
-
-		return ret
-
-
-	def _match_code_and_nodes(self, code, cache, meta):
+	def _match_code_and_nodes(self, code, cache):
 		#repl case
 		children = self.zk_children_if_exists('/arcus_repl/cache_list/' + code)
 		children += self.zk_children_if_exists('/arcus/cache_list/' + code)
@@ -302,7 +273,7 @@ class zookeeper:
 			if len(tmp) == 3:
 				child = tmp[2]
 
-			addr, name = child.split('-')
+			addr, name = child.split('-', 1)
 			try:
 				node = self.arcus_node_map[addr]
 			except KeyError:
@@ -319,10 +290,6 @@ class zookeeper:
 			if node.active == False:
 				cache.dead_node.append(node)
 
-		if code in meta:
-			cache.meta = meta[code]
-
-
 
 	def load_all(self):
 		codes = self.get_arcus_cache_list()
@@ -338,16 +305,11 @@ class zookeeper:
 			self.arcus_node_map[node.ip + ":" + node.port] = node
 			self.arcus_cache_map[node.code].node.append(node)
 
-		# meta info 
-		print('# get_arcus_meta_all()')
-		meta = self.get_arcus_meta_all()
-		print('# done')
-
 		print('# match code & nodes')
 		threads = []
 		
 		for code, cache in self.arcus_cache_map.items():
-			th = threading.Thread(target = self._match_code_and_nodes, args = (code, cache, meta))
+			th = threading.Thread(target = self._match_code_and_nodes, args = (code, cache))
 			th.start()
 			threads.append(th)
 
@@ -356,9 +318,6 @@ class zookeeper:
 
 		print('#done')
 
-		if 'zookeeper' in meta:
-			self.meta = meta['zookeeper']
-			
 
 	def _callback(self, event):
 		child_list = self.zk_children(event.path)

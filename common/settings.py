@@ -65,7 +65,13 @@ chart_resolution = 400
 # remove or add links you want
 #
 main_link = [	('system', '/system'),
-		('expr', '/expr'),]
+		('expr', '/expr'),
+		('arcus_stat', '/chart?type=arcus_stat'),
+		('arcus_prefix', '/chart?type=arcus_prefix'),
+		('arcus_list', '/addon?type=arcus_list'),
+		('arcus_util', '/addon?type=arcus_util'),
+		('jstat_stat', '/chart?type=jstat_stat'),
+		]
 
 
 # for arcus_mon

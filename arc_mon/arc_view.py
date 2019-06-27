@@ -30,7 +30,6 @@ import redis_mon
 import common.settings
 import common.core
 import telnetlib, json
-from graph.node import graph_pool
 
 
 arc_preset = redis_mon.redis_view.redis_preset
@@ -218,62 +217,6 @@ def get_chart_list(param):
 	return (['cluster', 'instance'], arc_cluster_map)
 
 
-def get_graph_list(param):
-	#print(param)
-	ret = {}
-	for cm in common.settings.arc_conf_masters:
-		ret[cm] = True
-
-	return (['cm'], ret)
-
-
-def get_graph_data(param):
-	#print(param)
-	addr = param['cm']
-	cm_map = {}
-	cm_list_map = {}
-	_conf_master_load(addr, cm_map, cm_list_map)
-
-	# make graph data
-	results = []
-	graph_data = render_arc_graph(addr, cm_map)
-	return graph_data
-
-
-def render_arc_graph(addr, cm_map):
-	ts_start = time.time()
-
-	position = 20 # yaxis
-	pool = graph_pool(position)
-
-	node_cm = pool.get_node(addr)
-	node_cm.weight = 300
-	node_cm.color = '0000FF'
-
-	for cluster, pgs in cm_map.items():
-		node_cluster = pool.get_node(cluster)
-		node_cluster.weight = 200
-		node_cluster.color = '00FF00'
-		node_cluster.link(node_cm)
-		
-	for cluster, pgs in cm_map.items():
-		node_cluster = pool.get_node(cluster)
-
-		for pg in pgs:
-			pgid, addr = pg.split('-')
-			host, port = addr.split('/')
-					
-			node_pg = pool.get_node(host)
-			node_pg.weight = 100
-			node_pg.color = '00FFFF'
-			node_pg.link(node_cluster, port, '00FF00')
-
-	result = pool.render()
-
-	ts_end = time.time()
-	print('## %s elapsed: %f' % (addr, ts_end - ts_start))
-	return result
-
 
 def get_addon_page(param):
 	print(param)
@@ -294,8 +237,7 @@ def get_addon_page(param):
 
 		tmp ="""<div style="float:left; width:3%%;">%d</div>
 			<div style="float:left; width:12%%;"><a href="/chart?type=arc_stat&cluster=%s&instance=[EACH]">%s</a></div>
-			<div style="float:left; width:25%%;"><a href="/graph?type=arc_graph&cm=%s">%s</a></div>
-			""" % (idx, cluster_name, cluster_name, cm, cm)
+			""" % (idx, cluster_name, cluster_name)
 		idx += 1
 
 		tmp_instance = ''

@@ -77,7 +77,8 @@ class serial_loader:
 		for chart_list in chart_list_list:
 			chart_data_list += chart_list
 
-		return sorted(chart_data_list, key=lambda chart: chart.title)
+		#return sorted(chart_data_list, key=lambda chart: chart.title)
+		return chart_data_list
 
 
 class merge_loader:
