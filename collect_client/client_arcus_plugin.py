@@ -29,7 +29,7 @@ class arcus_stat:
 		self.name = 'arcus'
 		self.type = 'rrd'
 		self.addr = []
-		self.collect_prefix_limit = 32
+		self.collect_prefix_limit = 2048
 
 		self.collect_key_init()
 		self.collect_prefix_key_init()
@@ -93,7 +93,7 @@ class arcus_stat:
 	def do_arcus_command(self, ip, port, command, timeout=0.2):
 		tn = telnetlib.Telnet(ip, port)
 		tn.write(bytes(command + '\r\n', 'utf-8'))
-		result = tn.read_until(bytes('END', 'utf-8'), timeout)
+		result = tn.read_until(bytes('\r\nEND', 'utf-8'), timeout)
 
 
 		result = result.decode('utf-8');
@@ -143,6 +143,10 @@ class arcus_stat:
 
 	def collect_prefix(self, all_stats):
 		for addr in self.addr:
+			break
+			#if addr[1] != '11300': # check-out
+			#	continue
+
 			result = self.do_arcus_command(addr[0], addr[1], 'stats detail dump', 1.0)
 			if 'END' not in result: # ignore this result. timeout or bad packet, or too many prefixes
 				continue
